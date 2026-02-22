@@ -12,6 +12,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added `scripts/patch-lightningcss.js` to patch `lightningcss` to use `lightningcss-wasm` in environments where native LightningCSS binaries fail to load.
 - Added npm `postinstall` hook to run the LightningCSS patch automatically after dependency install.
 - Added `dev:turbo` npm script (`next dev`) while keeping stable local development on webpack mode.
+- Added `src/lib/discord.js` helper to auto-add authenticated Discord users to a configured guild via Discord API.
 
 ### Changed
 - Updated `dev` npm script to `next dev --webpack` to avoid Turbopack runtime failure on WASM SWC fallback environments.
@@ -19,6 +20,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Standardized UCP application status checks to enum values used by backend (`pending`, `interview`, `accepted`, `declined`) instead of mixed labels.
 - Updated `src/components/WhitelistForm.jsx` select handling to React-safe default selection (`defaultValue=""` instead of `selected` on `<option>`).
 - Removed direct `@next/swc-win32-x64-msvc` dependency entry from `package.json` (Next manages this internally).
+- Updated Discord OAuth scope in `src/lib/auth.js` to include `guilds.join` and trigger server auto-join during login.
+- Updated `.env_example` with safer placeholder values and clearer Discord auto-join variable descriptions (`DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID`).
 
 ### Fixed
 - Fixed invalid React Hook usage in `src/app/ucp/my-characters/page.js` by moving per-vehicle image state into dedicated `VehicleCard` component (no hooks inside map loops).

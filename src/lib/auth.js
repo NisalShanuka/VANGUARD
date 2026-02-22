@@ -1,12 +1,13 @@
 import DiscordProvider from "next-auth/providers/discord";
 import { createOrUpdateUser, getUserByDiscordId } from "@/lib/db";
+import { addDiscordMemberToGuild } from "@/lib/discord";
 
 export const authOptions = {
     providers: [
         DiscordProvider({
             clientId: process.env.DISCORD_CLIENT_ID,
             clientSecret: process.env.DISCORD_CLIENT_SECRET,
-            authorization: { params: { scope: 'identify email' } },
+            authorization: { params: { scope: "identify email guilds.join" } },
         }),
     ],
     secret: process.env.NEXTAUTH_SECRET,
@@ -24,6 +25,19 @@ export const authOptions = {
                     console.error("Error in signIn callback (createOrUpdateUser):", error);
                     // We still return true to allow the user to sign in, 
                     // unless we want to block them on DB failure.
+                }
+
+                try {
+                    const joinResult = await addDiscordMemberToGuild({
+                        userId: profile?.id,
+                        userAccessToken: account?.access_token,
+                    });
+
+                    if (!joinResult.ok && !joinResult.skipped) {
+                        console.error("Discord auto-join failed:", joinResult);
+                    }
+                } catch (error) {
+                    console.error("Error in signIn callback (discord auto-join):", error);
                 }
             }
             return true;
