@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import AnimatedPage from '@/components/AnimatedPage';
 import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
-import KnowledgebaseEditor from '@/components/KnowledgebaseEditor';
+
 
 // ─── Reusable input styles ────────────────────────────────────────────────────
 const inputStyle = {
@@ -1168,7 +1168,6 @@ export default function AdminDashboard() {
                         { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
                         { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
                         { id: 'server', label: 'Live Server', icon: 'fas fa-network-wired' },
-                        { id: 'knowledgebase', label: 'Knowledgebase', icon: 'fas fa-book' },
                         { id: 'logs', label: 'Staff Logs', icon: 'fas fa-folder-open' },
                         { id: 'settings', label: 'Settings', icon: 'fas fa-cog' }
                     ].map(tab => (
@@ -1603,10 +1602,7 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* --- KNOWLEDGEBASE TAB --- */}
-                {mainTab === 'knowledgebase' && (
-                    <KnowledgebaseEditor />
-                )}
+
 
                 {/* --- ADMIN LOGS TAB --- */}
                 {mainTab === 'logs' && (

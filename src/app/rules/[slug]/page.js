@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import AnimatedPage from '@/components/AnimatedPage';
 import RulesLayout from '@/components/RulesLayout';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -8,20 +9,28 @@ import { useLanguage } from '@/i18n/LanguageContext';
 export default function RulesPage() {
     const params = useParams();
     const { language } = useLanguage();
+    const { data: session } = useSession();
+    const [fullData, setFullData] = useState(null);
     const [rulesData, setRulesData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const isAdmin = session?.user?.role === 'admin';
 
-    useEffect(() => {
+    const fetchRules = () => {
         setLoading(true);
         fetch(`/api/knowledgebase/${params.slug}`)
             .then(res => res.json())
             .then(data => {
                 if (!data.error) {
+                    setFullData(data);
                     setRulesData(data[language]);
                 }
             })
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchRules();
     }, [params.slug, language]);
 
     if (loading) return (
@@ -34,7 +43,12 @@ export default function RulesPage() {
 
     return (
         <AnimatedPage>
-            <RulesLayout data={rulesData} />
+            <RulesLayout
+                data={rulesData}
+                fullPageData={fullData}
+                isAdmin={isAdmin}
+                refreshData={fetchRules}
+            />
         </AnimatedPage>
     );
 }

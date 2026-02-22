@@ -13,20 +13,56 @@ export async function GET() {
 
     try {
         if (isAdmin) {
-            // Admin: show pending applications count
-            const rows = await query(
-                `SELECT COUNT(*) as count FROM applications WHERE status = 'pending'`
-            ).catch(() => [{ count: 0 }]);
+            // Admin: show alerts for all application statuses
+            // 1. Get counts for badge/summary
+            const counts = await query(`
+                SELECT status, COUNT(*) as count 
+                FROM applications 
+                WHERE status IN ('pending', 'interview')
+                GROUP BY status
+            `).catch(() => []);
 
-            const count = rows[0]?.count || 0;
-            const notifications = count > 0 ? [{
-                title: `${count} pending application${count > 1 ? 's' : ''} awaiting review`,
-                subtitle: 'Click to open the admin dashboard',
-                status: 'pending',
-                href: '/admin',
-            }] : [];
+            const pendingCount = counts.find(c => c.status === 'pending')?.count || 0;
+            const interviewCount = counts.find(c => c.status === 'interview')?.count || 0;
+            const totalUnread = pendingCount + interviewCount;
 
-            return NextResponse.json({ notifications, unread: count });
+            // 2. Fetch recent activity (alerts)
+            const recentActivity = await query(`
+                SELECT a.id, a.status, a.updated_at, u.name as username
+                FROM applications a
+                LEFT JOIN users u ON a.user_id = u.id
+                ORDER BY a.updated_at DESC
+                LIMIT 5
+            `).catch(() => []);
+
+            const notifications = recentActivity.map(app => {
+                let title = 'Application Alert';
+                let subtitle = `${app.username}'s app is now ${app.status}`;
+
+                if (app.status === 'pending') title = 'New Application';
+                else if (app.status === 'interview') title = 'Interview Scheduled';
+                else if (app.status === 'accepted') title = 'Application Accepted';
+                else if (app.status === 'declined') title = 'Application Declined';
+
+                return {
+                    title,
+                    subtitle,
+                    status: app.status,
+                    href: '/admin',
+                };
+            });
+
+            // If no recent activity, but pending items exist, show summary
+            if (notifications.length === 0 && totalUnread > 0) {
+                notifications.push({
+                    title: `${totalUnread} items awaiting review`,
+                    subtitle: `${pendingCount} pending, ${interviewCount} interview`,
+                    status: 'pending',
+                    href: '/admin',
+                });
+            }
+
+            return NextResponse.json({ notifications, unread: totalUnread });
 
         } else {
             // Regular user: show their application status updates
@@ -40,11 +76,12 @@ export async function GET() {
 
             const notifications = (apps || []).map(app => ({
                 title: 'Application Update',
-                subtitle: `Status: ${app.status}`,
+                subtitle: `Your application is now: ${app.status}`,
                 status: app.status,
                 href: '/ucp',
             }));
 
+            // Count anything that's NOT pending as "unread update" for the user
             const unread = (apps || []).filter(a => a.status !== 'pending').length;
             return NextResponse.json({ notifications, unread });
         }
