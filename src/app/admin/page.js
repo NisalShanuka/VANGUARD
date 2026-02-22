@@ -823,12 +823,12 @@ export default function AdminDashboard() {
         } else if (status === 'authenticated') {
             fetchApps();
             // Auto refresh lists every 15 seconds
-            const interval = setInterval(() => {
-                fetchApps();
-                if (mainTab === 'server') fetchServerPlayers();
-                if (mainTab === 'logs') fetchLogs();
-            }, 15000);
-            return () => clearInterval(interval);
+            // const interval = setInterval(() => {
+            //     fetchApps();
+            //     if (mainTab === 'server') fetchServerPlayers();
+            //     if (mainTab === 'logs') fetchLogs();
+            // }, 15000);
+            // return () => clearInterval(interval);
         }
     }, [status, mainTab]);
 
@@ -1226,35 +1226,47 @@ export default function AdminDashboard() {
 
             <section className="mx-auto max-w-6xl px-6 pb-20">
                 {/* Main Tabs */}
-                <div className="mb-8 flex gap-2 border-b border-white/10 pb-4">
-                    {[
-                        { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
-                        { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
-                        { id: 'server', label: 'Live Server', icon: 'fas fa-network-wired' },
-                        { id: 'knowledgebase', label: 'Knowledgebase', icon: 'fas fa-book' },
-                        { id: 'logs', label: 'Staff Logs', icon: 'fas fa-folder-open' },
-                        { id: 'settings', label: 'Settings', icon: 'fas fa-cog' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setMainTab(tab.id)}
-                            className={`flex items-center gap-2 rounded-none px-5 py-2.5 text-sm font-bold transition-all ${mainTab === tab.id
-                                ? 'bg-white text-black'
-                                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-                                }`}
-                        >
-                            <i className={tab.icon} /> {tab.label}
-                        </button>
-                    ))}
+                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div className="flex gap-2 flex-wrap">
+                        {[
+                            { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
+                            { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
+                            { id: 'server', label: 'Live Server', icon: 'fas fa-network-wired' },
+                            { id: 'knowledgebase', label: 'Knowledgebase', icon: 'fas fa-book' },
+                            { id: 'logs', label: 'Staff Logs', icon: 'fas fa-folder-open' },
+                            { id: 'settings', label: 'Settings', icon: 'fas fa-cog' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setMainTab(tab.id)}
+                                className={`flex items-center gap-2 rounded-none px-5 py-2.5 text-sm font-bold transition-all ${mainTab === tab.id
+                                    ? 'bg-white text-black'
+                                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                                    }`}
+                            >
+                                <i className={tab.icon} /> {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            if (mainTab === 'applications') fetchApps();
+                            if (mainTab === 'server') fetchServerPlayers();
+                            if (mainTab === 'announcements') fetchAnnouncements();
+                            if (mainTab === 'logs') fetchLogs();
+                            if (mainTab === 'settings') fetchTypes();
+                        }}
+                        className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 transition whitespace-nowrap"
+                    >
+                        <i className={`fas fa-rotate ${loading || serverLoading || logsLoading || annLoading ? 'animate-spin' : ''}`} /> Refresh
+                    </button>
                 </div>
 
                 {mainTab === 'applications' && (
                     <>
-                        <div className="mb-8 flex items-center justify-between">
+                        <div className="mb-8">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Application Inbox</p>
-                            <button onClick={fetchApps} className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition">
-                                <i className="fas fa-rotate" /> Refresh
-                            </button>
                         </div>
 
                         {error && (
