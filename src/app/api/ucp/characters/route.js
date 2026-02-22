@@ -6,13 +6,26 @@ import mysql from 'mysql2/promise';
 let gamePool;
 function getGameDb() {
     if (!gamePool) {
+        console.log('--- Initializing Game Database Pool ---');
+        console.log('Host:', process.env.GAME_DB_HOST);
+        console.log('User:', process.env.GAME_DB_USER);
+        // Never log the actual password in production, but we check if it exists
+        console.log('Password set:', !!process.env.GAME_DB_PASSWORD);
+
         gamePool = mysql.createPool({
-            host: process.env.GAME_DB_HOST || 'localhost',
-            user: process.env.GAME_DB_USER || 'root',
-            password: process.env.GAME_DB_PASSWORD || '',
-            database: process.env.GAME_DB_NAME || 'test1',
+            host: process.env.GAME_DB_HOST || 'mysql.gravelhost.com',
+            user: process.env.GAME_DB_USER || 'u34572_rhgHiyuWev',
+            password: process.env.GAME_DB_PASSWORD || '5aFXsV!h9wQ!Pecq1qS6ZioS',
+            database: process.env.GAME_DB_NAME || 's34572_qbox',
+            port: parseInt(process.env.GAME_DB_PORT || '3306'),
             waitForConnections: true,
-            connectionLimit: 5,
+            connectionLimit: 10,
+            queueLimit: 0,
+            enableKeepAlive: true,
+            keepAliveInitialDelay: 0,
+            ssl: {
+                rejectUnauthorized: false
+            }
         });
     }
     return gamePool;

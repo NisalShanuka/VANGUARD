@@ -11,30 +11,33 @@ import KnowledgebaseEditor from '@/components/KnowledgebaseEditor';
 
 // ─── Reusable input styles ────────────────────────────────────────────────────
 const inputStyle = {
-    width: '100%', padding: '9px 12px',
-    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 0, color: '#fff', fontSize: 12, outline: 'none',
-    transition: 'border-color 0.2s',
+    width: '100%', padding: '12px 14px',
+    background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 0, color: '#fff', fontSize: '13px', outline: 'none',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
 };
 const labelStyle = {
-    display: 'block', fontSize: 10, fontWeight: 700,
-    textTransform: 'uppercase', letterSpacing: '0.15em',
-    marginBottom: 5,
+    display: 'block', fontSize: '10px', fontWeight: 900,
+    textTransform: 'uppercase', letterSpacing: '0.2em',
+    marginBottom: 8, color: 'rgba(255,255,255,0.4)'
 };
 
 function Toast({ msg, type, onDone }) {
     useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, []);
     return (
         <div style={{
-            position: 'fixed', top: 80, right: 24, zIndex: 9999,
-            padding: '14px 20px', borderRadius: 0, fontSize: 13, fontWeight: 700,
-            background: 'rgba(255,255,255,0.05)',
-            border: `1px solid rgba(255,255,255,0.2)`,
-            color: '#fff',
-            backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
-            display: 'flex', alignItems: 'center', gap: 10
+            position: 'fixed', top: 100, right: 30, zIndex: 9999,
+            padding: '16px 24px', borderRadius: 0, fontSize: '12px', fontWeight: 900,
+            background: 'rgba(10,10,10,0.8)',
+            borderLeft: `3px solid ${type === 'success' ? '#43b581' : '#f04747'}`,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em',
+            backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'center', gap: 12
         }}>
-            <i className={type === 'success' ? 'fas fa-check-circle text-white' : 'fas fa-exclamation-triangle text-white'} />
+            <i className={type === 'success' ? 'fas fa-check-circle text-[#43b581]' : 'fas fa-exclamation-triangle text-[#f04747]'} />
             {msg}
         </div>
     );
@@ -43,14 +46,14 @@ function Toast({ msg, type, onDone }) {
 function Toggle({ checked, onChange }) {
     return (
         <button type="button" onClick={() => onChange(!checked)} style={{
-            width: 44, height: 24, borderRadius: 0, border: 'none', cursor: 'pointer',
-            background: checked ? '#fff' : 'rgba(255,255,255,0.12)',
-            position: 'relative', transition: 'background 0.3s', flexShrink: 0,
+            width: 40, height: 20, borderRadius: 0, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
+            background: checked ? '#fff' : 'rgba(255,255,255,0.05)',
+            position: 'relative', transition: 'all 0.3s', flexShrink: 0,
         }}>
             <span style={{
-                position: 'absolute', top: 3, left: checked ? 23 : 3,
-                width: 18, height: 18, borderRadius: 0, background: checked ? '#000' : '#fff',
-                transition: 'left 0.3s',
+                position: 'absolute', top: 2, left: checked ? 22 : 2,
+                width: 14, height: 14, borderRadius: 0, background: checked ? '#000' : 'rgba(255,255,255,0.4)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }} />
         </button>
     );
@@ -63,14 +66,14 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
     const [selectVal, setSelectVal] = useState(selectOptions ? selectOptions[0].value : "");
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: '100%', maxWidth: 400, background: '#000', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 0, padding: 24, boxShadow: '0 24px 80px rgba(0,0,0,1)' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 900, color: '#fff' }}>{title}</h3>
-                <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>{promptText}</p>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: 420, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, padding: 32, boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
+                <h3 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
+                <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{promptText}</p>
 
                 {!isConfirm && selectOptions && (
                     <select
-                        style={{ ...inputStyle, marginBottom: 10, cursor: 'pointer' }}
+                        style={{ ...inputStyle, marginBottom: 12, cursor: 'pointer' }}
                         value={selectVal}
                         onChange={e => setSelectVal(e.target.value)}
                     >
@@ -89,10 +92,12 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
                         autoFocus
                         type={type}
                         list={autocompleteData ? "actionmodal-datalist" : undefined}
-                        style={{ ...inputStyle, marginBottom: secondaryType ? 10 : 0 }}
+                        style={{ ...inputStyle, marginBottom: secondaryType ? 12 : 0 }}
                         value={val}
-                        placeholder={autocompleteData ? "Start typing to search..." : ""}
+                        placeholder={autocompleteData ? "Search..." : ""}
                         onChange={e => setVal(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                         onKeyDown={e => e.key === 'Enter' && !secondaryType && onSubmit(val, selectVal)}
                     />
                 )}
@@ -104,13 +109,15 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
                         value={val2}
                         placeholder={secondaryPlaceholder}
                         onChange={e => setVal2(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                         onKeyDown={e => e.key === 'Enter' && onSubmit(val, selectVal, val2)}
                     />
                 )}
 
-                <div style={{ display: 'flex', gap: 10, marginTop: !isConfirm ? 20 : 0, justifyContent: 'flex-end' }}>
-                    <button onClick={onClose} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: 0, fontSize: 11, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cancel</button>
-                    <button onClick={() => onSubmit(val, selectVal, val2)} style={{ padding: '8px 16px', background: '#fff', border: 'none', color: '#000', borderRadius: 0, fontSize: 11, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{actionButtonText || 'Confirm'}</button>
+                <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'stretch' }}>
+                    <button onClick={onClose} style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', borderRadius: 0, fontSize: 11, fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.2em', transition: 'all 0.2s' }} onMouseEnter={e => e.target.style.color = '#fff'}>Cancel</button>
+                    <button onClick={() => onSubmit(val, selectVal, val2)} style={{ flex: 1, padding: '14px', background: '#fff', border: 'none', color: '#000', borderRadius: 0, fontSize: 11, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.2em' }}>{actionButtonText || 'Confirm'}</button>
                 </div>
             </motion.div>
         </div>
@@ -131,17 +138,17 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
 
     return (
         <div
-            style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(8px)' }}
+            style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(15px)' }}
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={{ opacity: 0, scale: 0.98, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                style={{ width: 700, background: '#000', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+                style={{ width: 740, background: '#080808', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', boxShadow: '0 40px 100px rgba(0,0,0,1)' }}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)' }}>
+                <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ color: '#fff', fontWeight: 900, fontSize: 18, fontFamily: 'monospace' }}>[{player.id}]</span>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -1226,8 +1233,8 @@ export default function AdminDashboard() {
 
             <section className="mx-auto max-w-6xl px-6 pb-20">
                 {/* Main Tabs */}
-                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
-                    <div className="flex gap-2 flex-wrap">
+                <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6">
+                    <div className="flex gap-1.5 flex-wrap p-1 bg-white/[0.03] border border-white/5 rounded-none">
                         {[
                             { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
                             { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
@@ -1239,28 +1246,17 @@ export default function AdminDashboard() {
                             <button
                                 key={tab.id}
                                 onClick={() => setMainTab(tab.id)}
-                                className={`flex items-center gap-2 rounded-none px-5 py-2.5 text-sm font-bold transition-all ${mainTab === tab.id
-                                    ? 'bg-white text-black'
-                                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                                className={`flex items-center gap-2.5 px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 relative group ${mainTab === tab.id
+                                    ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+                                    : 'text-white/40 hover:text-white/80 hover:bg-white/5'
                                     }`}
                             >
-                                <i className={tab.icon} /> {tab.label}
+                                <i className={`${tab.icon} ${mainTab === tab.id ? 'opacity-100' : 'opacity-40 group-hover:opacity-70'}`} />
+                                {tab.label}
+                                {mainTab === tab.id && <motion.div layoutId="activeTab" className="absolute inset-0 border border-white/20 pointer-events-none" />}
                             </button>
                         ))}
                     </div>
-
-                    <button
-                        onClick={() => {
-                            if (mainTab === 'applications') fetchApps();
-                            if (mainTab === 'server') fetchServerPlayers();
-                            if (mainTab === 'announcements') fetchAnnouncements();
-                            if (mainTab === 'logs') fetchLogs();
-                            if (mainTab === 'settings') fetchTypes();
-                        }}
-                        className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white hover:bg-white/10 transition whitespace-nowrap"
-                    >
-                        <i className={`fas fa-rotate ${loading || serverLoading || logsLoading || annLoading ? 'animate-spin' : ''}`} /> Refresh
-                    </button>
                 </div>
 
                 {mainTab === 'applications' && (
@@ -1276,16 +1272,26 @@ export default function AdminDashboard() {
                         )}
 
                         {/* Stat cards */}
-                        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <div className="mb-10 grid grid-cols-2 gap-5 md:grid-cols-4">
                             {TABS.map(tab => (
                                 <motion.button
                                     key={tab.key}
-                                    whileHover={{ y: -3 }}
+                                    whileHover={{ y: -4, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => setActiveTab(tab.key)}
-                                    className={`glass-panel text-center transition cursor-pointer w-full ${activeTab === tab.key ? 'border-white/50 bg-white/10' : ''}`}
+                                    className={`relative glass-panel p-6 text-center transition-all duration-300 cursor-pointer overflow-hidden ${activeTab === tab.key ? 'border-white/40 ring-1 ring-white/20' : 'hover:border-white/20'}`}
                                 >
-                                    <p className="text-3xl font-display font-black" style={{ color: activeTab === tab.key ? '#fff' : tab.color }}>{tab.count}</p>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mt-1">{tab.label}</p>
+                                    {activeTab === tab.key && (
+                                        <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: tab.color }} />
+                                    )}
+                                    <p className="text-4xl font-display font-black tracking-tighter mb-1" style={{ color: activeTab === tab.key ? '#fff' : tab.color }}>{tab.count}</p>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">{tab.label}</p>
+
+                                    {activeTab === tab.key && (
+                                        <div className="absolute -right-4 -bottom-4 opacity-5 text-4xl transform -rotate-12 pointer-events-none">
+                                            <i className="fas fa-file-invoice" />
+                                        </div>
+                                    )}
                                 </motion.button>
                             ))}
                         </div>
