@@ -1,0 +1,88 @@
+﻿{
+    "success":  true,
+    "tables":  [
+                   {
+                       "Tables_in_test1":  "0resmon_apartment_rooms"
+                   },
+                   {
+                       "Tables_in_test1":  "admin_announcements"
+                   },
+                   {
+                       "Tables_in_test1":  "admin_logs"
+                   },
+                   {
+                       "Tables_in_test1":  "appearance"
+                   },
+                   {
+                       "Tables_in_test1":  "application_audit_logs"
+                   },
+                   {
+                       "Tables_in_test1":  "application_questions"
+                   },
+                   {
+                       "Tables_in_test1":  "application_types"
+                   },
+                   {
+                       "Tables_in_test1":  "application_users"
+                   },
+                   {
+                       "Tables_in_test1":  "applications"
+                   },
+                   {
+                       "Tables_in_test1":  "deathmatch_profiles"
+                   },
+                   {
+                       "Tables_in_test1":  "dicebet_stats"
+                   },
+                   {
+                       "Tables_in_test1":  "fuel_stations"
+                   },
+                   {
+                       "Tables_in_test1":  "knowledgebase_pages"
+                   },
+                   {
+                       "Tables_in_test1":  "kv_store"
+                   },
+                   {
+                       "Tables_in_test1":  "outfits"
+                   },
+                   {
+                       "Tables_in_test1":  "player_vehicles"
+                   },
+                   {
+                       "Tables_in_test1":  "players"
+                   },
+                   {
+                       "Tables_in_test1":  "qbx_prison"
+                   },
+                   {
+                       "Tables_in_test1":  "stores"
+                   },
+                   {
+                       "Tables_in_test1":  "users"
+                   }
+               ],
+    "kvStore":  {
+                    "exists":  true,
+                    "data":  [
+                                 {
+                                     "id":  1,
+                                     "key_name":  "knowledgebase_categories",
+                                     "value_data":  "{\"en\":[{\"title\":\"Getting Started\",\"status\":\"Available\",\"to\":\"/knowledgebase/getting-started\"},{\"title\":\"General Rules\",\"status\":\"Available\",\"to\":\"/rules/general\"},{\"title\":\"Server Rules\",\"status\":\"Available\",\"to\":\"/rules/server\"},{\"title\":\"RolePlay Rules\",\"status\":\"Available\",\"to\":\"/rules/roleplay\"},{\"title\":\"General Situation Count\",\"status\":\"Available\",\"to\":\"/counts/general-situation\"},{\"title\":\"Robbery Situation Count\",\"status\":\"Available\",\"to\":\"/counts/robbery-situation\"},{\"title\":\"Factions\",\"status\":\"Unavailable\"},{\"title\":\"Crew / Gang\",\"status\":\"Unavailable\"}],\"si\":[{\"title\":\"à¶à¶»à¶¸à·à¶· à¶à·à¶»à·à¶¸\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/knowledgebase/getting-started\"},{\"title\":\"à·à·à¶¸à·à¶±à·à·âà¶º à¶±à·à¶­à·\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/rules/general\"},{\"title\":\"à·à·à·à·à¶¯à·à¶ºà¶ à¶±à·à¶­à·\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/rules/server\"},{\"title\":\"RolePlay à¶±à·à¶­à·\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/rules/roleplay\"},{\"title\":\"à·à·à¶¸à·à¶±à·à·âà¶º à·à·à¶¯à·à·à·à¶¸à· à¶à¶«à¶±\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/counts/general-situation\"},{\"title\":\"à¶»à·à¶¶à¶»à· à·à·à¶¯à·à·à·à¶¸à· à¶à¶«à¶±\",\"status\":\"à¶½à¶¶à·à¶à¶­ à·à·à¶\",\"to\":\"/counts/robbery-situation\"},{\"title\":\"à¶à¶«à·à¶©à·à¶ºà¶¸à·\",\"status\":\"à¶½à¶¶à·à¶à¶­ à¶±à·à·à·à¶\"},{\"title\":\"Crew / Gang\",\"status\":\"à¶½à¶¶à·à¶à¶­ à¶±à·à·à·à¶\"}]}",
+                                     "updated_at":  "2026-02-22T18:10:33.000Z"
+                                 }
+                             ]
+                },
+    "kbPages":  {
+                    "exists":  true,
+                    "data":  [
+                                 {
+                                     "id":  1,
+                                     "slug":  "getting-started",
+                                     "data_en":  "{\"title\":\"Getting Started with Vanguard\",\"content\":\"\u003cp\u003eWelcome to Vanguard Roleplay! To get started, follow these steps:\u003c/p\u003e\u003cul\u003e\u003cli\u003eJoin our Discord server.\u003c/li\u003e\u003cli\u003eRead the rules in the Knowledgebase.\u003c/li\u003e\u003cli\u003eApply for whitelist.\u003c/li\u003e\u003c/ul\u003e\"}",
+                                     "data_si":  "{\"title\":\"Vanguard à·à¶¸à¶ à¶à¶»à¶¸à·à¶· à¶à·à¶»à·à¶¸\",\"content\":\"\u003cp\u003eVanguard Roleplay à·à·à¶­ à·à·à¶¯à¶»à¶ºà·à¶±à· à¶´à·à·\u0085à·à¶à¶±à·à¶¸à·! à¶à¶»à¶¸à·à¶· à¶à·à¶»à·à¶¸à¶§, à¶¸à·à¶¸ à¶´à·à¶ºà·à¶» à¶\u0085à¶±à·à¶à¶¸à¶±à¶º à¶à¶»à¶±à·à¶±:\u003c/p\u003e\u003cul\u003e\u003cli\u003eà¶\u0085à¶´à¶à· Discord server à¶à¶à¶§ à·à¶¸à·à¶¶à¶±à·à¶° à·à¶±à·à¶±.\u003c/li\u003e\u003cli\u003eKnowledgebase à·à· à¶±à·à¶­à· à¶à·à¶ºà·à¶±à·à¶±.\u003c/li\u003e\u003cli\u003eWhitelist à·à¶³à·à· à¶\u0085à¶ºà¶¯à·à¶¸à· à¶à¶»à¶±à·à¶±.\u003c/li\u003e\u003c/ul\u003e\"}",
+                                     "updated_at":  "2026-02-22T18:10:33.000Z"
+                                 }
+                             ]
+                }
+}
