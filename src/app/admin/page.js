@@ -1753,9 +1753,14 @@ export default function AdminDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                         {/* Existing Types */}
                         <div>
-                            <h2 style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>
-                                Application Categories ({types?.length || 0})
-                            </h2>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <h2 style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                                    Application Categories ({types?.length || 0})
+                                </h2>
+                                <button onClick={fetchTypes} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <i className={`fas fa-rotate ${loading ? 'animate-spin' : ''}`} /> Refresh
+                                </button>
+                            </div>
                             {types?.length === 0 ? (
                                 <div className="glass-panel" style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
                                     No application types found. Create one below.
