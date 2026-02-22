@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSession, signIn } from 'next-auth/react';
 import AnimatedPage from '@/components/AnimatedPage';
 import HeroSlider from '@/components/HeroSlider';
 import { featureHighlights as featureHighlightsData } from '@/data/home.js';
@@ -50,6 +51,7 @@ function ApplicationCard({ type, t }) {
 
 export default function HomeClient({ applicationTypes }) {
     const { language, t } = useLanguage();
+    const { data: session } = useSession();
     const featureHighlights = getLocalized(featureHighlightsData, language);
 
     return (
@@ -197,9 +199,15 @@ export default function HomeClient({ applicationTypes }) {
                             <p className="mt-4 max-w-2xl text-white/70">{t('home.eventDescription')}</p>
                         </motion.div>
                         <motion.div variants={fadeUp(12, 0.3)} whileHover={{ y: -2 }} whileTap={tapPress} className="w-fit">
-                            <a href="https://discord.gg/wuq7TFYT" target="_blank" rel="noreferrer" className="btn-primary">
-                                {t('home.eventCta')}
-                            </a>
+                            {session ? (
+                                <Link href="/ucp" className="btn-primary">
+                                    {t('home.eventCtaDashboard')}
+                                </Link>
+                            ) : (
+                                <button type="button" onClick={() => signIn('discord')} className="btn-primary">
+                                    {t('home.eventCtaJoin')}
+                                </button>
+                            )}
                         </motion.div>
                     </div>
                 </motion.div>

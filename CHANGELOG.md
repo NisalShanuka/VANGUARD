@@ -27,6 +27,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Updated favicon references in `src/app/layout.js` to use the same `/images/logo.png` asset shown in the header logo.
 - Updated header unauthenticated Discord CTA text in `src/components/Header.jsx` from `Login with Discord` to `Join with Discord`.
 - Removed the redundant Discord invite icon/button from `src/components/Header.jsx` now that login flow auto-joins users to the guild.
+- Updated home event Discord CTA in `src/app/HomeClient.jsx` to be auth-aware: logged-out users see `Join with Discord` (Discord OAuth), while logged-in users see `Go to dashboard` (links to `/ucp`), with matching i18n keys in `src/i18n/translations.js`.
 
 ### Fixed
 - Fixed invalid React Hook usage in `src/app/ucp/my-characters/page.js` by moving per-vehicle image state into dedicated `VehicleCard` component (no hooks inside map loops).

@@ -40,7 +40,8 @@ export const translations = {
       eventTitle: 'Join Our Discord Community',
       eventDescription:
         'Get instant updates, announcements, and community support in our official Discord server. Join now to connect with players, stay informed, and be ready for every new development.',
-      eventCta: 'Join Discord',
+      eventCtaJoin: 'Join with Discord',
+      eventCtaDashboard: 'Go to dashboard',
       reviewsKicker: '#Vanguard Players Reviews',
       reviewsTitle: 'Join thousands of players and share your experience',
       alt: {
@@ -156,7 +157,8 @@ export const translations = {
       eventTitle: 'අපගේ Discord ප්‍රජාවට එක්වන්න',
       eventDescription:
         'අපගේ නිල Discord සේවාදායකයට එක්වෙලා ක්ෂණික යාවත්කාලීන, නිවේදන සහ ප්‍රජා සහාය ලබාගන්න. ක්‍රීඩකයන් සමඟ සම්බන්ධ වෙන්න, තොරතුරු දැනගන්න, සහ අලුත් සියලුම වෙනස්කම් සඳහා සූදානම් වෙන්න.',
-      eventCta: 'Discord එකට එක්වන්න',
+      eventCtaJoin: 'Discord සමඟ එක්වන්න',
+      eventCtaDashboard: 'ඩෑෂ්බෝඩ් වෙත යන්න',
       reviewsKicker: '#Vanguard ක්‍රීඩක සමාලෝචන',
       reviewsTitle: 'දහස් ගණනක ක්‍රීඩකයින් සමඟ එකතු වී ඔබේ අත්දැකීම බෙදාගන්න',
       alt: {
