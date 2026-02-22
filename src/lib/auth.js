@@ -48,6 +48,7 @@ export const authOptions = {
             return token;
         }
     },
+    debug: process.env.NODE_ENV === 'development',
     // pages: {
     //     error: '/api/auth/error',
     // }
