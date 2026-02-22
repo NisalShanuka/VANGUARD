@@ -24,6 +24,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Updated Discord OAuth scope in `src/lib/auth.js` to include `guilds.join` and trigger server auto-join during login.
 - Updated `.env_example` with safer placeholder values and clearer Discord auto-join variable descriptions (`DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID`).
 - Updated favicon metadata in `src/app/layout.js` to use project icon assets instead of default Next.js favicon behavior.
+- Updated favicon references in `src/app/layout.js` to use the same `/images/logo.png` asset shown in the header logo.
 - Updated header unauthenticated Discord CTA text in `src/components/Header.jsx` from `Login with Discord` to `Join with Discord`.
 - Removed the redundant Discord invite icon/button from `src/components/Header.jsx` now that login flow auto-joins users to the guild.
 
@@ -33,6 +34,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Removed unused imports in multiple components/pages to reduce lint/runtime noise.
 - Resolved Next.js deprecation warning by replacing `src/middleware.js` with `src/proxy.js`.
 - Removed default `src/app/favicon.ico` to prevent fallback to the Next.js default favicon.
+- Synced `src/app/icon.png` to the same image content as `public/images/logo.png` to avoid favicon source mismatch.
 
 ### Notes
 - Native SWC warning may still appear on affected Windows environments; app runs with WASM fallback in webpack dev mode.
