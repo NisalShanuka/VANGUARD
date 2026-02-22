@@ -309,7 +309,10 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
 // ─── Questions Modal ──────────────────────────────────────────────────────────
 function QuestionsModal({ type, onClose }) {
     const [questions, setQuestions] = useState([]);
-    const [form, setForm] = useState({ label: '', field_type: 'text', options: '', is_required: true, section_title: 'General Information' });
+    const [sections, setSections] = useState([]);
+    const [newSectionName, setNewSectionName] = useState('');
+    const [addingToSection, setAddingToSection] = useState(null); // section title currently being edited
+    const [form, setForm] = useState({ label: '', field_type: 'text', options: '', is_required: true });
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
@@ -318,22 +321,34 @@ function QuestionsModal({ type, onClose }) {
     async function fetchQuestions() {
         const res = await fetch(`/api/admin/questions?type_id=${type.id}`);
         const data = await res.json();
-        setQuestions(Array.isArray(data) ? data : []);
+        const qList = Array.isArray(data) ? data : [];
+        setQuestions(qList);
+        // Extract existing sections
+        const existingSections = Array.from(new Set(qList.map(q => q.section_title || 'General Information')));
+        setSections(existingSections.length > 0 ? existingSections : ['General Information']);
     }
 
-    async function addQuestion(e) {
-        e.preventDefault();
+    function addSection() {
+        if (!newSectionName.trim()) return;
+        if (sections.includes(newSectionName.trim())) return setToast({ msg: 'Section already exists', type: 'error' });
+        setSections([...sections, newSectionName.trim()]);
+        setNewSectionName('');
+    }
+
+    async function addQuestion(sectionTitle) {
+        if (!form.label.trim()) return setToast({ msg: 'Label required', type: 'error' });
         setSaving(true);
         const res = await fetch('/api/admin/questions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...form, type_id: type.id }),
+            body: JSON.stringify({ ...form, type_id: type.id, section_title: sectionTitle }),
         });
         const data = await res.json();
         setSaving(false);
         if (data.success) {
             setToast({ msg: 'Question added!', type: 'success' });
             setForm({ label: '', field_type: 'text', options: '', is_required: true });
+            setAddingToSection(null);
             fetchQuestions();
         } else {
             setToast({ msg: data.error || 'Error', type: 'error' });
@@ -364,81 +379,90 @@ function QuestionsModal({ type, onClose }) {
                 </div>
 
                 <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-                    {/* Add form */}
-                    <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, padding: 24 }}>
-                        <h3 style={{ margin: '0 0 20px', fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Add New Question</h3>
-                        <form onSubmit={addQuestion} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
-                                <div>
-                                    <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Section Title</label>
-                                    <input style={inputStyle} placeholder="e.g. OOC Information" value={form.section_title} onChange={e => setForm(f => ({ ...f, section_title: e.target.value }))} />
-                                </div>
-                                <div>
-                                    <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Question Label *</label>
-                                    <input style={inputStyle} placeholder="e.g. Character Age" value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} required />
-                                </div>
-                                <div>
-                                    <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Field Type</label>
-                                    <select style={{ ...inputStyle }} value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
-                                        <option value="text">Short Text</option>
-                                        <option value="textarea">Long Text</option>
-                                        <option value="number">Number</option>
-                                        <option value="select">Dropdown</option>
-                                        <option value="checkbox">Checkbox List</option>
-                                    </select>
-                                </div>
-                            </div>
-                            {(['select', 'checkbox'].includes(form.field_type)) && (
-                                <div>
-                                    <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Options (comma separated)</label>
-                                    <input style={inputStyle} placeholder="Option 1, Option 2, Option 3" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
-                                </div>
-                            )}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>
-                                    <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
-                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Required field</span>
-                                </label>
-                                <button type="submit" disabled={saving} style={{ padding: '12px 24px', background: '#fff', border: 'none', borderRadius: 0, color: '#000', fontWeight: 900, fontSize: 11, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                    {saving ? '...' : '+ Add Question'}
-                                </button>
-                            </div>
-                        </form>
+                    {/* Add Section Header */}
+                    <div style={{ display: 'flex', gap: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: 16 }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>New Section Name</label>
+                            <input style={inputStyle} placeholder="e.g. Personal Details" value={newSectionName} onChange={e => setNewSectionName(e.target.value)} />
+                        </div>
+                        <button onClick={addSection} style={{ alignSelf: 'flex-end', padding: '12px 20px', background: '#fff', border: 'none', color: '#000', fontWeight: 900, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
+                            + Create Section
+                        </button>
                     </div>
 
-                    {/* Questions list */}
-                    <div>
-                        <h3 style={{ margin: '0 0 14px', fontSize: 12, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Existing Questions ({questions.length})</h3>
-                        {questions.length === 0 ? (
-                            <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '32px 0', fontSize: 13, border: '1px dashed rgba(255,255,255,0.1)' }}>No questions yet. Add one above.</p>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                {Array.from(new Set(questions.map(q => q.section_title || 'General Information'))).map(section => (
-                                    <div key={section}>
-                                        <h4 style={{ fontSize: 10, fontWeight: 900, color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 12px', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.2em', borderLeft: '2px solid #fff' }}>
-                                            {section}
-                                        </h4>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            {questions.filter(q => (q.section_title || 'General Information') === section).map((q, i) => (
-                                                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                        {sections.map(section => (
+                            <div key={section} style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <h4 style={{ margin: 0, fontSize: 11, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                                        {section}
+                                    </h4>
+                                    <button onClick={() => setAddingToSection(addingToSection === section ? null : section)} style={{ background: 'transparent', border: 'none', color: addingToSection === section ? '#ff4d4d' : '#fff', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer' }}>
+                                        {addingToSection === section ? 'Cancel' : '+ Add Question'}
+                                    </button>
+                                </div>
+
+                                <div style={{ padding: 20 }}>
+                                    {/* Questions in this section */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: addingToSection === section ? 20 : 0 }}>
+                                        {questions.filter(q => (q.section_title || 'General Information') === section).length === 0 ? (
+                                            <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.2)', textAlign: 'center', padding: '10px 0' }}>No questions in this section.</p>
+                                        ) : (
+                                            questions.filter(q => (q.section_title || 'General Information') === section).map(q => (
+                                                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <div>
                                                         <p style={{ fontWeight: 800, fontSize: 13, color: '#fff', margin: 0 }}>{q.label}</p>
                                                         <p style={{ margin: '4px 0 0', fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                            Type: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{q.field_type?.toUpperCase()}</span>
-                                                            {' · '}Required: <span style={{ color: q.is_required ? '#fff' : 'rgba(255,255,255,0.3)' }}>{q.is_required ? 'YES' : 'NO'}</span>
-                                                            {q.options && <span style={{ opacity: 0.4 }}> · {q.options}</span>}
+                                                            {q.field_type?.toUpperCase()} {q.is_required ? '· REQUIRED' : ''}
                                                         </p>
                                                     </div>
-                                                    <button onClick={() => deleteQuestion(q.id)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)', borderRadius: 0, padding: '4px 10px', cursor: 'pointer', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ff4d4d'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
-                                                        Remove
+                                                    <button onClick={() => deleteQuestion(q.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 9, fontWeight: 900 }} onMouseEnter={e => e.currentTarget.style.color = '#ff4d4d'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}>
+                                                        REMOVE
                                                     </button>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            ))
+                                        )}
                                     </div>
-                                ))}
+
+                                    {/* Inline Add Question Form */}
+                                    {addingToSection === section && (
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: 16, marginTop: 10 }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                                                <div>
+                                                    <label style={labelStyle}>Question Label *</label>
+                                                    <input style={inputStyle} value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
+                                                </div>
+                                                <div>
+                                                    <label style={labelStyle}>Field Type</label>
+                                                    <select style={inputStyle} value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
+                                                        <option value="text">Short Text</option>
+                                                        <option value="textarea">Long Text</option>
+                                                        <option value="number">Number</option>
+                                                        <option value="select">Dropdown</option>
+                                                        <option value="checkbox">Checkbox List</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            {['select', 'checkbox'].includes(form.field_type) && (
+                                                <div style={{ marginBottom: 12 }}>
+                                                    <label style={labelStyle}>Options (comma separated)</label>
+                                                    <input style={inputStyle} placeholder="Option 1, Option 2" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
+                                                </div>
+                                            )}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
+                                                    <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
+                                                    Required
+                                                </label>
+                                                <button onClick={() => addQuestion(section)} disabled={saving} style={{ padding: '10px 20px', background: '#fff', border: 'none', color: '#000', fontWeight: 900, fontSize: 10, textTransform: 'uppercase', cursor: 'pointer' }}>
+                                                    {saving ? 'Saving...' : 'Confirm Question'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                        ))}
                     </div>
                 </div>
             </motion.div>
