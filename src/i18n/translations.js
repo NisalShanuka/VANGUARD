@@ -56,6 +56,7 @@ export const translations = {
       description: 'Browse server rules, situations, and essential guides for every roleplayer.',
       comingSoon: 'Coming soon',
       openFolder: 'Open folder',
+      backToKB: 'Back to Knowledgebase',
     },
     announcements: {
       title: 'Announcements',
@@ -172,7 +173,8 @@ export const translations = {
       subtitle: 'තොරතුරු මධ්‍යස්ථානය',
       description: 'සේවාදායක නීති, සිදුවීම් ගණන සහ සෑම රෝල්ප්ලේකරුවෙකුටම වැදගත් මගපෙන්වීම් පිරික්සන්න.',
       comingSoon: 'ඉක්මනින්',
-      openFolder: 'ෆෝල්ඩරය විවෘත කරන්න',
+      openFolder: 'පැකේජය විවෘත කරන්න',
+      backToKB: 'දැනුම් මධ්‍යස්ථානයට ආපසු',
     },
     announcements: {
       title: 'නිවේදන',

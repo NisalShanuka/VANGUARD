@@ -4,7 +4,7 @@ import { query } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
-    const { slug } = params;
+    const { slug } = await params;
     try {
         const results = await query("SELECT * FROM knowledgebase_pages WHERE slug = ?", [slug]);
         if (results.length > 0) {
