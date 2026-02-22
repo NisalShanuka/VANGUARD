@@ -85,10 +85,10 @@ export default function MyApplications() {
                                     </div>
                                 </div>
 
-                                {app.staff_feedback && (
+                                {app.notes && (
                                     <div className="mt-6 border-t border-white/5 pt-4">
                                         <p className="text-overline text-white">Staff Feedback</p>
-                                        <p className="mt-2 text-body italic text-white/70">"{app.staff_feedback}"</p>
+                                        <p className="mt-2 text-body italic text-white/70">"{app.notes}"</p>
                                     </div>
                                 )}
                             </motion.div>

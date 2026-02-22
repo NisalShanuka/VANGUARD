@@ -4,6 +4,22 @@ import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
 
 
+// Safely ensure a column exists
+async function ensureColumn(table, column, definition) {
+    try {
+        const rows = await query(
+            `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+            [table, column]
+        );
+        if (!rows || rows.length === 0) {
+            await query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+        }
+    } catch (e) {
+        console.error(`[ensureColumn] ${table}.${column}:`, e.message);
+    }
+}
+
 // GET questions for a type
 export async function GET(req) {
     const session = await getServerSession(authOptions);
@@ -14,6 +30,8 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const typeId = searchParams.get('type_id');
     if (!typeId) return NextResponse.json({ error: 'type_id required' }, { status: 400 });
+
+    await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
 
     const questions = await query(
         `SELECT * FROM application_questions WHERE type_id = ? ORDER BY order_num ASC`,
@@ -31,6 +49,8 @@ export async function POST(req) {
 
     const { type_id, label, field_type, options, is_required, section_title } = await req.json();
     if (!type_id || !label) return NextResponse.json({ error: 'type_id and label required' }, { status: 400 });
+
+    await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
 
     try {
         const result = await query(

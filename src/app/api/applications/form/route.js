@@ -17,6 +17,7 @@ export async function GET(request) {
             CREATE TABLE IF NOT EXISTS application_questions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 type_id INT NOT NULL,
+                section_title VARCHAR(255) DEFAULT 'General Information',
                 label TEXT NOT NULL,
                 field_type VARCHAR(50) DEFAULT 'text',
                 options TEXT DEFAULT '',
@@ -26,6 +27,19 @@ export async function GET(request) {
                 FOREIGN KEY (type_id) REFERENCES application_types(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         `);
+
+        // Safely ensure section_title exists even if table was created before
+        try {
+            const rows = await query(
+                `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'application_questions' AND COLUMN_NAME = 'section_title'`
+            );
+            if (!rows || rows.length === 0) {
+                await query(`ALTER TABLE application_questions ADD COLUMN section_title VARCHAR(255) DEFAULT 'General Information' AFTER type_id`);
+            }
+        } catch (e) {
+            console.error('[Form API] section_title migration:', e.message);
+        }
 
         // Get application type
         const types = await query(
@@ -39,9 +53,9 @@ export async function GET(request) {
 
         const type = types[0];
 
-        // Get questions — use actual column names: label, field_type
+        // Get questions — include section_title
         const questions = await query(
-            'SELECT id, label, field_type, is_required, options FROM application_questions WHERE type_id = ? ORDER BY order_num ASC',
+            'SELECT id, section_title, label, field_type, is_required, options FROM application_questions WHERE type_id = ? ORDER BY order_num ASC',
             [type.id]
         );
 
