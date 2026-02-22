@@ -167,7 +167,7 @@ export default function UCPDashboard() {
                                     <Link href="/rules/server" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">SERVER RULES</Link>
                                 </li>
                                 <li>
-                                    <Link href="https://discord.gg/UK4e9QR6fN" target="_blank" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">DISCORD SUPPORT</Link>
+                                    <Link href="https://discord.gg/wuq7TFYT" target="_blank" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">DISCORD SUPPORT</Link>
                                 </li>
                             </ul>
                         </motion.div>

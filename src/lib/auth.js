@@ -13,12 +13,18 @@ export const authOptions = {
     callbacks: {
         async signIn({ user, account, profile }) {
             if (account.provider === "discord") {
-                await createOrUpdateUser({
-                    id: profile.id,
-                    username: profile.username,
-                    discriminator: profile.discriminator,
-                    avatar: profile.image_url || profile.avatar
-                });
+                try {
+                    await createOrUpdateUser({
+                        id: profile.id,
+                        username: profile.username,
+                        discriminator: profile.discriminator,
+                        avatar: profile.image_url || profile.avatar
+                    });
+                } catch (error) {
+                    console.error("Error in signIn callback (createOrUpdateUser):", error);
+                    // We still return true to allow the user to sign in, 
+                    // unless we want to block them on DB failure.
+                }
             }
             return true;
         },

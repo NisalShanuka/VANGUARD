@@ -15,20 +15,20 @@ export async function GET() {
     }
 
     try {
+        // Fetch user basic data
         const users = await query(
-            'SELECT role FROM application_users WHERE discord_id = ?',
+            'SELECT role FROM application_users WHERE id = ?',
             [session.user.id]
         );
-        const fetchedUser = users[0] || { role: 'Citizen' };
-        const user = { ...fetchedUser, is_admin: fetchedUser.role === 'admin' ? 1 : 0 };
+        const user = users[0];
 
+        // Fetch recent applications
         const recentApplications = await query(
             `SELECT a.*, t.name as type_name 
              FROM applications a 
              JOIN application_types t ON a.type_id = t.id 
              WHERE a.user_id = ? 
-             ORDER BY a.created_at DESC 
-             LIMIT 5`,
+             ORDER BY a.created_at DESC LIMIT 5`,
             [session.user.id]
         );
 

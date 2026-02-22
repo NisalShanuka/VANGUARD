@@ -12,10 +12,10 @@ export async function GET() {
 
     try {
         const applications = await query(
-            `SELECT a.*, t.name as type_name, u.discord_name 
+            `SELECT a.*, t.name as type_name, u.username as discord_name 
        FROM applications a 
        JOIN application_types t ON a.type_id = t.id 
-       JOIN users u ON a.user_id = u.id
+       JOIN application_users u ON a.user_id = u.id
        WHERE a.user_id = ? 
        ORDER BY a.created_at DESC`,
             [session.user.id]

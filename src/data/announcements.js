@@ -64,7 +64,7 @@ export const announcementDetail = {
     ],
     links: [
       { label: 'Whitelist Application', to: '/ucp' },
-      { label: 'Join Discord', to: 'https://discord.gg/UK4e9QR6fN', external: true },
+      { label: 'Join Discord', to: 'https://discord.gg/wuq7TFYT', external: true },
     ],
   },
   si: {
@@ -107,7 +107,7 @@ export const announcementDetail = {
     ],
     links: [
       { label: 'වයිට්ලිස්ට් අයදුම්පත', to: '/ucp' },
-      { label: 'Discord ගෲප් එකට සෙට් වෙන්න', to: 'https://discord.gg/UK4e9QR6fN', external: true },
+      { label: 'Discord ගෲප් එකට සෙට් වෙන්න', to: 'https://discord.gg/wuq7TFYT', external: true },
     ],
   },
 };

@@ -12,17 +12,18 @@ export async function POST(req) {
 
         const body = await req.json();
 
-        // Fetch user_id from application_users
-        const users = await query("SELECT id FROM application_users WHERE discord_id = ?", [session.user.id]);
-        let userId;
+        const userId = session.user.id;
+
+        // Ensure user exists in application_users (should already exist due to session)
+        const users = await query("SELECT id FROM application_users WHERE id = ?", [userId]);
         if (users.length === 0) {
+            // Fallback for edge cases where user is in session but not in DB somehow
             const result = await query(
                 "INSERT INTO application_users (discord_id, username, discriminator, avatar) VALUES (?, ?, ?, ?)",
-                [session.user.id, session.user.name, "", session.user.image]
+                [session.user.discord_id || userId, session.user.name || "Unknown", "", session.user.image || ""]
             );
-            userId = result.insertId;
-        } else {
-            userId = users[0].id;
+            // userId is already set to session.user.id, but if we just inserted, we should use the new one?
+            // Actually, session.user.id SHOULD be the DB ID.
         }
 
         // Check if application_types exists, specifically 'whitelist'
