@@ -8,6 +8,7 @@ import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 import KnowledgebaseEditor from '@/components/KnowledgebaseEditor';
 
+
 // ─── Reusable input styles ────────────────────────────────────────────────────
 const inputStyle = {
     width: '100%', padding: '9px 12px',
@@ -308,7 +309,7 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
 // ─── Questions Modal ──────────────────────────────────────────────────────────
 function QuestionsModal({ type, onClose }) {
     const [questions, setQuestions] = useState([]);
-    const [form, setForm] = useState({ label: '', field_type: 'text', options: '', is_required: true });
+    const [form, setForm] = useState({ label: '', field_type: 'text', options: '', is_required: true, section_title: 'General Information' });
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
@@ -367,7 +368,11 @@ function QuestionsModal({ type, onClose }) {
                     <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, padding: 24 }}>
                         <h3 style={{ margin: '0 0 20px', fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Add New Question</h3>
                         <form onSubmit={addQuestion} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                                <div>
+                                    <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Section Title</label>
+                                    <input style={inputStyle} placeholder="e.g. OOC Information" value={form.section_title} onChange={e => setForm(f => ({ ...f, section_title: e.target.value }))} />
+                                </div>
                                 <div>
                                     <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Question Label *</label>
                                     <input style={inputStyle} placeholder="e.g. Character Age" value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} required />
@@ -379,10 +384,11 @@ function QuestionsModal({ type, onClose }) {
                                         <option value="textarea">Long Text</option>
                                         <option value="number">Number</option>
                                         <option value="select">Dropdown</option>
+                                        <option value="checkbox">Checkbox List</option>
                                     </select>
                                 </div>
                             </div>
-                            {form.field_type === 'select' && (
+                            {(['select', 'checkbox'].includes(form.field_type)) && (
                                 <div>
                                     <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Options (comma separated)</label>
                                     <input style={inputStyle} placeholder="Option 1, Option 2, Option 3" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
@@ -406,20 +412,29 @@ function QuestionsModal({ type, onClose }) {
                         {questions.length === 0 ? (
                             <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '32px 0', fontSize: 13, border: '1px dashed rgba(255,255,255,0.1)' }}>No questions yet. Add one above.</p>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                {questions.map((q, i) => (
-                                    <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0 }}>
-                                        <div>
-                                            <p style={{ fontWeight: 800, fontSize: 13, color: '#fff', margin: 0 }}>{i + 1}. {q.label}</p>
-                                            <p style={{ margin: '4px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                Type: <span style={{ color: '#fff' }}>{q.field_type?.toUpperCase()}</span>
-                                                {' · '}Required: <span style={{ color: q.is_required ? '#fff' : 'rgba(255,255,255,0.3)' }}>{q.is_required ? 'YES' : 'NO'}</span>
-                                                {q.options && <span style={{ opacity: 0.6 }}> · {q.options}</span>}
-                                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                {Array.from(new Set(questions.map(q => q.section_title || 'General Information'))).map(section => (
+                                    <div key={section}>
+                                        <h4 style={{ fontSize: 10, fontWeight: 900, color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 12px', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.2em', borderLeft: '2px solid #fff' }}>
+                                            {section}
+                                        </h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            {questions.filter(q => (q.section_title || 'General Information') === section).map((q, i) => (
+                                                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 0 }}>
+                                                    <div>
+                                                        <p style={{ fontWeight: 800, fontSize: 13, color: '#fff', margin: 0 }}>{q.label}</p>
+                                                        <p style={{ margin: '4px 0 0', fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                            Type: <span style={{ color: 'rgba(255,255,255,0.6)' }}>{q.field_type?.toUpperCase()}</span>
+                                                            {' · '}Required: <span style={{ color: q.is_required ? '#fff' : 'rgba(255,255,255,0.3)' }}>{q.is_required ? 'YES' : 'NO'}</span>
+                                                            {q.options && <span style={{ opacity: 0.4 }}> · {q.options}</span>}
+                                                        </p>
+                                                    </div>
+                                                    <button onClick={() => deleteQuestion(q.id)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)', borderRadius: 0, padding: '4px 10px', cursor: 'pointer', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ff4d4d'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <button onClick={() => deleteQuestion(q.id)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', borderRadius: 0, padding: '8px 16px', cursor: 'pointer', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                            Delete
-                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -433,6 +448,32 @@ function QuestionsModal({ type, onClose }) {
 }
 
 // ─── Type Card ────────────────────────────────────────────────────────────────
+function ImageWithInfo({ src }) {
+    const [info, setInfo] = useState(null);
+    const [err, setErr] = useState(false);
+
+    if (!src || err) return <div style={{ width: '100%', height: 100, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>No Preview Available</div>;
+
+    const fullSrc = src.startsWith('http') ? src : `/images/covers/${src}`;
+
+    return (
+        <div style={{ position: 'relative', marginTop: 10 }}>
+            <img
+                src={fullSrc}
+                alt="Preview"
+                onError={() => setErr(true)}
+                onLoad={(e) => setInfo({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
+                style={{ width: '100%', height: 140, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+            {info && (
+                <div style={{ position: 'absolute', bottom: 6, right: 6, background: 'rgba(0,0,0,0.8)', padding: '2px 6px', fontSize: 9, fontWeight: 900, color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    {info.w} × {info.h} PX
+                </div>
+            )}
+        </div>
+    );
+}
+
 function TypeCard({ type: initialType, onDelete, onSave }) {
     const [t, setT] = useState(initialType);
     const [saving, setSaving] = useState(false);
@@ -446,18 +487,12 @@ function TypeCard({ type: initialType, onDelete, onSave }) {
         setSaving(false);
     }
 
-    // Auto-save when active toggle is clicked
     async function handleToggleActive(newValue) {
         const updated = { ...t, is_active: newValue };
         setT(updated);
         setToggling(true);
         await onSave(updated);
         setToggling(false);
-    }
-
-    async function handleDelete() {
-        if (!confirm(`WARNING: This will delete ALL applications and questions for "${t.name}". Proceed?`)) return;
-        await onDelete(t.id);
     }
 
     const statuses = [
@@ -468,113 +503,110 @@ function TypeCard({ type: initialType, onDelete, onSave }) {
     ];
 
     return (
-        <>
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 0, overflow: 'hidden', transition: 'border-color 0.3s' }}>
-                {/* Header */}
-                <div style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                        <div style={{ width: 40, height: 40, borderRadius: 0, background: t.is_active ? 'rgba(67,181,129,0.12)' : 'rgba(114,137,218,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: t.is_active ? '#43b581' : '#7289da', transition: 'all 0.3s' }}>
-                            <i className={t.icon || 'fas fa-file-alt'} />
-                        </div>
-                        <div>
-                            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#fff' }}>{t.name}</h3>
-                            <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>/{t.slug}</p>
-                        </div>
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${expanded ? 'rgba(255,255,255,0.2)' : (t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.07)')}`, borderRadius: 0, overflow: 'hidden', transition: 'all 0.3s' }}>
+            <div style={{ padding: '16px 20px', background: expanded ? 'rgba(255,255,255,0.03)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: expanded ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 44, height: 44, background: t.is_active ? 'rgba(67,181,129,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <i className={t.icon || 'fas fa-file-alt'} />
                     </div>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                        {/* Active Toggle — auto-saves instantly */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {toggling ? (
-                                <div style={{ width: 44, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#43b581', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-                                </div>
-                            ) : (
-                                <Toggle checked={!!t.is_active} onChange={handleToggleActive} />
-                            )}
-                            <span style={{ fontSize: 11, fontWeight: 700, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.3)' }}>
-                                {t.is_active ? 'Active' : 'Hidden'}
-                            </span>
-                        </div>
-                        <button onClick={() => setShowQuestions(true)} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <i className="fas fa-question-circle" /> Questions
-                        </button>
-                        <button onClick={() => setExpanded(e => !e)} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 0, color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
-                            {expanded ? '▲ Collapse' : '▼ Configure'}
-                        </button>
-                        <button onClick={handleDelete} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <i className="fas fa-trash-can" /> Delete
-                        </button>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff' }}>{t.name}</h3>
+                        <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>/{t.slug} • {t.is_active ? 'LIVE' : 'HIDDEN'}</p>
                     </div>
                 </div>
-
-                {/* Expandable config */}
-                <AnimatePresence>
-                    {expanded && (
-                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                            <div style={{ padding: '20px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                {/* Icon + Cover */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                                    <div>
-                                        <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Icon Class (FontAwesome)</label>
-                                        <input style={inputStyle} placeholder="fas fa-file-alt" value={t.icon || ''} onChange={e => setT(p => ({ ...p, icon: e.target.value }))} />
-                                    </div>
-                                    <div>
-                                        <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>Cover Image filename</label>
-                                        <input style={inputStyle} placeholder="custom.jpg" value={t.cover_image || ''} onChange={e => setT(p => ({ ...p, cover_image: e.target.value }))} />
-                                    </div>
-                                </div>
-
-                                {/* Webhooks + Roles */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    {/* Webhooks */}
-                                    <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 0, padding: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <p style={{ margin: '0 0 14px', fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <i className="fas fa-bell" /> Status Webhooks
-                                        </p>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                            {statuses.map(({ key, label, color }) => (
-                                                <div key={key}>
-                                                    <label style={{ ...labelStyle, color }}>{label} Webhook URL</label>
-                                                    <input style={inputStyle} placeholder="https://discord.com/api/webhooks/..."
-                                                        value={t[`webhook_${key}`] || ''}
-                                                        onChange={e => setT(p => ({ ...p, [`webhook_${key}`]: e.target.value }))} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {/* Roles */}
-                                    <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 0, padding: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <p style={{ margin: '0 0 14px', fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <i className="fas fa-masks-theater" /> Auto-Grant Roles
-                                        </p>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                            {statuses.map(({ key, label, color }) => (
-                                                <div key={key}>
-                                                    <label style={{ ...labelStyle, color }}>{label} Role ID</label>
-                                                    <input style={inputStyle} placeholder="Discord Role ID"
-                                                        value={t[`role_${key}`] || ''}
-                                                        onChange={e => setT(p => ({ ...p, [`role_${key}`]: e.target.value }))} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Save button */}
-                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <button onClick={() => handleSave()} disabled={saving}
-                                        style={{ padding: '12px 32px', background: '#fff', border: 'none', borderRadius: 0, color: '#000', fontWeight: 900, fontSize: 13, cursor: 'pointer', opacity: saving ? 0.7 : 1, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        {saving ? 'Saving...' : <><i className="fas fa-save" /> Save Changes</>}
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 10 }}>
+                        {toggling ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> : <Toggle checked={!!t.is_active} onChange={handleToggleActive} />}
+                    </div>
+                    <button onClick={() => setShowQuestions(true)} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Questions</button>
+                    <button onClick={() => setExpanded(!expanded)} style={{ padding: '7px 14px', border: '1px solid', borderRadius: 0, fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', background: expanded ? '#fff' : 'rgba(255,255,255,0.05)', borderColor: expanded ? '#fff' : 'rgba(255,255,255,0.1)', color: expanded ? '#000' : '#fff' }}>
+                        {expanded ? 'CLOSE EDIT' : 'EDIT APP'}
+                    </button>
+                    <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 14 }}><i className="fas fa-trash-can" /></button>
+                </div>
             </div>
 
+            <AnimatePresence>
+                {expanded && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
+                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, background: 'rgba(0,0,0,0.3)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: -4 }}>General Settings</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                        <div>
+                                            <label style={labelStyle}>App Name</label>
+                                            <input style={inputStyle} value={t.name} onChange={e => setT({ ...t, name: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>URL Slug</label>
+                                            <input style={inputStyle} value={t.slug} onChange={e => setT({ ...t, slug: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={labelStyle}>Description</label>
+                                        <textarea style={{ ...inputStyle, minHeight: 60 }} value={t.description || ''} onChange={e => setT({ ...t, description: e.target.value })} />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                        <div>
+                                            <label style={labelStyle}>Icon (FA Class)</label>
+                                            <input style={inputStyle} value={t.icon || ''} onChange={e => setT({ ...t, icon: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Custom Cover Image filename</label>
+                                            <input style={inputStyle} value={t.cover_image || ''} onChange={e => setT({ ...t, cover_image: e.target.value })} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Cover Image Preview</h4>
+                                    <ImageWithInfo src={t.cover_image} />
+                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 8, lineHeight: 1.5 }}>
+                                        Recommended Size: 1200×600px. <br />
+                                        Stored in: <span style={{ color: '#fff' }}>/public/images/covers/</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-bell mr-2" /> Discord Webhooks</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {statuses.map(s => (
+                                            <div key={s.key}>
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Hook</label>
+                                                <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-id-card mr-2" /> Auto-Roles</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {statuses.map(s => (
+                                            <div key={s.key}>
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Role ID</label>
+                                                <input style={inputStyle} value={t[`role_${s.key}`] || ''} onChange={e => setT({ ...t, [`role_${s.key}`]: e.target.value })} placeholder="Discord Role ID" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
+                                <button onClick={() => setExpanded(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}>Cancel</button>
+                                <button onClick={() => handleSave()} disabled={saving} style={{ padding: '10px 40px', background: '#fff', color: '#000', border: 'none', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+                                    {saving ? 'Saving...' : 'Save Configuration'}
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {showQuestions && <QuestionsModal type={t} onClose={() => setShowQuestions(false)} />}
-        </>
+        </div>
     );
 }
 
@@ -766,8 +798,15 @@ export default function AdminDashboard() {
             router.push('/');
         } else if (status === 'authenticated') {
             fetchApps();
+            // Auto refresh lists every 15 seconds
+            const interval = setInterval(() => {
+                fetchApps();
+                if (mainTab === 'server') fetchServerPlayers();
+                if (mainTab === 'logs') fetchLogs();
+            }, 15000);
+            return () => clearInterval(interval);
         }
-    }, [status]);
+    }, [status, mainTab]);
 
     async function fetchApps() {
         setLoading(true); setError(null);

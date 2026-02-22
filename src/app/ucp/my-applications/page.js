@@ -19,6 +19,8 @@ export default function MyApplications() {
             router.push('/');
         } else if (status === 'authenticated') {
             fetchData();
+            const interval = setInterval(fetchData, 30000); // 30s refresh
+            return () => clearInterval(interval);
         }
     }, [status]);
 

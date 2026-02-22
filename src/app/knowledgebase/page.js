@@ -6,10 +6,14 @@ import PageHeader from '@/components/PageHeader';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getLocalized } from '@/i18n/utils';
 
+import { useSession } from 'next-auth/react';
+
 export default function Knowledgebase() {
     const { language, t } = useLanguage();
+    const { data: session } = useSession();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const isAdmin = session?.user?.role === 'admin';
 
     useEffect(() => {
         fetch('/api/knowledgebase')
@@ -38,6 +42,13 @@ export default function Knowledgebase() {
             />
 
             <section className="mx-auto max-w-6xl px-6 pb-16">
+                {isAdmin && (
+                    <div className="mb-8 flex justify-end">
+                        <Link href="/admin" className="bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition flex items-center gap-2">
+                            <i className="fas fa-screwdriver-wrench" /> Manage Knowledgebase
+                        </Link>
+                    </div>
+                )}
                 <div
                     className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                 >

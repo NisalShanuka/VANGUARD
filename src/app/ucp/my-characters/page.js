@@ -25,9 +25,12 @@ function StatBar({ value = 0, max = 100, color = '#fff' }) {
 
 function ItemImage({ name }) {
     const [err, setErr] = useState(false);
+    // Use the proxy API that fetches from ox_inventory
+    const src = err ? `/images/items/${name}.png` : `/api/items/${name}.png`;
+
     return err
         ? <div style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.04)', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: 2 }}>{name?.replace(/_/g, ' ')}</div>
-        : <img src={`https://cfx-nui-ox_inventory/web/images/${name}.png`} alt={name} onError={() => setErr(true)} style={{ width: 48, height: 48, objectFit: 'contain', imageRendering: 'pixelated' }} />;
+        : <img src={src} alt={name} onError={() => setErr(true)} style={{ width: 48, height: 48, objectFit: 'contain', imageRendering: 'pixelated' }} />;
 }
 
 function InventoryGrid({ items, title = 'Inventory', icon = <i className="fas fa-suitcase" /> }) {
@@ -611,7 +614,11 @@ export default function MyCharacters() {
 
     useEffect(() => {
         if (status === 'unauthenticated') router.push('/');
-        else if (status === 'authenticated') fetchCharacters();
+        else if (status === 'authenticated') {
+            fetchCharacters();
+            const interval = setInterval(fetchCharacters, 15000); // Auto-refresh every 15s
+            return () => clearInterval(interval);
+        }
     }, [status]);
 
     async function fetchCharacters() {
@@ -633,11 +640,19 @@ export default function MyCharacters() {
 
     return (
         <AnimatedPage>
-            <PageHeader
-                title="My Characters"
-                subtitle="City Registry"
-                description="View your in-game characters, vehicles, inventory, and statistics."
-            />
+            <div style={{ position: 'relative' }}>
+                <PageHeader
+                    title="My Characters"
+                    subtitle="City Registry"
+                    description="View your in-game characters, vehicles, inventory, and statistics."
+                />
+                <div style={{ position: 'absolute', top: 40, right: 32, display: 'flex', gap: 10 }}>
+                    <button onClick={fetchCharacters} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', padding: '10px 16px', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}>
+                        <i className={`fas fa-rotate ${loading ? 'animate-spin' : ''}`} style={{ marginRight: 8 }} />
+                        {loading ? 'Refreshing...' : 'Refresh List'}
+                    </button>
+                </div>
+            </div>
             <section className="mx-auto max-w-6xl px-6 pb-20">
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
