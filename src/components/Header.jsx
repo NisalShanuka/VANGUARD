@@ -42,7 +42,7 @@ function useNotifications(session) {
     };
 
     fetchNotifications();
-    const id = setInterval(fetchNotifications, 60000); // Poll less frequently (1m)
+    const id = setInterval(fetchNotifications, 30000); // 30s
 
     return () => {
       controller.abort();
@@ -51,6 +51,17 @@ function useNotifications(session) {
   }, [session?.user?.id]);
 
   return { notifications, unread };
+}
+
+function timeAgo(date) {
+  if (!date) return '';
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return new Date(date).toLocaleDateString();
 }
 
 // ─────────────────────────────────────────────────────────
@@ -142,21 +153,19 @@ function DashboardMenu({ session, onClose }) {
             <div style={{ padding: '8px 18px 10px', fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
               No new notifications
             </div>
-          ) : notifications.slice(0, 3).map((n, i) => (
-            <Link key={i} href={n.href || '/ucp'} onClick={onClose} style={{ textDecoration: 'none', display: 'flex', alignItems: 'flex-start', gap: 10, padding: '7px 18px', transition: 'background 0.15s' }}
+          ) : notifications.slice(0, 5).map((n, i) => (
+            <Link key={i} href={n.href || '/ucp'} onClick={onClose} style={{ textDecoration: 'none', display: 'flex', alignItems: 'flex-start', gap: 10, padding: '9px 18px', transition: 'background 0.15s', borderBottom: '1px solid rgba(255,255,255,0.03)' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 13, lineHeight: 1.2, flexShrink: 0, opacity: 0.5 }}>{statusEmoji[n.status] || <i className="fas fa-file-lines" />}</span>
+              <span style={{ fontSize: 12, lineHeight: 1.2, flexShrink: 0, opacity: 0.8, color: n.status === 'declined' ? '#f04747' : (n.status === 'accepted' ? '#43b581' : '#fff') }}>{statusEmoji[n.status] || <i className="fas fa-file-lines" />}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</p>
-                <p style={{ margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{n.subtitle}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</p>
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', fontWeight: 800, textTransform: 'uppercase', flexShrink: 0 }}>{timeAgo(n.time)}</span>
+                </div>
+                <p style={{ margin: '2px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>{n.subtitle}</p>
               </div>
-              {n.status && (
-                <span style={{ fontSize: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000', padding: '2px 6px', background: '#fff', border: '1px solid #fff', borderRadius: 0, whiteSpace: 'nowrap' }}>
-                  {n.status}
-                </span>
-              )}
             </Link>
           ))}
         </div>

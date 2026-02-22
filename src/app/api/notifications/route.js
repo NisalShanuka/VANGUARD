@@ -37,7 +37,7 @@ export async function GET() {
 
             const notifications = recentActivity.map(app => {
                 let title = 'Application Alert';
-                let subtitle = `${app.username}'s app is now ${app.status}`;
+                let subtitle = `${app.username}'s app is now ${app.status.toUpperCase()}`;
 
                 if (app.status === 'pending') title = 'New Application';
                 else if (app.status === 'interview') title = 'Interview Scheduled';
@@ -48,6 +48,7 @@ export async function GET() {
                     title,
                     subtitle,
                     status: app.status,
+                    time: app.updated_at,
                     href: '/admin',
                 };
             });
@@ -58,6 +59,7 @@ export async function GET() {
                     title: `${totalUnread} items awaiting review`,
                     subtitle: `${pendingCount} pending, ${interviewCount} interview`,
                     status: 'pending',
+                    time: new Date(),
                     href: '/admin',
                 });
             }
@@ -67,8 +69,9 @@ export async function GET() {
         } else {
             // Regular user: show their application status updates
             const apps = await query(`
-                SELECT a.id, a.status, a.updated_at
+                SELECT a.id, a.status, a.updated_at, t.name as type_name
                 FROM applications a
+                LEFT JOIN application_types t ON a.type_id = t.id
                 WHERE a.user_id = ?
                 ORDER BY a.updated_at DESC
                 LIMIT 5
@@ -76,13 +79,15 @@ export async function GET() {
 
             const notifications = (apps || []).map(app => ({
                 title: 'Application Update',
-                subtitle: `Your application is now: ${app.status}`,
+                subtitle: `Your ${app.type_name} application is ${app.status.toUpperCase()}`,
                 status: app.status,
-                href: '/ucp',
+                time: app.updated_at,
+                href: '/ucp/my-applications',
             }));
 
-            // Count anything that's NOT pending as "unread update" for the user
-            const unread = (apps || []).filter(a => a.status !== 'pending').length;
+            // Count anything updated in the last 24 hours as "unread" for simplicity if no 'seen' field exists
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const unread = (apps || []).filter(a => new Date(a.updated_at) > oneDayAgo).length;
             return NextResponse.json({ notifications, unread });
         }
     } catch (error) {

@@ -29,13 +29,13 @@ export async function POST(req) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { type_id, label, field_type, options, is_required } = await req.json();
+    const { type_id, label, field_type, options, is_required, section_title } = await req.json();
     if (!type_id || !label) return NextResponse.json({ error: 'type_id and label required' }, { status: 400 });
 
     try {
         const result = await query(
-            `INSERT INTO application_questions (type_id, label, field_type, options, is_required) VALUES (?, ?, ?, ?, ?)`,
-            [type_id, label, field_type || 'text', options || '', is_required ? 1 : 0]
+            `INSERT INTO application_questions (type_id, section_title, label, field_type, options, is_required) VALUES (?, ?, ?, ?, ?, ?)`,
+            [type_id, section_title || 'General Information', label, field_type || 'text', options || '', is_required ? 1 : 0]
         );
         return NextResponse.json({ success: true, id: result.insertId });
     } catch (e) {

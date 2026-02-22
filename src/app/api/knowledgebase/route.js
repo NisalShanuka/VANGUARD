@@ -16,8 +16,8 @@ export async function GET(req) {
                 return NextResponse.json({
                     id: page.id,
                     slug: page.slug,
-                    en: JSON.parse(page.en_content || '{}'),
-                    si: JSON.parse(page.si_content || '{}')
+                    en: JSON.parse(page.data_en || '{}'),
+                    si: JSON.parse(page.data_si || '{}')
                 });
             }
             return NextResponse.json({ error: 'Page not found' }, { status: 404 });
@@ -33,5 +33,35 @@ export async function GET(req) {
     } catch (error) {
         console.error('[KB API GET Error]', error.message);
         return NextResponse.json({ error: 'Failed to load knowledgebase data' }, { status: 500 });
+    }
+}
+
+export async function POST(req) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { id, slug, en, si } = await req.json();
+
+        if (id) {
+            // Update existing
+            await query(
+                "UPDATE knowledgebase_pages SET data_en = ?, data_si = ? WHERE id = ?",
+                [JSON.stringify(en), JSON.stringify(si), id]
+            );
+        } else {
+            // Create new
+            await query(
+                "INSERT INTO knowledgebase_pages (slug, data_en, data_si) VALUES (?, ?, ?)",
+                [slug, JSON.stringify(en), JSON.stringify(si)]
+            );
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('[KB API POST Error]', error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -140,6 +140,22 @@ export default function WhitelistForm({
                           <option key={oIdx} value={opt.value} className="bg-black">{opt.label}</option>
                         ))}
                       </select>
+                    ) : field.type === 'checkbox' ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 border border-white/10 bg-black/50">
+                        {field.options?.map((opt, oIdx) => (
+                          <label key={oIdx} className="flex items-center gap-3 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              name={field.name}
+                              value={opt.value}
+                              className="w-4 h-4 accent-white cursor-pointer"
+                            />
+                            <span className="text-sm text-white/60 group-hover:text-white transition-colors">
+                              {opt.label}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     ) : (
                       <input
                         type={field.type || 'text'}

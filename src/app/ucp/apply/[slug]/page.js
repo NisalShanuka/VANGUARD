@@ -36,6 +36,38 @@ function FieldInput({ q, value, onChange }) {
             </select>
         );
     }
+    if (q.field_type === 'checkbox') {
+        const options = (q.options || '').split(',').map(o => o.trim()).filter(Boolean);
+        const selectedValues = (value || '').split(',').map(v => v.trim()).filter(Boolean);
+
+        const handleCheck = (opt, checked) => {
+            let newValues;
+            if (checked) {
+                newValues = [...selectedValues, opt];
+            } else {
+                newValues = selectedValues.filter(v => v !== opt);
+            }
+            onChange({ target: { value: newValues.join(', ') } });
+        };
+
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 border border-white/10 bg-black/40">
+                {options.map(opt => (
+                    <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                            type="checkbox"
+                            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#fff' }}
+                            checked={selectedValues.includes(opt)}
+                            onChange={(e) => handleCheck(opt, e.target.checked)}
+                        />
+                        <span className="text-sm text-white/70 group-hover:text-white transition-colors">
+                            {opt}
+                        </span>
+                    </label>
+                ))}
+            </div>
+        );
+    }
     return <input type="text" {...props} />;
 }
 
@@ -135,7 +167,7 @@ export default function ApplicationForm() {
     );
 
     // Is field "short" (goes in 2-col grid)?
-    const isShort = (q) => q.field_type === 'text' || q.field_type === 'number' || !q.field_type;
+    const isShort = (q) => (q.field_type === 'text' || q.field_type === 'number' || !q.field_type) && q.field_type !== 'checkbox';
 
     return (
         <AnimatedPage>
@@ -176,28 +208,33 @@ export default function ApplicationForm() {
                             <p className="text-white/30 text-xs">Admin needs to add questions for this application type.</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="px-8 py-8">
-                            {/* 2-column grid: short fields side-by-side, textareas/selects full width */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                                {questions.map((q) => (
-                                    <div
-                                        key={q.id}
-                                        className={
-                                            !isShort(q) ? 'md:col-span-2' : ''
-                                        }
-                                    >
-                                        <label htmlFor={`field_${q.id}`} className={labelClass}>
-                                            {q.label}
-                                            {q.is_required ? <span className="text-white ml-1">*</span> : null}
-                                        </label>
-                                        <FieldInput
-                                            q={q}
-                                            value={formData[q.id]}
-                                            onChange={(e) => setFormData({ ...formData, [q.id]: e.target.value })}
-                                        />
+                        <form onSubmit={handleSubmit} className="px-8 py-8 space-y-12">
+                            {Array.from(new Set(questions.map(q => q.section_title || 'General Information'))).map(section => (
+                                <div key={section} className="space-y-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-[1px] flex-1 bg-white/10" />
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 bg-white/5 px-3 py-1 border border-white/5 whitespace-nowrap">
+                                            {section}
+                                        </h3>
+                                        <div className="h-[1px] flex-1 bg-white/10" />
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                                        {questions.filter(q => (q.section_title || 'General Information') === section).map((q) => (
+                                            <div key={q.id} className={!isShort(q) ? 'md:col-span-2' : ''}>
+                                                <label htmlFor={`field_${q.id}`} className={labelClass}>
+                                                    {q.label}
+                                                    {q.is_required ? <span className="text-white ml-1">*</span> : null}
+                                                </label>
+                                                <FieldInput
+                                                    q={q}
+                                                    value={formData[q.id]}
+                                                    onChange={(e) => setFormData({ ...formData, [q.id]: e.target.value })}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
 
                             {/* Submit row */}
                             <div className="mt-8 flex items-center gap-6 border-t border-white/5 pt-6">
