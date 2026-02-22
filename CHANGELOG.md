@@ -13,6 +13,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added npm `postinstall` hook to run the LightningCSS patch automatically after dependency install.
 - Added `dev:turbo` npm script (`next dev`) while keeping stable local development on webpack mode.
 - Added `src/lib/discord.js` helper to auto-add authenticated Discord users to a configured guild via Discord API.
+- Added `src/app/icon.png` (project-branded app icon) for App Router favicon handling.
 
 ### Changed
 - Updated `dev` npm script to `next dev --webpack` to avoid Turbopack runtime failure on WASM SWC fallback environments.
@@ -22,12 +23,16 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Removed direct `@next/swc-win32-x64-msvc` dependency entry from `package.json` (Next manages this internally).
 - Updated Discord OAuth scope in `src/lib/auth.js` to include `guilds.join` and trigger server auto-join during login.
 - Updated `.env_example` with safer placeholder values and clearer Discord auto-join variable descriptions (`DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID`).
+- Updated favicon metadata in `src/app/layout.js` to use project icon assets instead of default Next.js favicon behavior.
+- Updated header unauthenticated Discord CTA text in `src/components/Header.jsx` from `Login with Discord` to `Join with Discord`.
+- Removed the redundant Discord invite icon/button from `src/components/Header.jsx` now that login flow auto-joins users to the guild.
 
 ### Fixed
 - Fixed invalid React Hook usage in `src/app/ucp/my-characters/page.js` by moving per-vehicle image state into dedicated `VehicleCard` component (no hooks inside map loops).
 - Fixed local dev compile crash caused by missing native LightningCSS module (`../lightningcss.win32-x64-msvc.node`) via deterministic WASM fallback patch.
 - Removed unused imports in multiple components/pages to reduce lint/runtime noise.
 - Resolved Next.js deprecation warning by replacing `src/middleware.js` with `src/proxy.js`.
+- Removed default `src/app/favicon.ico` to prevent fallback to the Next.js default favicon.
 
 ### Notes
 - Native SWC warning may still appear on affected Windows environments; app runs with WASM fallback in webpack dev mode.

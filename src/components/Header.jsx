@@ -396,19 +396,9 @@ export default function Header() {
                   boxShadow: '0 4px 20px rgba(255,255,255,0.15)',
                 }}
               >
-                LOGIN WITH DISCORD
+                Join with Discord
               </motion.button>
             )}
-
-            {/* Discord */}
-            <motion.a href="https://discord.gg/wuq7TFYT" target="_blank" rel="noreferrer"
-              whileHover={{ y: -2, scale: 1.1 }}
-              style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, transition: 'color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
-            >
-              <i className="fa-brands fa-discord" />
-            </motion.a>
           </div>
 
           {/* ── Mobile right ── */}
@@ -494,7 +484,7 @@ export default function Header() {
           </div>
           {!session && (
             <button onClick={() => signIn('discord')} style={{ padding: '12px', borderRadius: 0, border: 'none', background: '#fff', color: '#000', fontSize: 11, fontWeight: 900, letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}>
-              Login with Discord
+              Join with Discord
             </button>
           )}
         </div>
