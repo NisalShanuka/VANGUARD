@@ -44,12 +44,18 @@ export const authOptions = {
         },
         async session({ session, token }) {
             if (session.user) {
-                const dbUser = await getUserByDiscordId(token.sub);
-                if (dbUser) {
-                    session.user.id = dbUser.id;
-                    session.user.discord_id = dbUser.discord_id;
-                    session.user.role = dbUser.role;
-                } else {
+                try {
+                    const dbUser = await getUserByDiscordId(token.sub);
+                    if (dbUser) {
+                        session.user.id = dbUser.id;
+                        session.user.discord_id = dbUser.discord_id;
+                        session.user.role = dbUser.role;
+                    } else {
+                        session.user.id = token.sub;
+                    }
+                } catch (error) {
+                    console.error("Error in session callback (getUserByDiscordId):", error);
+                    // Fallback to token sub if DB fails so login doesn't crash
                     session.user.id = token.sub;
                 }
             }
