@@ -6,7 +6,7 @@ import { fadeUp, stagger, tapPress, viewport } from './motionPresets.js';
 const socials = [
   { label: 'Facebook', href: '#', icon: 'fa-brands fa-facebook-f' },
   { label: 'Twitter', href: '#', icon: 'fa-brands fa-x-twitter' },
-  { label: 'Discord', href: 'https://discord.gg/tmvrp', icon: 'fa-brands fa-discord' },
+  { label: 'Discord', href: 'https://discord.gg/wuq7TFYT', icon: 'fa-brands fa-discord' },
   { label: 'TikTok', href: 'https://www.tiktok.com/@vanguardrp0.1', icon: 'fa-brands fa-tiktok' },
   { label: 'YouTube', href: 'https://www.youtube.com/@VANGUARDROLEPLAY-u3t', icon: 'fa-brands fa-youtube' },
 ];

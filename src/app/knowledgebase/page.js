@@ -1,8 +1,12 @@
 "use client";
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import AnimatedPage from '@/components/AnimatedPage';
 import PageHeader from '@/components/PageHeader';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { getLocalized } from '@/i18n/utils';
+
 export default function Knowledgebase() {
     const { language, t } = useLanguage();
     const [items, setItems] = useState([]);

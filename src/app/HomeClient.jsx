@@ -197,7 +197,7 @@ export default function HomeClient({ applicationTypes }) {
                             <p className="mt-4 max-w-2xl text-white/70">{t('home.eventDescription')}</p>
                         </motion.div>
                         <motion.div variants={fadeUp(12, 0.3)} whileHover={{ y: -2 }} whileTap={tapPress} className="w-fit">
-                            <a href="https://discord.gg/UK4e9QR6fN" target="_blank" rel="noreferrer" className="btn-primary">
+                            <a href="https://discord.gg/wuq7TFYT" target="_blank" rel="noreferrer" className="btn-primary">
                                 {t('home.eventCta')}
                             </a>
                         </motion.div>

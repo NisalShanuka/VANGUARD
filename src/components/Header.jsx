@@ -401,7 +401,7 @@ export default function Header() {
             )}
 
             {/* Discord */}
-            <motion.a href="https://discord.gg/UK4e9QR6fN" target="_blank" rel="noreferrer"
+            <motion.a href="https://discord.gg/wuq7TFYT" target="_blank" rel="noreferrer"
               whileHover={{ y: -2, scale: 1.1 }}
               style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, transition: 'color 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.color = '#fff'}
