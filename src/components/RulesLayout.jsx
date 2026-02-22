@@ -1,11 +1,9 @@
 "use client";
-import { motion } from 'framer-motion';
 import PageHeader from './PageHeader.jsx';
 import Sidebar from './Sidebar.jsx';
 import { quickLinks as quickLinksData, tags as tagsData } from '../data/sidebar.js';
 import { useLanguage } from '../i18n/LanguageContext.jsx';
 import { getLocalized } from '../i18n/utils.js';
-import { fadeUp, stagger, viewport } from './motionPresets.js';
 
 export default function RulesLayout({ data }) {
   const { language, t } = useLanguage();

@@ -173,54 +173,59 @@ function GarageTab({ vehicles }) {
     }
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-            {vehicles.map((v, i) => {
-                const state = vehicleStateMap[v.state ?? 0];
-                const modelSlug = (v.vehicle || '').toLowerCase().trim();
-                const [imgErr, setImgErr] = useState(false);
-                return (
-                    <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, overflow: 'hidden' }}>
-                        {/* Vehicle image */}
-                        <div style={{ position: 'relative', height: 140, background: 'rgba(0,0,0,0.4)', overflow: 'hidden' }}>
-                            {!imgErr
-                                ? <img src={`https://docs.fivem.net/vehicles/${modelSlug}.webp`} alt={v.vehicle}
-                                    onError={() => setImgErr(true)}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
-                                : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}><i className="fas fa-car" /></div>
-                            }
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
-                            <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                <div>
-                                    <p style={{ fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.2 }}>{v.vehicle}</p>
-                                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>{v.plate}</p>
-                                </div>
-                                <span style={{ fontSize: 9, fontWeight: 800, padding: '3px 8px', borderRadius: 0, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>{state.label}</span>
-                            </div>
-                        </div>
-                        {/* Condition bars */}
-                        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                            {[
-                                { label: 'Engine', value: v.engine ?? 1000, max: 1000, color: '#fff' },
-                                { label: 'Body', value: v.body ?? 1000, max: 1000, color: '#fff' },
-                                { label: 'Fuel', value: v.fuel ?? 0, max: 100, color: '#fff' },
-                            ].map(({ label, value, max, color }) => (
-                                <div key={label}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 4 }}>
-                                        <span style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
-                                        <span style={{ color: '#fff', fontWeight: 700 }}>{Math.round(value / max * 100)}%</span>
-                                    </div>
-                                    <StatBar value={value} max={max} color={color} />
-                                </div>
-                            ))}
-                            {v.traveldistance > 0 && (
-                                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8 }}>
-                                    <i className="fas fa-location-dot mr-1" /> {(v.traveldistance / 1000).toFixed(1)} km traveled
-                                    {v.state === 2 && v.depotprice > 0 && <span style={{ color: '#fff' }}> · Depot: ${v.depotprice.toLocaleString()}</span>}
-                                </p>
-                            )}
-                        </div>
+            {vehicles.map((v, i) => (
+                <VehicleCard key={i} vehicle={v} />
+            ))}
+        </div>
+    );
+}
+
+function VehicleCard({ vehicle: v }) {
+    const [imgErr, setImgErr] = useState(false);
+    const state = vehicleStateMap[v.state ?? 0];
+    const modelSlug = (v.vehicle || '').toLowerCase().trim();
+
+    return (
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, overflow: 'hidden' }}>
+            {/* Vehicle image */}
+            <div style={{ position: 'relative', height: 140, background: 'rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+                {!imgErr
+                    ? <img src={`https://docs.fivem.net/vehicles/${modelSlug}.webp`} alt={v.vehicle}
+                        onError={() => setImgErr(true)}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}><i className="fas fa-car" /></div>
+                }
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+                <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <div>
+                        <p style={{ fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.2 }}>{v.vehicle}</p>
+                        <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>{v.plate}</p>
                     </div>
-                );
-            })}
+                    <span style={{ fontSize: 9, fontWeight: 800, padding: '3px 8px', borderRadius: 0, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>{state.label}</span>
+                </div>
+            </div>
+            {/* Condition bars */}
+            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                    { label: 'Engine', value: v.engine ?? 1000, max: 1000, color: '#fff' },
+                    { label: 'Body', value: v.body ?? 1000, max: 1000, color: '#fff' },
+                    { label: 'Fuel', value: v.fuel ?? 0, max: 100, color: '#fff' },
+                ].map(({ label, value, max, color }) => (
+                    <div key={label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 4 }}>
+                            <span style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
+                            <span style={{ color: '#fff', fontWeight: 700 }}>{Math.round(value / max * 100)}%</span>
+                        </div>
+                        <StatBar value={value} max={max} color={color} />
+                    </div>
+                ))}
+                {v.traveldistance > 0 && (
+                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8 }}>
+                        <i className="fas fa-location-dot mr-1" /> {(v.traveldistance / 1000).toFixed(1)} km traveled
+                        {v.state === 2 && v.depotprice > 0 && <span style={{ color: '#fff' }}> - Depot: ${v.depotprice.toLocaleString()}</span>}
+                    </p>
+                )}
+            </div>
         </div>
     );
 }

@@ -68,8 +68,8 @@ export default function MyApplications() {
                                     <div>
                                         <div className="flex items-center gap-3">
                                             <h3 className="text-h3">{app.type_name}</h3>
-                                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${app.status === 'approved' ? 'bg-white text-black border border-white' :
-                                                app.status === 'rejected' ? 'bg-white/10 text-white/40 border border-white/20' :
+                                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${app.status === 'accepted' ? 'bg-white text-black border border-white' :
+                                                app.status === 'declined' ? 'bg-white/10 text-white/40 border border-white/20' :
                                                     'bg-white/20 text-white border border-white/30'
                                                 }`}>
                                                 {app.status}

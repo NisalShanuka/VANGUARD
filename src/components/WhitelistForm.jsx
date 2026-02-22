@@ -132,9 +132,10 @@ export default function WhitelistForm({
                       <select
                         name={field.name}
                         required={field.required}
+                        defaultValue=""
                         className="w-full border border-white/10 bg-black p-4 text-sm text-white transition-all focus:border-white/50 focus:outline-none focus:ring-1 focus:ring-white/20"
                       >
-                        <option value="" disabled selected>Select an option</option>
+                        <option value="" disabled>Select an option</option>
                         {field.options?.map((opt, oIdx) => (
                           <option key={oIdx} value={opt.value} className="bg-black">{opt.label}</option>
                         ))}

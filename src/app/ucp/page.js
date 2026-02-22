@@ -110,8 +110,8 @@ export default function UCPDashboard() {
                                                 <p className="text-caption text-white/40">{new Date(app.created_at).toLocaleDateString()}</p>
                                             </div>
                                             <div className="flex items-center gap-4">
-                                                <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${app.status === 'approved' ? 'bg-white text-black border border-white' :
-                                                    app.status === 'rejected' ? 'bg-white/10 text-white/40 border border-white/20' :
+                                                <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${app.status === 'accepted' ? 'bg-white text-black border border-white' :
+                                                    app.status === 'declined' ? 'bg-white/10 text-white/40 border border-white/20' :
                                                         'bg-white/20 text-white border border-white/30'
                                                     }`}>
                                                     {app.status}

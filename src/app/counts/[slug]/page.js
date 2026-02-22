@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import AnimatedPage from '@/components/AnimatedPage';
-import RulesLayout from '@/components/RulesLayout';
+import SituationLayout from '@/components/SituationLayout';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function CountsPage() {
@@ -34,7 +34,7 @@ export default function CountsPage() {
 
     return (
         <AnimatedPage>
-            <RulesLayout data={countsData} />
+            <SituationLayout data={countsData} />
         </AnimatedPage>
     );
 }
