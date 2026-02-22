@@ -160,7 +160,7 @@ export default function WhitelistForm({
           <div className="pt-8 flex flex-col sm:flex-row sm:items-center gap-6 border-t border-white/5">
             <motion.button
               type="submit"
-              className="btn-primary min-w-[200px]"
+              className="btn-accent min-w-[200px]"
               disabled={submitting}
               whileTap={tapPress}
             >

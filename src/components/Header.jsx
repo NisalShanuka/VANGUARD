@@ -79,7 +79,7 @@ function DashboardMenu({ session, onClose }) {
         width: 280, zIndex: 9999,
         background: '#000',
         border: '1px solid rgba(255,255,255,0.2)',
-        borderRadius: 0,
+        borderRadius: 16,
         boxShadow: '0 24px 80px rgba(0,0,0,1)',
         backdropFilter: 'blur(24px)',
         overflow: 'hidden',
@@ -94,13 +94,13 @@ function DashboardMenu({ session, onClose }) {
       }}>
         <div style={{ position: 'relative', flexShrink: 0 }}>
           {session?.user?.image ? (
-            <img src={session.user.image} alt="" style={{ width: 40, height: 40, borderRadius: 0, objectFit: 'cover', border: `2px solid #fff` }} />
+            <img src={session.user.image} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: `2px solid #fff` }} />
           ) : (
-            <div style={{ width: 40, height: 40, borderRadius: 0, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'rgba(255,255,255,0.3)' }}><i className="fas fa-user-circle" /></div>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: 'rgba(255,255,255,0.3)' }}><i className="fas fa-user-circle" /></div>
           )}
           <span style={{
             position: 'absolute', bottom: 0, right: 0,
-            width: 12, height: 12, borderRadius: 0,
+            width: 12, height: 12, borderRadius: '50%',
             background: '#fff',
             border: '2px solid #000',
           }} />
@@ -132,7 +132,7 @@ function DashboardMenu({ session, onClose }) {
               <i className="fas fa-bell" /> Notifications
             </span>
             {unread > 0 && (
-              <span style={{ fontSize: 9, fontWeight: 900, background: '#fff', color: '#000', padding: '1px 6px', borderRadius: 0 }}>
+              <span style={{ fontSize: 9, fontWeight: 900, background: '#fff', color: '#000', padding: '1px 6px', borderRadius: 16 }}>
                 {unread}
               </span>
             )}
@@ -153,7 +153,7 @@ function DashboardMenu({ session, onClose }) {
                 <p style={{ margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{n.subtitle}</p>
               </div>
               {n.status && (
-                <span style={{ fontSize: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000', padding: '2px 6px', background: '#fff', border: '1px solid #fff', borderRadius: 0, whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#000', padding: '2px 6px', background: '#fff', border: '1px solid #fff', borderRadius: 16, whiteSpace: 'nowrap' }}>
                   {n.status}
                 </span>
               )}
@@ -179,7 +179,7 @@ function DashboardMenu({ session, onClose }) {
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(240,71,71,0.06)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <span style={{ width: 30, height: 30, borderRadius: 0, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, color: 'rgba(255,255,255,0.4)' }}><i className="fas fa-right-from-bracket" /></span>
+          <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, color: 'rgba(255,255,255,0.4)' }}><i className="fas fa-right-from-bracket" /></span>
           <div>
             <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#fff' }}>Logout</p>
             <p style={{ margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Sign out of your account</p>
@@ -196,7 +196,7 @@ function MenuItem({ icon, label, sub, href, onClick, accent }) {
       onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
-      <span style={{ width: 30, height: 30, borderRadius: 0, background: accent ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>{icon}</span>
+      <span style={{ width: 30, height: 30, borderRadius: '50%', background: accent ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>{icon}</span>
       <div>
         <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: accent || '#fff' }}>{label}</p>
         <p style={{ margin: '1px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{sub}</p>
@@ -262,15 +262,23 @@ export default function Header() {
         {/* White accent line */}
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '35%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }} />
 
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 80, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
 
           {/* ── Logo ── */}
-          <motion.div whileHover={{ y: -1 }} style={{ flexShrink: 0 }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <motion.img src="/images/logo.png" alt="Vanguard" style={{ height: 34, width: 'auto' }} whileHover={{ scale: 1.06 }} />
+          <motion.div style={{ flexShrink: 0 }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', perspective: 1000 }}>
+              <motion.img
+                src="/images/logo.png"
+                alt="Vanguard"
+                style={{ height: 48, width: 'auto', transformStyle: 'preserve-3d' }}
+                animate={{ rotateY: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              />
               <div className="hidden sm:flex" style={{ flexDirection: 'column', lineHeight: 1.1 }}>
-                <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#fff' }}>VANGUARD</span>
-                <span style={{ fontSize: 7, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>ROLEPLAY</span>
+                <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff' }}>
+                  VANGUARD
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>ROLEPLAY</span>
               </div>
             </Link>
           </motion.div>
@@ -288,17 +296,20 @@ export default function Header() {
                       setDesktopDashOpen(false);
                     }}
                     style={{
-                      fontSize: 10, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase',
-                      textDecoration: 'none', color: active ? '#fff' : 'rgba(255,255,255,0.4)',
-                      transition: 'color 0.2s',
+                      fontSize: 12, fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase',
+                      textDecoration: 'none', color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                      transition: 'all 0.3s',
                     }}
-                    onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
-                    onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.48)'; }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
                   >
                     {label}
                   </Link>
                   {active && (
-                    <motion.div layoutId="navActive" style={{ position: 'absolute', bottom: -4, left: 0, right: 0, height: 2, borderRadius: 0, background: '#fff' }} />
+                    <motion.div
+                      layoutId="navActive"
+                      style={{ position: 'absolute', bottom: -6, left: 0, right: 0, height: 3, borderRadius: 16, background: '#fff' }}
+                    />
                   )}
                 </motion.div>
               );
@@ -309,10 +320,10 @@ export default function Header() {
           <div className="hidden md:flex" style={{ alignItems: 'center', gap: 10, flexShrink: 0, justifyContent: 'flex-end' }}>
 
             {/* Language */}
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, padding: 3, gap: 2 }}>
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: 3, gap: 2 }}>
               {['en', 'si'].map(lang => (
                 <button key={lang} onClick={() => setLanguage(lang)} style={{
-                  padding: '3px 9px', borderRadius: 0, border: 'none', cursor: 'pointer',
+                  padding: '3px 9px', borderRadius: 16, border: 'none', cursor: 'pointer',
                   fontSize: 9, fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase',
                   background: language === lang ? 'rgba(255,255,255,1)' : 'transparent',
                   color: language === lang ? '#000' : 'rgba(255,255,255,0.3)',
@@ -339,23 +350,23 @@ export default function Header() {
                       padding: '6px 14px 6px 7px',
                       background: desktopDashOpen ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
                       border: `1px solid ${desktopDashOpen ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)'}`,
-                      borderRadius: 0, transition: 'all 0.2s',
+                      borderRadius: 16, transition: 'all 0.2s',
                     }}
                   >
                     {/* Avatar */}
                     <div style={{ position: 'relative' }}>
                       {session.user?.image ? (
-                        <img src={session.user.image} alt="" style={{ width: 26, height: 26, borderRadius: 0, objectFit: 'cover', border: '1.5px solid #fff', display: 'block' }} />
+                        <img src={session.user.image} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #fff', display: 'block' }} />
                       ) : (
-                        <div style={{ width: 26, height: 26, borderRadius: 0, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}><i className="fas fa-user" /></div>
+                        <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}><i className="fas fa-user" /></div>
                       )}
                       {/* Admin dot */}
                       {session.user?.role === 'admin' && (
-                        <span style={{ position: 'absolute', bottom: -1, right: -1, width: 9, height: 9, borderRadius: 0, background: '#fff', border: '1.5px solid #000' }} />
+                        <span style={{ position: 'absolute', bottom: -1, right: -1, width: 9, height: 9, borderRadius: '50%', background: '#fff', border: '1.5px solid #000' }} />
                       )}
                       {/* Unread dot */}
                       {unread > 0 && session.user?.role !== 'admin' && (
-                        <span style={{ position: 'absolute', bottom: -1, right: -1, width: 9, height: 9, borderRadius: 0, background: '#fff', border: '1.5px solid #000' }} />
+                        <span style={{ position: 'absolute', bottom: -1, right: -1, width: 9, height: 9, borderRadius: '50%', background: '#fff', border: '1.5px solid #000' }} />
                       )}
                     </div>
                     <div style={{ textAlign: 'left' }}>
@@ -391,7 +402,7 @@ export default function Header() {
                 whileTap={{ scale: 0.97 }}
                 style={{
                   padding: '8px 20px', fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
-                  textTransform: 'uppercase', border: 'none', borderRadius: 0, cursor: 'pointer',
+                  textTransform: 'uppercase', border: 'none', borderRadius: 16, cursor: 'pointer',
                   background: '#fff', color: '#000',
                   boxShadow: '0 4px 20px rgba(255,255,255,0.15)',
                 }}
@@ -408,11 +419,11 @@ export default function Header() {
                 <motion.button onClick={() => setMobileDashOpen(o => !o)} whileTap={{ scale: 0.95 }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   <div style={{ position: 'relative' }}>
                     {session.user?.image ? (
-                      <img src={session.user.image} style={{ width: 32, height: 32, borderRadius: 0, objectFit: 'cover', border: '2px solid #fff' }} />
+                      <img src={session.user.image} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff' }} />
                     ) : (
-                      <div style={{ width: 32, height: 32, borderRadius: 0, background: 'rgba(255,255,255,0.1)', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
                     )}
-                    {unread > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: 0, background: '#fff', border: '2px solid #000', fontSize: 7, fontWeight: 900, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unread > 9 ? '9+' : unread}</span>}
+                    {unread > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderRadius: '50%', background: '#fff', border: '2px solid #000', fontSize: 7, fontWeight: 900, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unread > 9 ? '9+' : unread}</span>}
                   </div>
                 </motion.button>
                 <AnimatePresence>
@@ -425,12 +436,12 @@ export default function Header() {
               type="button"
               onClick={() => setMenuOpen(o => !o)}
               whileTap={{ scale: 0.95 }}
-              style={{ width: 38, height: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 0, cursor: 'pointer' }}
+              style={{ width: 38, height: 38, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 16, cursor: 'pointer' }}
             >
               {[0, 1, 2].map(i => (
                 <motion.span key={i}
                   animate={menuOpen ? { rotate: i === 0 ? 45 : i === 2 ? -45 : 0, y: i === 0 ? 6.5 : i === 2 ? -6.5 : 0, opacity: i === 1 ? 0 : 1 } : { rotate: 0, y: 0, opacity: 1 }}
-                  style={{ display: 'block', width: 18, height: 1.5, background: 'rgba(255,255,255,0.65)', borderRadius: 0 }}
+                  style={{ display: 'block', width: 18, height: 1.5, background: 'rgba(255,255,255,0.65)', borderRadius: 4 }}
                 />
               ))}
             </motion.button>
@@ -450,13 +461,13 @@ export default function Header() {
       >
         <div style={{ padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>Navigation</span>
-          <button onClick={() => setMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: 28, height: 28, borderRadius: 0, cursor: 'pointer', fontSize: 12 }}>✕</button>
+          <button onClick={() => setMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', fontSize: 12 }}>✕</button>
         </div>
 
         <nav style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
           {NAV_LINKS.map(({ href, label }) => (
             <Link key={href} href={href} onClick={() => setMenuOpen(false)} style={{
-              padding: '11px 14px', borderRadius: 0, textDecoration: 'none',
+              padding: '11px 14px', borderRadius: 16, textDecoration: 'none',
               fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase',
               background: pathname === href ? 'rgba(255,255,255,0.1)' : 'transparent',
               borderLeft: `2px solid ${pathname === href ? '#fff' : 'transparent'}`,
@@ -472,7 +483,7 @@ export default function Header() {
           <div style={{ display: 'flex', gap: 6 }}>
             {['en', 'si'].map(lang => (
               <button key={lang} onClick={() => setLanguage(lang)} style={{
-                flex: 1, padding: '7px', borderRadius: 0, border: '1px solid',
+                flex: 1, padding: '7px', borderRadius: 16, border: '1px solid',
                 borderColor: language === lang ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.1)',
                 background: language === lang ? '#fff' : 'transparent',
                 color: language === lang ? '#000' : 'rgba(255,255,255,0.3)',
@@ -483,7 +494,7 @@ export default function Header() {
             ))}
           </div>
           {!session && (
-            <button onClick={() => signIn('discord')} style={{ padding: '12px', borderRadius: 0, border: 'none', background: '#fff', color: '#000', fontSize: 11, fontWeight: 900, letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}>
+            <button onClick={() => signIn('discord')} style={{ padding: '12px', borderRadius: 16, border: 'none', background: '#fff', color: '#000', fontSize: 11, fontWeight: 900, letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer' }}>
               Join with Discord
             </button>
           )}

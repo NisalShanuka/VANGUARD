@@ -4,9 +4,6 @@ import { useLanguage } from '../i18n/LanguageContext.jsx';
 import { fadeUp, stagger, tapPress, viewport } from './motionPresets.js';
 
 const socials = [
-  { label: 'Facebook', href: '#', icon: 'fa-brands fa-facebook-f' },
-  { label: 'Twitter', href: '#', icon: 'fa-brands fa-x-twitter' },
-  { label: 'Discord', href: 'https://discord.gg/wuq7TFYT', icon: 'fa-brands fa-discord' },
   { label: 'TikTok', href: 'https://www.tiktok.com/@vanguardrp0.1', icon: 'fa-brands fa-tiktok' },
   { label: 'YouTube', href: 'https://www.youtube.com/@VANGUARDROLEPLAY-u3t', icon: 'fa-brands fa-youtube' },
 ];
@@ -39,7 +36,7 @@ export default function Footer() {
               href={social.href}
               target="_blank"
               rel="noreferrer"
-              className="rounded-none border border-white/10 p-2 text-white/70 transition hover:border-white hover:text-white h-9 w-9 flex items-center justify-center"
+              className="rounded-full border border-white/10 bg-white/5 p-2 text-white/70 transition-all duration-300 hover:border-accent-500/50 hover:bg-accent-500/20 hover:text-white hover:shadow-[0_0_15px_rgba(200,200,200,0.3)] h-10 w-10 flex items-center justify-center"
               aria-label={social.label}
               variants={fadeUp(10, 0.2)}
               whileHover={{ y: -3, rotate: -2 }}

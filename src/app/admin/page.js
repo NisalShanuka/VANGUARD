@@ -1145,7 +1145,7 @@ export default function AdminDashboard() {
     if (loading) return (
         <div className="flex h-screen items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-                <div className="h-8 w-8 border-2 border-white border-t-transparent rounded-none animate-spin" />
+                <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
                 <p className="text-[10px] uppercase tracking-widest text-white/30">Loading Applications...</p>
             </div>
         </div>

@@ -64,7 +64,7 @@ export default function SituationLayout({ data }) {
               <motion.div variants={fadeUp(14, 0.35)} className="glass-panel">
                 <h4>{t('situations.updates')}</h4>
                 <div className="mt-4 flex items-center gap-3">
-                  <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-none" />
+                  <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-xl" />
                   <div>
                     <p className="text-small text-white">{data.update.author}</p>
                     <p className="text-caption text-white/50">{data.update.date}</p>
