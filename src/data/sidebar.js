@@ -1,0 +1,51 @@
+export const quickLinks = {
+  en: [
+    { label: 'Knowledgebase', to: '/knowledgebase' },
+    { label: 'Server Rules', to: '/rules/server' },
+    { label: 'General Rules', to: '/rules/general' },
+    { label: 'RolePlay Rules', to: '/rules/roleplay' },
+    { label: 'General Situation Count', to: '/counts/general-situation' },
+    { label: 'Robbery Situation Count', to: '/counts/robbery-situation' },
+  ],
+  si: [
+    { label: 'දැනුම් මධ්‍යස්ථානය', to: '/knowledgebase' },
+    { label: 'සේවාදායක නීති', to: '/rules/server' },
+    { label: 'සාමාන්්‍ය නීති', to: '/rules/general' },
+    { label: 'RolePlay නීති', to: '/rules/roleplay' },
+    { label: 'සාමාන්්‍ය සිදුවීම් ගණන', to: '/counts/general-situation' },
+    { label: 'රොබරි සිදුවීම් ගණන', to: '/counts/robbery-situation' },
+  ],
+};
+
+export const tags = {
+  en: [
+    'VANGUARD',
+    'RP',
+    'SRILANKA',
+    'ROLEPLAY',
+    'FIVEM',
+    'GTA5',
+    'GAMING',
+    'ROBBERY',
+    'POLICE',
+    'GANG',
+    'RULES',
+    'SITUATION',
+    'COUNT',
+  ],
+  si: [
+    'VANGUARD',
+    'RP',
+    'ශ්‍රීලංකා',
+    'රෝල්ප්ලේ',
+    'FIVEM',
+    'GTA5',
+    'ගේමින්ග්',
+    'රොබරි',
+    'පොලිස්',
+    'ගැන්ග්',
+    'නීති',
+    'සිදුවීම්',
+    'ගණන',
+  ],
+};
