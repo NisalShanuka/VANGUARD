@@ -25,6 +25,9 @@ function FieldInput({ q, value, onChange }) {
     if (q.field_type === 'number') {
         return <input type="number" {...props} />;
     }
+    if (q.field_type === 'date') {
+        return <input type="date" {...props} placeholder="" />;
+    }
     if (q.field_type === 'select') {
         return (
             <select {...props} className={`${inputClass} cursor-pointer [&>option]:bg-[#0a0a0a] [&>option]:text-white`}>
@@ -33,6 +36,21 @@ function FieldInput({ q, value, onChange }) {
                     <option key={o} value={o}>{o}</option>
                 ))}
             </select>
+        );
+    }
+    if (q.field_type === 'checkbox_single') {
+        return (
+            <label className="flex items-center gap-5 p-6 border border-white/5 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all cursor-pointer group rounded-2xl">
+                <input
+                    type="checkbox"
+                    style={{ width: 24, height: 24, cursor: 'pointer', accentColor: '#fff' }}
+                    checked={value === 'Yes'}
+                    onChange={(e) => onChange({ target: { value: e.target.checked ? 'Yes' : 'No' } })}
+                />
+                <span className="text-xs font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest leading-relaxed">
+                    Tick to confirm / එකඟ වීමට සලකුණු කරන්න
+                </span>
+            </label>
         );
     }
     if (q.field_type === 'checkbox') {
