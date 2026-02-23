@@ -106,21 +106,45 @@ export async function PATCH(req) {
 
         // Fire Discord webhook based on new status
         const webhookMap = {
-            accepted: { url: app.webhook_accepted, emoji: '✅', color: 0x43b581 },
-            declined: { url: app.webhook_declined, emoji: '❌', color: 0xf04747 },
-            interview: { url: app.webhook_interview, emoji: '🎤', color: 0x7289da },
+            accepted: {
+                url: app.webhook_accepted,
+                emoji: '✅',
+                color: 0x43b581,
+                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437694342402048/standard_4.gif?ex=699d7bee&is=699c2a6e&hm=fcd38a8ed1a2d39fe2292f718e80261d51315e4620f5a2731d76c721033878be&'
+            },
+            declined: {
+                url: app.webhook_declined,
+                emoji: '❌',
+                color: 0xf04747,
+                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437694753701908/standard_3.gif?ex=699d7bee&is=699c2a6e&hm=7b95af5e8d440d991ee5103b6388e038b6ba8390a9ca13c1293310ef2c643683&'
+            },
+            interview: {
+                url: app.webhook_interview,
+                emoji: '🎤',
+                color: 0x7289da,
+                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693344153670/standard_2.gif?ex=699d7bee&is=699c2a6e&hm=f00784c328e028b3a5e5e7ea3d8e3c5401d3ac0f8ff124177129b34ded3a2f89&'
+            },
         };
+
         const wh = webhookMap[status];
         if (wh && wh.url) {
+            const mention = app.discord_id ? `<@${app.discord_id}>` : `**${app.username}**`;
+
             await fetch(wh.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    content: `Hey, ${mention}`,
                     embeds: [{
-                        title: `${wh.emoji} Application ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-                        description: `**${app.username}**'s **${app.type_name}** application has been **${status}**.`,
+                        title: `🛡️ Vanguard Roleplay Application Team`,
+                        description: `**VanguardRP Whitelist Application**\n\n${mention}, Your form has been **${status}** ${wh.emoji}.\n${status === 'accepted' ? 'Feel free to enjoy your stay.' : (status === 'declined' ? 'Feel free to apply again in 14 days.' : 'Please check your DMs/Emails for interview details.')}`,
                         color: wh.color,
-                        fields: notes ? [{ name: 'Staff Notes', value: notes }] : [],
+                        fields: [
+                            { name: 'RESULT', value: status.toUpperCase() + ' ' + wh.emoji, inline: true },
+                            { name: 'REASON', value: notes || 'Read the questions & server rules carefully', inline: false }
+                        ],
+                        image: { url: wh.image },
+                        footer: { text: 'Vanguard Roleplay by SI CI', icon_url: 'https://vanguardroleplay.net/logo.png' },
                         timestamp: new Date().toISOString(),
                     }]
                 })
