@@ -76,7 +76,7 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
 
                 {!isConfirm && selectOptions && (
                     <select
-                        style={{ ...inputStyle, marginBottom: 12, cursor: 'pointer' }}
+                        style={{ ...inputStyle, marginBottom: 12, cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}
                         value={selectVal}
                         onChange={e => setSelectVal(e.target.value)}
                     >
@@ -444,7 +444,7 @@ function QuestionsModal({ type, onClose }) {
                                                 </div>
                                                 <div>
                                                     <label style={labelStyle}>Field Type</label>
-                                                    <select style={inputStyle} value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
+                                                    <select style={{ ...inputStyle, cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }} value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
                                                         <option value="text">Short Text</option>
                                                         <option value="textarea">Long Text</option>
                                                         <option value="number">Number</option>
@@ -1253,7 +1253,7 @@ export default function AdminDashboard() {
                             <button
                                 key={tab.id}
                                 onClick={() => setMainTab(tab.id)}
-                                className={`flex items-center gap-2.5 px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 relative group ${mainTab === tab.id
+                                className={`flex items-center gap-2.5 px-4 md:px-6 py-3 text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 relative group ${mainTab === tab.id
                                     ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]'
                                     : 'text-white/40 hover:text-white/80 hover:bg-white/5'
                                     }`}
@@ -1323,7 +1323,7 @@ export default function AdminDashboard() {
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Applicant</th>
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Type</th>
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Status</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Submitted</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 hidden md:table-cell">Submitted</th>
                                             <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Action</th>
                                         </tr>
                                     </thead>
@@ -1352,7 +1352,7 @@ export default function AdminDashboard() {
                                                 <td className="px-6 py-4">
                                                     <StatusBadge status={app.status} />
                                                 </td>
-                                                <td className="px-6 py-4 text-[11px] text-white/40">
+                                                <td className="px-6 py-4 text-[11px] text-white/40 hidden md:table-cell">
                                                     {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -1850,6 +1850,14 @@ export default function AdminDashboard() {
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
+                select option {
+                    background-color: #0c0c0c !important;
+                    color: white !important;
+                }
+                select:focus {
+                    border-color: rgba(255,255,255,0.3) !important;
+                    background: rgba(255,255,255,0.06) !important;
+                }
             `}</style>
         </AnimatedPage>
     );

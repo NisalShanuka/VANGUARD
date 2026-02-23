@@ -87,12 +87,12 @@ function DashboardMenu({ session, onClose }) {
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'absolute', right: 0, top: 'calc(100% + 12px)',
-        width: 280, zIndex: 9999,
-        background: '#000',
-        border: '1px solid rgba(255,255,255,0.2)',
-        borderRadius: 16,
-        boxShadow: '0 24px 80px rgba(0,0,0,1)',
-        backdropFilter: 'blur(24px)',
+        width: 300, zIndex: 9999,
+        background: 'rgba(5,5,5,0.85)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: 0,
+        boxShadow: '0 40px 100px rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(32px)',
         overflow: 'hidden',
       }}
     >
@@ -266,11 +266,11 @@ export default function Header() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-          background: scrolled ? 'rgba(0,0,0,0.98)' : 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
-          borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
-          boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.8)' : 'none',
-          transition: 'background 0.35s, border-color 0.35s, box-shadow 0.35s',
+          background: scrolled ? 'rgba(5,5,5,0.75)' : 'rgba(5,5,5,0.6)',
+          backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
+          borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)'}`,
+          boxShadow: scrolled ? '0 10px 40px rgba(0,0,0,0.8)' : 'none',
+          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         {/* White accent line */}
@@ -470,7 +470,7 @@ export default function Header() {
         onClick={() => setMenuOpen(false)}
       />
       <div
-        className={`fixed top-0 right-0 bottom-0 w-[270px] z-50 bg-[#000]/98 border-l border-white/20 backdrop-blur-xl transition-transform duration-300 ease-out shadow-2xl ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 right-0 bottom-0 w-[270px] z-50 bg-[#050505]/95 border-l border-white/10 backdrop-blur-3xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_0_100px_rgba(0,0,0,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         <div style={{ padding: '18px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

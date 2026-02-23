@@ -161,7 +161,7 @@ function OverviewTab({ char }) {
 
             {/* Inventory */}
             <div className="char-card">
-                <div className="char-card-header"><i className="fas fa- suitcase mr-2" /> Backpack Inventory</div>
+                <div className="char-card-header"><i className="fas fa-suitcase mr-2" /> Backpack Inventory</div>
                 <div className="char-card-body">
                     <InventoryGrid items={inventory} title="" />
                 </div>
@@ -189,7 +189,7 @@ function VehicleCard({ vehicle: v }) {
     const modelSlug = (v.vehicle || '').toLowerCase().trim();
 
     return (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, overflow: 'hidden' }}>
+        <div className="bg-white/[0.02] border border-white/10 rounded-none overflow-hidden transition-all duration-300 hover:bg-white/5">
             {/* Vehicle image */}
             <div style={{ position: 'relative', height: 140, background: 'rgba(0,0,0,0.4)', overflow: 'hidden' }}>
                 {!imgErr
@@ -532,16 +532,16 @@ function CharacterCard({ char }) {
     ];
 
     return (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, overflow: 'hidden', marginBottom: 32 }}>
+        <div className="glass-panel" style={{ padding: 0, overflow: 'hidden', marginBottom: 32 }}>
             {/* Hero section */}
-            <div style={{ padding: '24px 28px', background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+            <div className="flex flex-col md:flex-row flex-wrap justify-between items-center gap-6 p-6 md:px-8 md:py-8 bg-gradient-to-br from-white/[0.05] to-transparent border-b border-white/5">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
                     {/* Avatar */}
                     <div style={{ width: 64, height: 64, borderRadius: 0, overflow: 'hidden', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: '#fff', flexShrink: 0, border: '2px solid rgba(255,255,255,0.1)' }}>
                         {avatar ? <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (ci.firstname?.[0] || '?').toUpperCase()}
                     </div>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#fff' }}>{ci.firstname} {ci.lastname}</h3>
+                        <h3 className="m-0 text-xl md:text-2xl font-black text-white">{ci.firstname} {ci.lastname}</h3>
                         <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 0, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 {char.citizenid}
@@ -555,12 +555,12 @@ function CharacterCard({ char }) {
                     </div>
                 </div>
                 {/* Money */}
-                <div style={{ display: 'flex', gap: 24, alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '12px 20px', borderRadius: 0, border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-center bg-white/[0.03] px-6 py-4 md:px-8 md:py-4 border border-white/5 backdrop-blur-md w-full md:w-auto">
                     <div style={{ textAlign: 'center' }}>
                         <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 3 }}>Bank Balance</p>
                         <p style={{ fontSize: 18, fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>${(money.bank ?? 0).toLocaleString()}</p>
                     </div>
-                    <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.07)' }} />
+                    <div className="hidden sm:block w-px h-9 bg-white/10" />
                     <div style={{ textAlign: 'center' }}>
                         <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 3 }}>Cash Assets</p>
                         <p style={{ fontSize: 18, fontWeight: 900, color: '#aaa', fontFamily: 'monospace' }}>${(money.cash ?? 0).toLocaleString()}</p>
@@ -588,7 +588,7 @@ function CharacterCard({ char }) {
             </div>
 
             {/* Tab Content */}
-            <div style={{ padding: '24px 28px' }}>
+            <div className="p-4 md:p-8">
                 <AnimatePresence mode="wait">
                     <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                         {tab === 'overview' && <OverviewTab char={char} />}
@@ -684,9 +684,9 @@ export default function MyCharacters() {
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
-                .char-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; }
-                .char-card-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); }
-                .char-card-body { padding: 16px; flex: 1; }
+                .char-card { @apply liquid-card; }
+                .char-card-header { @apply liquid-card-header text-[10px] font-black uppercase tracking-[0.2em] text-white/50; border-none; }
+                .char-card-body { padding: 24px; flex: 1; }
                 .char-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
                 .char-row:last-child { border-bottom: none; }
                 .char-row span { color: rgba(255,255,255,0.45); }

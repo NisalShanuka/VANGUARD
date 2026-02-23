@@ -121,11 +121,24 @@
   }
 
   .glass-panel {
-    @apply rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_8px_32px_#0000005e] backdrop-blur-2xl relative overflow-hidden transition-all duration-300;
+    @apply rounded-none border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl relative overflow-hidden transition-all duration-500;
+  }
+
+  .glass-panel::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none;
   }
 
   .glass-panel:hover {
-    @apply border-white/20 shadow-[0_8px_32px_#c8c8c826];
+    @apply border-white/20 bg-white/[0.05] shadow-[0_20px_50px_rgba(0,0,0,0.7)];
+  }
+
+  .liquid-card {
+    @apply glass-panel p-0 border-white/5 bg-white/[0.02] backdrop-blur-3xl;
+  }
+
+  .liquid-card-header {
+    @apply px-6 py-4 border-b border-white/5 bg-white/[0.04] flex items-center justify-between;
   }
 
   .section-kicker {

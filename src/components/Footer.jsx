@@ -17,7 +17,7 @@ export default function Footer() {
       whileInView="show"
       viewport={viewport}
       variants={fadeUp(20, 0.45)}
-      className="relative z-10 border-t border-white/10 bg-black/90"
+      className="relative z-10 border-t border-white/5 bg-[#050505]/80 backdrop-blur-3xl"
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm text-white/70 md:flex-row">
         <motion.span variants={fadeUp(12, 0.3)} className="uppercase tracking-widest text-[10px] font-bold">

@@ -23,7 +23,7 @@ function ApplicationCard({ type, t }) {
     return (
         <motion.div
             whileHover={{ y: -8, scale: 1.01 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-xl transition-all duration-500 hover:border-white/30 hover:shadow-[0_8px_40px_rgba(255,255,255,0.15)] hover:bg-white/10"
+            className="glass-panel group p-0 transition-all duration-500"
         >
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
             <div className="relative">
@@ -72,7 +72,7 @@ export default function HomeClient({ applicationTypes }) {
                 variants={fadeUp(18, 0.45)}
                 className="mx-auto max-w-6xl px-6 py-16"
             >
-                <motion.div variants={stagger(0.1, 0.04)} className="relative overflow-hidden glass-panel !p-10 shadow-lg !rounded-[2.5rem]">
+                <motion.div variants={stagger(0.1, 0.04)} className="relative overflow-hidden glass-panel p-6 md:!p-12 shadow-lg">
                     <motion.img
                         src="/images/slider/1.webp"
                         alt=""
@@ -89,7 +89,7 @@ export default function HomeClient({ applicationTypes }) {
                             >
                                 <i className="fas fa-book-open text-accent-500" /> {t('home.storyKicker')}
                             </motion.p>
-                            <h2 className="mt-4 text-4xl font-display font-bold tracking-tight">{t('home.storyTitle')}</h2>
+                            <h2 className="mt-4 text-3xl md:text-4xl font-display font-bold tracking-tight">{t('home.storyTitle')}</h2>
                             <p className="mt-4 text-white/70 leading-relaxed text-lg">{t('home.storyDescription')}</p>
                             <motion.div whileHover={{ y: -2 }} whileTap={tapPress} className="mt-6 w-fit">
                                 <Link href="/ucp" className="btn-accent">{t('home.storyCta')}</Link>
@@ -224,7 +224,7 @@ export default function HomeClient({ applicationTypes }) {
                 variants={fadeUp(18, 0.45)}
                 className="mx-auto max-w-6xl px-6 py-16"
             >
-                <motion.div variants={stagger(0.1, 0.05)} className="relative overflow-hidden glass-panel !p-10 !rounded-[2.5rem]">
+                <motion.div variants={stagger(0.1, 0.05)} className="relative overflow-hidden glass-panel p-6 md:!p-12">
                     <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
                         <motion.div variants={fadeUp(14, 0.35)}>
                             <p className="section-kicker">{t('home.eventKicker')}</p>
