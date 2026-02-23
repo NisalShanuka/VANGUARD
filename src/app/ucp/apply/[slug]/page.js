@@ -6,9 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AnimatedPage from '@/components/AnimatedPage';
 
-const inputClass =
-    "w-full bg-white/5 border border-white/10 text-white text-sm px-4 py-3 rounded-xl outline-none transition-all focus:border-white/40 focus:bg-white/10 focus:ring-1 focus:ring-white/20 placeholder:text-white/20 backdrop-blur-sm";
-const labelClass = "block text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2 ml-1";
+const inputClass = "glass-input";
+const labelClass = "block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1";
 
 function FieldInput({ q, value, onChange }) {
     const props = {

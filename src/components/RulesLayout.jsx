@@ -114,21 +114,31 @@ export default function RulesLayout({ data, fullPageData, isAdmin, refreshData }
               // ── VIEW MODE ──
               <>
                 {data.intro && (
-                  <div className="glass-panel mb-6">
-                    <p className="section-kicker drop-shadow-[0_0_8px_#2dd4bf66]">{t('rules.overview')}</p>
-                    <p className="mt-3 text-body text-white/70">{data.intro}</p>
+                  <div className="liquid-card mb-8">
+                    <div className="liquid-card-header">
+                      <p className="section-kicker">{t('rules.overview')}</p>
+                    </div>
+                    <div className="p-8">
+                      <p className="text-body text-white/70 leading-relaxed font-light">{data.intro}</p>
+                    </div>
                   </div>
                 )}
                 {data.sections.map((section, idx) => (
-                  <div key={idx} className="glass-panel mb-6">
-                    <h3 className="text-h3 section-title mb-4">{section.title}</h3>
-                    <ul className="mt-4 list-disc space-y-2 pl-6 text-body text-white/70">
-                      {section.items.map((item, iIdx) => (
-                        <li key={iIdx} className="leading-relaxed">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                  <div key={idx} className="liquid-card mb-8">
+                    <div className="liquid-card-header">
+                      <h3 className="text-xl font-display font-bold uppercase tracking-widest text-white">{section.title}</h3>
+                      <div className="w-10 h-[1px] bg-white/20" />
+                    </div>
+                    <div className="p-8">
+                      <ul className="list-none space-y-4 text-body text-white/70">
+                        {section.items.map((item, iIdx) => (
+                          <li key={iIdx} className="leading-relaxed flex gap-4">
+                            <span className="text-accent-400 font-bold shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </>

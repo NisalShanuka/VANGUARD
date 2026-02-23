@@ -74,34 +74,31 @@ export default function UCPDashboard() {
                                         <motion.div
                                             whileHover={{ y: -6, scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="glass-panel group relative flex flex-col justify-between min-h-[160px] p-8 border-white/5 transition-all duration-500 hover:border-white/20 hover:bg-white/5 shadow-2xl overflow-hidden"
+                                            className="glass-panel group relative flex flex-col justify-between min-h-[180px]"
                                         >
-                                            {/* Liquid background effect on hover */}
-                                            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-[60px] transition-all duration-700 group-hover:bg-white/10 group-hover:scale-150" />
-
                                             <div className="relative z-10 flex flex-col h-full">
                                                 <div className="mb-auto">
                                                     <div className="flex items-center gap-3 mb-4">
-                                                        <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                                                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">Available</span>
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)] animate-pulse" />
+                                                        <span className="text-[9px] font-black uppercase tracking-[0.35em] text-white/30">Application Open</span>
                                                     </div>
-                                                    <h4 className="text-xl md:text-2xl font-display font-medium leading-tight uppercase tracking-wider text-white group-hover:text-white transition-colors">
+                                                    <h4 className="text-xl md:text-2xl font-display font-black leading-tight uppercase tracking-[0.1em] text-white">
                                                         {type.name}
                                                     </h4>
                                                 </div>
 
-                                                <div className="mt-8 flex items-center justify-between">
-                                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                                                        Requirement: <span className="text-white/60">Level 1</span>
+                                                <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6">
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/20">
+                                                        Path: <span className="text-white/40">Vanguard Story</span>
                                                     </p>
-                                                    <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center transition-all duration-300 group-hover:bg-white group-hover:border-white">
-                                                        <i className="fas fa-arrow-right text-[10px] text-white group-hover:text-black" />
+                                                    <div className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center transition-all duration-500 group-hover:bg-white group-hover:border-white group-hover:shadow-accent-glow">
+                                                        <i className="fas fa-arrow-right text-[11px] text-white group-hover:text-black transition-colors" />
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Decorative background ID */}
-                                            <div className="absolute -right-2 -top-2 text-8xl font-display font-black opacity-[0.02] transition-all duration-500 group-hover:opacity-[0.06] select-none pointer-events-none italic">
+                                            <div className="absolute -right-2 -top-2 text-8xl font-display font-black opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110 select-none pointer-events-none italic">
                                                 0{type.id}
                                             </div>
                                         </motion.div>
