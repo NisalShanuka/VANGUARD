@@ -1,5 +1,5 @@
-"use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { useSession } from 'next-auth/react';
@@ -319,6 +319,7 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
 
 
 // ─── Draggable Components (Defined outside to prevent unmount on re-render) ───────
+// ─── Draggable Components (Defined outside to prevent unmount on re-render) ───────
 const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
     const controls = useDragControls();
     return (
@@ -326,26 +327,32 @@ const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
             value={q}
             dragListener={false}
             dragControls={controls}
-            className="flex justify-between items-center p-3 bg-[#111] border border-white/10 hover:border-white/20 transition-all group rounded-lg mb-2 shadow-2xl"
+            layout="position"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            whileDrag={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.1)", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}
+            transition={{ type: "spring", stiffness: 600, damping: 35 }}
+            className="flex justify-between items-center p-3 bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all group rounded-lg mb-2 shadow-sm"
             style={{ position: 'relative', zIndex: 1 }}
         >
             <div className="flex items-center gap-4 flex-1">
                 <div
-                    onPointerDown={(e) => controls.start(e)}
-                    className="cursor-grab active:cursor-grabbing p-3 text-white/40 hover:text-white transition-colors flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-md"
-                    style={{ touchAction: 'none', width: '40px', height: '40px' }}
+                    onPointerDown={(e) => { e.preventDefault(); controls.start(e); }}
+                    className="cursor-grab active:cursor-grabbing p-3 text-white/20 group-hover:text-white/60 transition-colors flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-md"
+                    style={{ touchAction: 'none', width: '36px', height: '36px' }}
                 >
-                    <i className="fas fa-grip-vertical"></i>
+                    <i className="fas fa-grip-vertical text-[12px]"></i>
                 </div>
-                <div>
-                    <p className="font-bold text-sm text-white/90 mb-0.5 group-hover:text-white transition-colors">{q.label}</p>
+                <div className="flex-1">
+                    <p className="font-bold text-sm text-white/90 mb-0.5 group-hover:text-white transition-colors truncate max-w-[280px]">{q.label}</p>
                     <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
+                        <span className="text-[8px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
                             {q.field_type?.toUpperCase()}
                         </span>
                         {q.is_required && (
-                            <span className="text-[8px] bg-red-500/10 text-red-500/80 font-black uppercase tracking-widest px-2 py-0.5 rounded border border-red-500/20">
-                                REQUIRED
+                            <span className="text-[8px] text-accent-400 font-black uppercase tracking-widest flex items-center gap-1">
+                                <div className="w-1 h-1 rounded-full bg-accent-400"></div> Required
                             </span>
                         )}
                     </div>
@@ -354,17 +361,17 @@ const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
             <div className="flex gap-2 ml-4">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(q); }}
-                    className="w-10 h-10 flex items-center justify-center bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transition-all border border-white/5 hover:border-white/20 rounded-md"
-                    title="Edit Question"
+                    className="w-9 h-9 flex items-center justify-center bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 rounded-md"
+                    title="Edit Field"
                 >
-                    <i className="fas fa-pencil-alt text-sm"></i>
+                    <i className="fas fa-pencil-alt text-[12px]"></i>
                 </button>
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteQuestion(q.id); }}
-                    className="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all border border-red-500/10 hover:border-red-500/30 rounded-md"
-                    title="Delete Question"
+                    className="w-9 h-9 flex items-center justify-center bg-white/5 text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all border border-white/5 hover:border-red-400/20 rounded-md"
+                    title="Delete Field"
                 >
-                    <i className="fas fa-trash-alt text-sm"></i>
+                    <i className="fas fa-trash-alt text-[12px]"></i>
                 </button>
             </div>
         </Reorder.Item>
@@ -392,23 +399,33 @@ const DraggableSection = ({
 }) => {
     const controls = useDragControls();
     const sectionQuestions = questions.filter(q => (q.section_title || 'General Information') === section);
+    const editorRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (addingToSection === section && editorRef.current) {
+            editorRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [addingToSection, section]);
 
     return (
         <Reorder.Item
             value={section}
             dragListener={false}
             dragControls={controls}
-            className="glass-panel p-0 border-white/10 select-none overflow-visible mb-8 bg-[#0a0a0a]/80 backdrop-blur-xl"
+            layout="position"
+            whileDrag={{ scale: 1.01, zIndex: 50, boxShadow: "0 30px 60px rgba(0,0,0,0.6)" }}
+            transition={{ type: "spring", stiffness: 400, damping: 40 }}
+            className="glass-panel p-0 border-white/10 select-none overflow-visible mb-10 bg-[#080808]/40 backdrop-blur-3xl shadow-2xl"
         >
-            <div className="liquid-card-header bg-white/[0.05] flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <div className="liquid-card-header bg-white/[0.03] flex items-center justify-between px-6 py-5 border-b border-white/5">
                 <div
-                    onPointerDown={(e) => controls.start(e)}
-                    className="cursor-grab active:cursor-grabbing flex items-center gap-4 py-2 pr-6 group bg-white/5 rounded-lg px-4 hover:bg-white/10 transition-all"
+                    onPointerDown={(e) => { e.preventDefault(); controls.start(e); }}
+                    className="cursor-grab active:cursor-grabbing flex items-center gap-4 py-2 pr-8 group bg-white/5 rounded-xl px-4 hover:bg-white/10 transition-all"
                     style={{ touchAction: 'none' }}
                 >
-                    <i className="fas fa-bars text-white/40 group-hover:text-white"></i>
-                    <div className="w-2 h-2 rounded-full bg-accent-400 shadow-[0_0_10px_rgba(255,255,255,0.7)]"></div>
-                    <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em] truncate max-w-[200px]">
+                    <i className="fas fa-bars text-white/20 group-hover:text-white transition-colors"></i>
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_12px_rgba(200,200,200,0.8)]"></div>
+                    <h4 className="text-[12px] font-black text-white uppercase tracking-[0.4em] truncate max-w-[250px] drop-shadow-lg">
                         {section}
                     </h4>
                 </div>
@@ -425,16 +442,16 @@ const DraggableSection = ({
                                 setForm({ label: '', field_type: 'text', options: '', is_required: true });
                             }
                         }}
-                        className={`text-[10px] font-black uppercase tracking-widest transition-all px-4 py-2.5 border rounded-md shadow-lg ${addingToSection === section ? 'bg-red-500 text-white border-red-500 shadow-red-500/20' : 'bg-white text-black border-white hover:bg-white/90'}`}
+                        className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all px-6 py-2.5 border rounded-lg shadow-xl ${addingToSection === section ? 'bg-red-500 text-white border-red-500 shadow-red-500/30' : 'bg-white text-black border-white hover:bg-accent-400 hover:border-accent-400'}`}
                     >
-                        {addingToSection === section ? 'CLOSE EDITOR' : '+ ADD QUESTION'}
+                        {addingToSection === section ? 'CLOSE EDITOR' : '+ ADD FIELD'}
                     </button>
                     {sectionsLength > 1 && sectionQuestions.length === 0 && (
                         <button
                             onClick={() => setSections(sections.filter(s => s !== section))}
-                            className="text-[10px] text-red-500 hover:text-red-400 font-black uppercase tracking-widest px-2"
+                            className="text-[10px] text-red-500/50 hover:text-red-500 font-black uppercase tracking-widest px-2 transition-colors"
                         >
-                            REMOVE
+                            DELETE
                         </button>
                     )}
                 </div>
@@ -463,74 +480,83 @@ const DraggableSection = ({
                     )}
                 </Reorder.Group>
 
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                     {addingToSection === section && (
                         <motion.div
+                            ref={editorRef}
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="overflow-hidden bg-white/[0.02] border-t border-white/5"
                         >
-                            <div className="bg-white/5 border border-white/10 p-8 mt-4 shadow-inner">
-                                <h5 className="text-[11px] font-black uppercase tracking-[0.2em] text-white mb-8 flex items-center gap-3">
-                                    <div className="w-6 h-[2px] bg-white"></div>
-                                    {editingQuestion ? 'UPDATE QUESTION' : 'NEW QUESTION'}
-                                </h5>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Question Text *</label>
+                            <div className="p-8 mt-2">
+                                <div className="flex items-center gap-4 mb-10">
+                                    <div className="w-8 h-8 rounded-full bg-accent-400/20 flex items-center justify-center border border-accent-400/30">
+                                        <i className={`fas ${editingQuestion ? 'fa-pencil-alt' : 'fa-plus'} text-[12px] text-accent-400`}></i>
+                                    </div>
+                                    <h5 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">
+                                        {editingQuestion ? 'Editing Field Details' : 'Configure New Field'}
+                                    </h5>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                                    <div className="flex flex-col gap-3">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Label Name *</label>
                                         <input
-                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all font-medium"
+                                            className="w-full bg-black/40 border border-white/10 p-4 text-white text-sm outline-none focus:border-accent-400/50 transition-all rounded-lg font-medium ring-1 ring-white/5"
                                             value={form.label}
                                             onChange={e => setForm(f => ({ ...f, label: e.target.value }))}
-                                            placeholder="Enter your question label..."
+                                            placeholder="e.g. Profile URL"
                                         />
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Input Type</label>
+                                    <div className="flex flex-col gap-3">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Input Style</label>
                                         <select
-                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all [&>option]:bg-black font-medium"
+                                            className="w-full bg-black/40 border border-white/10 p-4 text-white text-sm outline-none focus:border-accent-400/50 transition-all [&>option]:bg-black rounded-lg font-medium ring-1 ring-white/5"
                                             value={form.field_type}
                                             onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}
                                         >
-                                            <option value="text">Short Input</option>
-                                            <option value="textarea">Paragraph Input</option>
-                                            <option value="number">Number Only</option>
-                                            <option value="select">Dropdown Menu</option>
-                                            <option value="checkbox">Multiple Selection</option>
+                                            <option value="text">Single Line Text</option>
+                                            <option value="textarea">Multi-line Paragraph</option>
+                                            <option value="number">Numeric Input</option>
+                                            <option value="select">Selection Menu</option>
+                                            <option value="checkbox">Multi-Checkbox</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 {['select', 'checkbox'].includes(form.field_type) && (
-                                    <div className="mb-8 flex flex-col gap-2">
-                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Choice Options (comma separated)</label>
+                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex flex-col gap-3">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Menu Choices (comma separated)</label>
                                         <input
-                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all"
-                                            placeholder="Example: Option 1, Option 2, Option 3"
+                                            className="w-full bg-black/40 border border-white/10 p-4 text-white text-sm outline-none focus:border-accent-400/50 transition-all rounded-lg"
+                                            placeholder="Red, Green, Blue"
                                             value={form.options}
                                             onChange={e => setForm(f => ({ ...f, options: e.target.value }))}
                                         />
-                                    </div>
+                                    </motion.div>
                                 )}
-                                <div className="flex justify-between items-center sm:flex-row flex-col gap-8 pt-8 border-t border-white/10">
-                                    <div className="flex items-center gap-6">
+
+                                <div className="flex justify-between items-center sm:flex-row flex-col gap-8 pt-10 border-t border-white/5 mt-4">
+                                    <div className="flex items-center gap-6 group cursor-pointer" onClick={() => setForm(f => ({ ...f, is_required: !f.is_required }))}>
                                         <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
-                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Mandatory field</span>
+                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-white transition-colors">Mark as Mandatory</span>
                                     </div>
                                     <div className="flex gap-4 w-full sm:w-auto">
                                         <button
                                             onClick={() => { setAddingToSection(null); setEditingQuestion(null); setForm({ label: '', field_type: 'text', options: '', is_required: true }); }}
-                                            className="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-md"
+                                            className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-white transition-all bg-white/5 hover:bg-white/10 rounded-lg"
                                         >
                                             DISCARD
                                         </button>
                                         <button
                                             onClick={() => saveQuestion(section)}
                                             disabled={saving}
-                                            className="bg-accent-400 text-black px-10 py-4 text-[11px] font-black uppercase tracking-[0.25em] disabled:opacity-50 flex items-center gap-3 shadow-[0_10px_30px_rgba(200,200,200,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-md"
+                                            className="bg-accent-400 text-black px-12 py-4 text-[11px] font-black uppercase tracking-[0.3em] disabled:opacity-50 flex items-center gap-3 shadow-[0_15px_40px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 transition-all rounded-lg"
                                         >
-                                            {saving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-check"></i>}
-                                            {editingQuestion ? 'UPDATE NOW' : 'CREATE FIELD'}
+                                            {saving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-save"></i>}
+                                            {editingQuestion ? 'COMMIT UPDATES' : 'CONFIRM FIELD'}
                                         </button>
                                     </div>
                                 </div>
@@ -606,13 +632,23 @@ function QuestionsModal({ type, onClose }) {
     }
 
     async function deleteQuestion(id) {
-        if (!confirm('Delete this question?')) return;
-        await fetch('/api/admin/questions', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, type_id: type.id }),
-        });
-        setQuestions(prev => prev.filter(q => q.id !== id));
+        if (!confirm('Are you sure you want to permanently delete this field?')) return;
+        setOrderSaving(true);
+        try {
+            const res = await fetch('/api/admin/questions', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, type_id: type.id }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setQuestions(prev => prev.filter(q => q.id !== id));
+                setToast({ msg: 'Field removed', type: 'success' });
+            }
+        } catch (e) {
+            setToast({ msg: 'Failed to delete', type: 'error' });
+        }
+        setOrderSaving(false);
     }
 
     function startEdit(q) {
