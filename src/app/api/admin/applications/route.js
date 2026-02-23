@@ -93,7 +93,7 @@ export async function PATCH(req) {
 
         // Get full application for webhook
         const apps = await query(`
-            SELECT a.*, u.username, u.discord_id, t.name as type_name,
+            SELECT a.*, u.username, u.discord_id, u.avatar, t.name as type_name,
                    t.webhook_accepted, t.webhook_declined, t.webhook_interview
             FROM applications a
             LEFT JOIN application_users u ON a.user_id = u.id
@@ -134,17 +134,19 @@ export async function PATCH(req) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    content: `Hey, ${mention}`,
+                    content: mention,
                     embeds: [{
-                        title: `🛡️ Vanguard Roleplay Application Team`,
-                        description: `**VanguardRP Whitelist Application**\n\n${mention}, Your form has been **${status}** ${wh.emoji}.\n${status === 'accepted' ? 'Feel free to enjoy your stay.' : (status === 'declined' ? 'Feel free to apply again in 14 days.' : 'Please check your DMs/Emails for interview details.')}`,
+                        title: `🛡️ APPLICATION STATUS: ${status.toUpperCase()}`,
+                        thumbnail: { url: app.avatar ? `https://cdn.discordapp.com/avatars/${app.discord_id}/${app.avatar}.png` : 'https://vanguardroleplay.net/logo.png' },
+                        description: `### Hello ${mention},\nYour application for **${app.type_name}** has been processed by our management team.`,
                         color: wh.color,
                         fields: [
-                            { name: 'RESULT', value: status.toUpperCase() + ' ' + wh.emoji, inline: true },
-                            { name: 'REASON', value: notes || 'Read the questions & server rules carefully', inline: false }
+                            { name: '📊 DECISION', value: `>>> **${status.toUpperCase()}** ${wh.emoji}`, inline: true },
+                            { name: '🏷️ TYPE', value: `>>> ${app.type_name}`, inline: true },
+                            { name: '📝 STAFF MESSAGE', value: notes ? `\`\`\`${notes}\`\`\`` : `\`\`\`Read our community rules and guidelines carefully.\`\`\``, inline: false }
                         ],
                         image: { url: wh.image },
-                        footer: { text: 'Vanguard Roleplay by SI CI', icon_url: 'https://vanguardroleplay.net/logo.png' },
+                        footer: { text: 'Vanguard Management System • Automatic Notification', icon_url: 'https://vanguardroleplay.net/logo.png' },
                         timestamp: new Date().toISOString(),
                     }]
                 })

@@ -66,16 +66,17 @@ export async function POST(req) {
         if (appType.webhook_pending) {
             const mention = session.user.discord_id ? `<@${session.user.discord_id}>` : `**${session.user.name}**`;
             await sendDiscordWebhook(appType.webhook_pending, {
-                title: `🛡️ Vanguard Roleplay Application Team`,
-                description: `**New ${appType.name} Application Received**\n\n${mention}, your form has been submitted and is now **PENDING** ⏳.\nOur staff team will review it shortly.`,
+                title: `📋 NEW APPLICATION RECEIVED`,
+                thumbnail: { url: session.user.image || 'https://vanguardroleplay.net/logo.png' },
+                description: `### Hello ${mention},\nThank you for applying to **Vanguard Roleplay**. Your application for **${appType.name}** is now under review.`,
                 fields: [
-                    { name: "APPLICANT", value: session.user.name || 'Unknown', inline: true },
-                    { name: "DISCORD ID", value: session.user.discord_id || 'N/A', inline: true },
-                    { name: "STATUS", value: "⏳ PENDING REVIEW", inline: true }
+                    { name: "👤 APPLICANT", value: `>>> ${session.user.name}`, inline: true },
+                    { name: "🆔 DISCORD ID", value: `>>> ${session.user.discord_id || 'N/A'}`, inline: true },
+                    { name: "⏳ STATUS", value: ">>> **PENDING REVIEW**", inline: true }
                 ],
                 image: { url: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693864382464/standard_5.gif?ex=699d7bee&is=699c2a6e&hm=48ef0a00d12c0441928bcaea140ab30f8e563ea22658d809d4cb8b8baeeb4613&' },
-                color: 0xf0b429
-            }, `Hey, ${mention}`);
+                color: 0xf1c40f
+            }, mention);
         }
 
         return NextResponse.json({ success: true });
