@@ -113,7 +113,7 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-small font-bold text-black transition-all hover:bg-neutral-200 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] active:scale-[0.98] focus:outline-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-small font-bold text-black transition-all hover:bg-neutral-200 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(255, 255, 255, 0.3)] active:scale-[0.98] focus:outline-none;
   }
 
   .btn-outline {
@@ -121,20 +121,22 @@
   }
 
   .glass-panel {
-    @apply rounded-none border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl relative overflow-hidden transition-all duration-500;
+    @apply rounded-none border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0, 0, 0, 0.5)] backdrop-blur-xl relative overflow-hidden transition-all duration-500;
   }
 
-  .glass-panel::before {
+  .glass-panel::before,
+  .liquid-card::before {
     content: '';
     @apply absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none;
   }
 
-  .glass-panel:hover {
-    @apply border-white/20 bg-white/[0.05] shadow-[0_20px_50px_rgba(0,0,0,0.7)];
+  .glass-panel:hover,
+  .liquid-card:hover {
+    @apply border-white/20 bg-white/[0.05] shadow-[0_20px_50px_rgba(0, 0, 0, 0.7)];
   }
 
   .liquid-card {
-    @apply glass-panel p-0 border-white/5 bg-white/[0.02] backdrop-blur-3xl;
+    @apply rounded-none border border-white/5 bg-white/[0.02] p-0 shadow-[0_20px_50px_rgba(0, 0, 0, 0.5)] backdrop-blur-3xl relative overflow-hidden transition-all duration-500;
   }
 
   .liquid-card-header {
