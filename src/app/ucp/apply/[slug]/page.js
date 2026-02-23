@@ -27,7 +27,7 @@ function FieldInput({ q, value, onChange }) {
     }
     if (q.field_type === 'select') {
         return (
-            <select {...props} className={`${inputClass} cursor-pointer`}>
+            <select {...props} className={`${inputClass} cursor-pointer [&>option]:bg-[#0a0a0a] [&>option]:text-white`}>
                 <option value="" disabled>Select Answer</option>
                 {(q.options || '').split(',').map(o => o.trim()).filter(Boolean).map(o => (
                     <option key={o} value={o}>{o}</option>
