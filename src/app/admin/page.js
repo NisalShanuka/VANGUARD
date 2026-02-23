@@ -350,7 +350,7 @@ const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
                     <p className="font-bold text-sm text-white/90 mb-0.5 group-hover:text-white transition-colors truncate max-w-[280px]">{q.label}</p>
                     <div className="flex items-center gap-2">
                         <span className="text-[8px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
-                            {q.field_type?.toUpperCase()}
+                            {q.field_type === 'checkbox_single' ? 'SINGLE TICK' : q.field_type?.toUpperCase()}
                         </span>
                         {q.is_required && (
                             <span className="text-[8px] text-accent-400 font-black uppercase tracking-widest flex items-center gap-1">
@@ -524,6 +524,7 @@ const DraggableSection = ({
                                             <option value="number">Numeric Input</option>
                                             <option value="select">Selection Menu</option>
                                             <option value="checkbox">Multi-Checkbox</option>
+                                            <option value="checkbox_single">Single Checkbox (Tick)</option>
                                         </select>
                                     </div>
                                 </div>

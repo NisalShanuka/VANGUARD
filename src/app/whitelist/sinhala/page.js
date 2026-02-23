@@ -13,7 +13,7 @@ export default function WhitelistSinhala() {
 
     return (
         <AnimatedPage>
-            <WhitelistForm language="si" />
+            <WhitelistForm slug="sinhala" />
         </AnimatedPage>
     );
 }

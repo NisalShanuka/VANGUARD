@@ -22,9 +22,7 @@ export default function WhitelistEnglish() {
 
             <div className="mx-auto max-w-7xl px-8 pb-32 md:px-12">
                 <WhitelistForm
-                    language="en"
-                    title="Application Form"
-                    submitLabel="Submit Application"
+                    slug="english"
                     successMessage="Your application has been submitted successfully. Our staff will review it soon."
                     errorMessage="Something went wrong. Please try again or contact support."
                 />
