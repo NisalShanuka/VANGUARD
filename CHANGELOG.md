@@ -14,6 +14,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Added `dev:turbo` npm script (`next dev`) while keeping stable local development on webpack mode.
 - Added `src/lib/discord.js` helper to auto-add authenticated Discord users to a configured guild via Discord API.
 - Added `src/app/icon.png` (project-branded app icon) for App Router favicon handling.
+- Added custom page transition animations using `framer-motion` in a new `src/app/template.jsx`.
+- Added a modern, dynamic looping background system (`Background.jsx`) substituting static pages with animated grid overlays, background orbs, and diagonal stripes.
 
 ### Changed
 - Updated `dev` npm script to `next dev --webpack` to avoid Turbopack runtime failure on WASM SWC fallback environments.
@@ -28,6 +30,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Updated header unauthenticated Discord CTA text in `src/components/Header.jsx` from `Login with Discord` to `Join with Discord`.
 - Removed the redundant Discord invite icon/button from `src/components/Header.jsx` now that login flow auto-joins users to the guild.
 - Updated home event Discord CTA in `src/app/HomeClient.jsx` to be auth-aware: logged-out users see `Join with Discord` (Discord OAuth), while logged-in users see `Go to dashboard` (links to `/ucp`), with matching i18n keys in `src/i18n/translations.js`.
+- Replaced visual loading states across the application: removed `nextjs-toploader` entirely in favor of an animated, centered circular spinner.
+- Updated header styling (`src/components/Header.jsx`): logo now continuously rotates on Y-axis, enlarged primary branding text and structural dimensions for modern aesthetic.
+- Updated home page hero elements (`src/app/HomeClient.jsx`) with interactive dynamic hover glows, micro-animations, and fluid layout transitions.
+- Adjusted social media presence in `Footer.jsx` and `Sidebar.jsx`, limiting visible references directly to TikTok and YouTube.
+- Removed entire background music system (audio contexts, components, state management) from `Layout.jsx` per user preference.
 
 ### Fixed
 - Fixed invalid React Hook usage in `src/app/ucp/my-characters/page.js` by moving per-vehicle image state into dedicated `VehicleCard` component (no hooks inside map loops).
