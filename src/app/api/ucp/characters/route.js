@@ -15,7 +15,7 @@ function getGameDb() {
         gamePool = mysql.createPool({
             host: process.env.GAME_DB_HOST || 'mysql.gravelhost.com',
             user: process.env.GAME_DB_USER || 'u34572_rhgHiyuWev',
-            password: process.env.GAME_DB_PASSWORD || 'h47149Ob27@D+jBHCJ^k2oL0',
+            password: 'h47149Ob27@D+jBHCJ^k2oL0',
             database: process.env.GAME_DB_NAME || 's34572_qbox',
             port: parseInt(process.env.GAME_DB_PORT || '3306'),
             waitForConnections: true,
