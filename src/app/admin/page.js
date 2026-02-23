@@ -921,6 +921,11 @@ function TypeCard({ type: initialType, onDelete, onSave }) {
                                                 <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." onFocus={(e) => e.target.style.borderColor = s.color} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                             </div>
                                         ))}
+                                        <div style={{ marginTop: 8, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <label style={{ ...labelStyle, color: '#fff', opacity: 0.9 }}>Staff Audit Log Hook</label>
+                                            <input style={inputStyle} value={t.webhook_log || ''} onChange={e => setT({ ...t, webhook_log: e.target.value })} placeholder="https://..." onFocus={(e) => e.target.style.borderColor = '#fff'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+                                            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 6, fontStyle: 'italic' }}>Optional private channel for staff decision logs.</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: 24, border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
@@ -979,10 +984,30 @@ function ReviewModal({ app, onClose, onUpdated }) {
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
+    const [questionLabels, setQuestionLabels] = useState({});
+
     const answers = (() => {
         try { return typeof app.content === 'string' ? JSON.parse(app.content) : (app.content || {}); }
         catch { return {}; }
     })();
+
+    useEffect(() => {
+        async function fetchQuestions() {
+            if (!app.type_id) return;
+            try {
+                const res = await fetch(`/api/admin/questions?type_id=${app.type_id}`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const qMap = {};
+                    data.forEach(q => qMap[q.id] = q.label);
+                    setQuestionLabels(qMap);
+                }
+            } catch (e) {
+                console.error('Failed to fetch questions:', e);
+            }
+        }
+        fetchQuestions();
+    }, [app.type_id]);
 
     async function save() {
         setSaving(true);
@@ -1055,7 +1080,7 @@ function ReviewModal({ app, onClose, onUpdated }) {
                                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>No answers recorded.</p>
                             ) : Object.entries(answers).map(([qId, answer]) => (
                                 <div key={qId} style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 0 }}>
-                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6 }}>Question #{qId}</p>
+                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6 }}>{questionLabels[qId] || `Question #${qId}`}</p>
                                     <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{answer || '—'}</p>
                                 </div>
                             ))}

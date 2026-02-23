@@ -25,6 +25,7 @@ export async function PATCH(req, { params }) {
     const webhook_interview = body.webhook_interview ?? '';
     const webhook_accepted = body.webhook_accepted ?? '';
     const webhook_declined = body.webhook_declined ?? '';
+    const webhook_log = body.webhook_log ?? '';
     const role_pending = body.role_pending ?? '';
     const role_interview = body.role_interview ?? '';
     const role_accepted = body.role_accepted ?? '';
@@ -35,7 +36,7 @@ export async function PATCH(req, { params }) {
             `UPDATE application_types SET
                 name = ?, slug = ?, description = ?,
                 is_active = ?, icon = ?, cover_image = ?,
-                webhook_pending = ?, webhook_interview = ?, webhook_accepted = ?, webhook_declined = ?,
+                webhook_pending = ?, webhook_interview = ?, webhook_accepted = ?, webhook_declined = ?, webhook_log = ?,
                 role_pending = ?, role_interview = ?, role_accepted = ?, role_declined = ?
              WHERE id = ?`,
             [
@@ -43,7 +44,7 @@ export async function PATCH(req, { params }) {
                 is_active ? 1 : 0,
                 icon,
                 cover_image,
-                webhook_pending, webhook_interview, webhook_accepted, webhook_declined,
+                webhook_pending, webhook_interview, webhook_accepted, webhook_declined, webhook_log,
                 role_pending, role_interview, role_accepted, role_declined,
                 id,
             ]

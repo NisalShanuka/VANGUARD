@@ -94,7 +94,7 @@ export async function PATCH(req) {
         // Get full application for webhook
         const apps = await query(`
             SELECT a.*, u.username, u.discord_id, u.avatar, t.name as type_name,
-                   t.webhook_accepted, t.webhook_declined, t.webhook_interview
+                   t.webhook_accepted, t.webhook_declined, t.webhook_interview, t.webhook_log
             FROM applications a
             LEFT JOIN application_users u ON a.user_id = u.id
             LEFT JOIN application_types t ON a.type_id = t.id
@@ -122,11 +122,13 @@ export async function PATCH(req) {
                 url: app.webhook_interview,
                 emoji: '🎤',
                 color: 0x7289da,
-                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693344153670/standard_2.gif?ex=699d7bee&is=699c2a6e&hm=f00784c328e028b3a5e5e7ea3d8e3c5401d3ac0f8ff124177129b34ded3a2f89&'
+                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693344153770/standard_2.gif?ex=699d7bee&is=699c2a6e&hm=f00784c328e028b3a5e5e7ea3d8e3c5401d3ac0f8ff124177129b34ded3a2f89&'
             },
         };
 
         const wh = webhookMap[status];
+
+        // 1. Send status update webhook (to applicant/public)
         if (wh && wh.url) {
             const mention = app.discord_id ? `<@${app.discord_id}>` : `**${app.username}**`;
 
@@ -147,6 +149,32 @@ export async function PATCH(req) {
                         ],
                         image: { url: wh.image },
                         footer: { text: 'Vanguard Management System • Automatic Notification', icon_url: 'https://vanguardroleplay.net/logo.png' },
+                        timestamp: new Date().toISOString(),
+                    }]
+                })
+            }).catch(() => { });
+        }
+
+        // 2. Send private staff log webhook (Audit Log)
+        if (app.webhook_log) {
+            const adminMention = session.user.discord_id ? `<@${session.user.discord_id}>` : `**${session.user.name}**`;
+            const userMention = app.discord_id ? `<@${app.discord_id}>` : `**${app.username}**`;
+
+            await fetch(app.webhook_log, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    embeds: [{
+                        title: `📑 STAFF ACTION LOG`,
+                        color: wh?.color || 0x2f3136,
+                        fields: [
+                            { name: '👤 STAFF MEMBER', value: `>>> ${adminMention}`, inline: true },
+                            { name: '🎯 ACTION', value: `>>> **${status.toUpperCase()}**`, inline: true },
+                            { name: '📝 APPLICANT', value: `>>> ${userMention} (${app.username})`, inline: true },
+                            { name: '🏷️ APP TYPE', value: `>>> ${app.type_name}`, inline: true },
+                            { name: '💬 STAFF NOTES', value: notes ? `\`\`\`${notes}\`\`\`` : `\`\`\`No notes provided.\`\`\``, inline: false }
+                        ],
+                        footer: { text: `Application ID: #${app.id} • Vanguard Management` },
                         timestamp: new Date().toISOString(),
                     }]
                 })

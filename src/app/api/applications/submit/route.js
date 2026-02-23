@@ -16,7 +16,7 @@ async function sendDiscordWebhook(url, embed, content = null) {
                     ...embed,
                     color: embed.color || 3447003,
                     timestamp: new Date().toISOString(),
-                    footer: { text: 'Vanguard Roleplay by SI CI', icon_url: 'https://vanguardroleplay.net/logo.png' }
+                    footer: { text: 'Vanguard Roleplay by SLCL', icon_url: 'https://vanguardroleplay.net/logo.png' }
                 }]
             })
         });
