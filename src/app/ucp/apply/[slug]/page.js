@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,6 +8,57 @@ import AnimatedPage from '@/components/AnimatedPage';
 
 const inputClass = "glass-input";
 const labelClass = "block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1";
+
+function CustomSelect({ q, value, onChange }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const options = (q.options || '').split(',').map(o => o.trim()).filter(Boolean);
+
+    return (
+        <div className="relative">
+            <div
+                className={`${inputClass} cursor-pointer flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors z-10`}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className={value ? 'text-white' : 'text-white/50'}>
+                    {value || 'Select Answer'}
+                </span>
+                <i className={`fas fa-chevron-down text-[10px] text-white/50 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <>
+                        <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-[calc(100%+8px)] left-0 w-full z-50 p-2 rounded-xl backdrop-blur-xl bg-black/70 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] max-h-60 overflow-y-auto"
+                        >
+                            {options.map(o => (
+                                <div
+                                    key={o}
+                                    className={`px-4 py-3 rounded-lg cursor-pointer text-sm transition-all flex items-center justify-between ${value === o ? 'bg-white/10 text-white font-bold' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                                    onClick={() => {
+                                        onChange({ target: { value: o } });
+                                        setIsOpen(false);
+                                    }}
+                                >
+                                    <span>{o}</span>
+                                    {value === o && <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />}
+                                </div>
+                            ))}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
 
 function FieldInput({ q, value, onChange }) {
     const props = {
@@ -29,14 +80,7 @@ function FieldInput({ q, value, onChange }) {
         return <input type="date" {...props} placeholder="" />;
     }
     if (q.field_type === 'select') {
-        return (
-            <select {...props} className={`${inputClass} cursor-pointer [&>option]:bg-[#0a0a0a] [&>option]:text-white`}>
-                <option value="" disabled>Select Answer</option>
-                {(q.options || '').split(',').map(o => o.trim()).filter(Boolean).map(o => (
-                    <option key={o} value={o}>{o}</option>
-                ))}
-            </select>
-        );
+        return <CustomSelect q={q} value={value} onChange={onChange} />;
     }
     if (q.field_type === 'checkbox_single') {
         return (
