@@ -14,6 +14,7 @@ const getPool = () => {
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
         connectTimeout: 5000, // 5s
+        ssl: undefined // Explicitly disable SSL for Gravelhost compatibility
     });
     return globalThis.pool;
 };
