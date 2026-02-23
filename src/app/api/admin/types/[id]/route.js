@@ -16,6 +16,9 @@ export async function PATCH(req, { params }) {
 
     // Safely extract all fields - use ?? null to avoid undefined (mysql2 rejects undefined)
     const is_active = body.is_active ?? 0;
+    const name = body.name ?? '';
+    const slug = body.slug ?? '';
+    const description = body.description ?? '';
     const icon = body.icon ?? 'fas fa-file-alt';
     const cover_image = body.cover_image ?? 'custom.jpg';
     const webhook_pending = body.webhook_pending ?? '';
@@ -30,11 +33,13 @@ export async function PATCH(req, { params }) {
     try {
         await query(
             `UPDATE application_types SET
+                name = ?, slug = ?, description = ?,
                 is_active = ?, icon = ?, cover_image = ?,
                 webhook_pending = ?, webhook_interview = ?, webhook_accepted = ?, webhook_declined = ?,
                 role_pending = ?, role_interview = ?, role_accepted = ?, role_declined = ?
              WHERE id = ?`,
             [
+                name, slug, description,
                 is_active ? 1 : 0,
                 icon,
                 cover_image,

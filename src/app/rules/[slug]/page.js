@@ -35,7 +35,7 @@ export default function RulesPage() {
 
     if (loading) return (
         <div className="flex h-[60vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-none border-b-2 border-white"></div>
+            <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
         </div>
     );
 

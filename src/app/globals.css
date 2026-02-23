@@ -1,54 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Bebas Neue", sans-serif;
-  --font-body: "Sora", sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
 
-  --color-ink-950: #000000;
-  --color-ink-900: #0a0a0a;
-  --color-ink-800: #1a1a1a;
-  --color-ink-700: #262626;
-  --color-ink-500: #404040;
+  --color-ink-950: #101012;
+  --color-ink-900: #151518;
+  --color-ink-800: #1a1a1e;
+  --color-ink-700: #222226;
+  --color-ink-500: #333338;
 
-  --color-maroon-900: #1a1a1a;
-  --color-maroon-800: #262626;
-  --color-maroon-600: #404040;
-  --color-maroon-400: #525252;
-  --color-maroon-200: #737373;
+  --color-primary-900: #1c1c1e;
+  --color-primary-800: #3a3a3c;
+  --color-primary-600: #636366;
+  --color-accent-500: #8e8e93;
+  --color-accent-400: #aeaeb2;
 
-  --color-teal-900: #262626;
-  --color-teal-800: #404040;
-  --color-teal-600: #737373;
-  --color-teal-400: #a3a3a3;
-  --color-teal-200: #d4d4d4;
+  --color-accent-900: #2c2c2e;
+  --color-accent-600: #8e8e93;
+  --color-accent-400: #c7c7cc;
+  --color-accent-200: #f2f2f7;
 
   --text-display: 4rem;
   --text-display--line-height: 4.5rem;
-  --text-display--letter-spacing: 0.08em;
+  --text-display--font-weight: 800;
 
   --text-h1: 3rem;
   --text-h1--line-height: 3.5rem;
-  --text-h1--letter-spacing: 0.06em;
+  --text-h1--font-weight: 700;
 
   --text-h2: 2.25rem;
   --text-h2--line-height: 2.75rem;
-  --text-h2--letter-spacing: 0.06em;
+  --text-h2--font-weight: 600;
 
   --text-h3: 1.75rem;
   --text-h3--line-height: 2.25rem;
-  --text-h3--letter-spacing: 0.05em;
+  --text-h3--font-weight: 600;
 
   --text-h4: 1.375rem;
   --text-h4--line-height: 1.875rem;
-  --text-h4--letter-spacing: 0.04em;
+  --text-h4--font-weight: 500;
 
   --text-h5: 1.125rem;
   --text-h5--line-height: 1.625rem;
-  --text-h5--letter-spacing: 0.04em;
+  --text-h5--font-weight: 500;
 
   --text-h6: 1rem;
   --text-h6--line-height: 1.5rem;
-  --text-h6--letter-spacing: 0.04em;
+  --text-h6--font-weight: 500;
 
   --text-body: 1rem;
   --text-body--line-height: 1.625rem;
@@ -59,9 +58,16 @@
   --text-caption: 0.75rem;
   --text-caption--line-height: 1.125rem;
 
-  --text-overline: 0.6875rem;
+  --text-overline: 0.75rem;
   --text-overline--line-height: 1rem;
-  --text-overline--letter-spacing: 0.24em;
+  --text-overline--letter-spacing: 0.15em;
+  --text-overline--font-weight: 700;
+
+  --shadow-liquid: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --shadow-liquid-hover: 0 20px 50px rgba(0, 0, 0, 0.7);
+  --shadow-accent-glow: 0 0 25px rgba(255, 255, 255, 0.3);
+  --shadow-accent-button: 0 0 20px rgba(200, 200, 200, 0.3);
+  --shadow-accent-button-hover: 0 0 30px rgba(200, 200, 200, 0.5);
 }
 
 @layer base {
@@ -70,7 +76,7 @@
   }
 
   body {
-    @apply bg-black text-white font-body antialiased;
+    @apply bg-transparent text-white font-body antialiased selection:bg-accent-500/30 selection:text-white;
   }
 
   h1,
@@ -79,7 +85,7 @@
   h4,
   h5,
   h6 {
-    @apply font-display uppercase text-white;
+    @apply font-display text-white tracking-tight;
   }
 
   h1 {
@@ -108,39 +114,92 @@
 }
 
 @layer components {
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-400 px-6 py-3 text-small font-semibold text-white shadow-accent-button transition-all hover:scale-[1.02] hover:shadow-accent-button-hover active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-accent-400/70;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-none bg-white px-6 py-3 text-small font-semibold uppercase tracking-[0.24em] text-black transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white/70;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-small font-bold text-black transition-all hover:bg-neutral-200 hover:scale-[1.02] hover:shadow-accent-glow active:scale-[0.98] focus:outline-none;
   }
 
   .btn-outline {
-    @apply inline-flex items-center gap-2 rounded-none border border-white/20 px-6 py-3 text-small font-semibold uppercase tracking-[0.24em] text-white transition hover:border-white hover:text-white;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-small font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/40 hover:scale-[1.02] active:scale-[0.98];
   }
 
   .glass-panel {
-    @apply rounded-none border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-xl;
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-liquid backdrop-blur-xl relative overflow-hidden transition-all duration-500;
+  }
+
+  .glass-panel::before,
+  .liquid-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none;
+  }
+
+  .glass-panel:hover,
+  .liquid-card:hover {
+    @apply border-white/20 bg-white/[0.05] shadow-liquid-hover;
+  }
+
+  .liquid-card {
+    @apply rounded-2xl border border-white/5 bg-white/[0.02] p-0 shadow-liquid backdrop-blur-3xl relative overflow-hidden transition-all duration-500;
+  }
+
+  .liquid-card-header {
+    @apply px-6 py-4 border-b border-white/5 bg-white/[0.04] flex items-center justify-between;
+  }
+
+  .glass-input {
+    @apply w-full bg-white/[0.03] border border-white/10 text-white text-sm px-4 py-3 rounded-xl outline-none transition-all placeholder:text-white/20 backdrop-blur-md focus:border-white/40 focus:bg-white/10 focus:shadow-accent-glow;
   }
 
   .section-kicker {
-    @apply text-overline font-semibold uppercase tracking-[0.24em] text-gray-400;
+    @apply text-overline text-accent-400 uppercase drop-shadow-[0_0_8px_#2dd4bf66];
   }
 
   .section-title {
-    @apply text-h1;
+    @apply text-h2 md:text-h1 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent pb-2;
+  }
+
+  @keyframes gridMove {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 0 50px;
+    }
+  }
+
+  @keyframes diagonalMove {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 60px 60px;
+    }
   }
 
   .grid-overlay {
     background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 80px 80px;
+    background-size: 50px 50px;
+    mask-image: linear-gradient(to bottom, black, transparent);
+    animation: gridMove 3s linear infinite;
+  }
+
+  .diagonal-stripes {
+    background-image: linear-gradient(45deg, transparent 45%, #ffffff 50%, transparent 55%);
+    background-size: 60px 60px;
+    animation: diagonalMove 4s linear infinite;
   }
 
   .bg-hero-radial {
-    background-image: radial-gradient(circle at top, rgba(255, 255, 255, 0.1), transparent 55%);
+    background-image: radial-gradient(circle at top, #c8c8c833, transparent 60%);
   }
 }
-
-
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -151,27 +210,5 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 transition-colors hover:bg-teal-600/50;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  @apply bg-white/10 rounded-full transition-colors hover:bg-accent-500/50;
 }

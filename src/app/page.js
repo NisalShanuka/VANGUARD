@@ -1,5 +1,6 @@
 // Server Component — no "use client"
 // Fetches application types directly from DB and passes to client component
+export const dynamic = 'force-dynamic';
 import { query } from '@/lib/db';
 import HomeClient from './HomeClient';
 

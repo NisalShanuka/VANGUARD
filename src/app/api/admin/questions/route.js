@@ -32,9 +32,11 @@ export async function GET(req) {
     if (!typeId) return NextResponse.json({ error: 'type_id required' }, { status: 400 });
 
     await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
+    await ensureColumn('application_questions', 'order_num', "INT DEFAULT 0");
+    await ensureColumn('application_questions', 'section_order', "INT DEFAULT 0");
 
     const questions = await query(
-        `SELECT * FROM application_questions WHERE type_id = ? ORDER BY order_num ASC`,
+        `SELECT * FROM application_questions WHERE type_id = ? ORDER BY section_order ASC, order_num ASC`,
         [typeId]
     );
     return NextResponse.json(questions);
@@ -51,6 +53,8 @@ export async function POST(req) {
     if (!type_id || !label) return NextResponse.json({ error: 'type_id and label required' }, { status: 400 });
 
     await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
+    await ensureColumn('application_questions', 'order_num', "INT DEFAULT 0");
+    await ensureColumn('application_questions', 'section_order', "INT DEFAULT 0");
 
     try {
         const result = await query(
@@ -58,6 +62,45 @@ export async function POST(req) {
             [type_id, section_title || 'General Information', label, field_type || 'text', options || '', is_required ? 1 : 0]
         );
         return NextResponse.json({ success: true, id: result.insertId });
+    } catch (e) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+// PATCH - update question(s)
+export async function PATCH(req) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+
+    // Bulk update for reordering
+    if (body.reorder && Array.isArray(body.questions)) {
+        try {
+            for (const q of body.questions) {
+                await query(
+                    'UPDATE application_questions SET order_num = ?, section_order = ?, section_title = ? WHERE id = ?',
+                    [q.order_num, q.section_order, q.section_title, q.id]
+                );
+            }
+            return NextResponse.json({ success: true });
+        } catch (e) {
+            return NextResponse.json({ error: e.message }, { status: 500 });
+        }
+    }
+
+    // Single update
+    const { id, type_id, label, field_type, options, is_required, section_title } = body;
+    if (!id || !type_id) return NextResponse.json({ error: 'id and type_id required' }, { status: 400 });
+
+    try {
+        await query(
+            `UPDATE application_questions SET label = ?, field_type = ?, options = ?, is_required = ?, section_title = ? WHERE id = ? AND type_id = ?`,
+            [label, field_type, options, is_required ? 1 : 0, section_title, id, type_id]
+        );
+        return NextResponse.json({ success: true });
     } catch (e) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

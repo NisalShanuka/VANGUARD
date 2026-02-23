@@ -41,7 +41,7 @@ export default function HeroSlider() {
         <motion.div
           key={slide.image}
           initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 0.42, scale: 1 }}
+          animate={{ opacity: 0.8, scale: 1 }}
           exit={{ opacity: 0, scale: 1.03 }}
           transition={{ duration: 0.8, ease: 'easeInOut' }}
           className="absolute inset-0 bg-cover bg-no-repeat"
@@ -51,7 +51,7 @@ export default function HeroSlider() {
           }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
       <motion.div
         initial="hidden"
@@ -79,7 +79,7 @@ export default function HeroSlider() {
             </motion.p>
             <motion.div variants={fadeUp(14, 0.32)} className="mt-8 flex flex-wrap gap-4">
               <motion.div whileHover={{ y: -2 }} whileTap={tapPress}>
-                <Link href={slide.cta.to} className="btn-primary">
+                <Link href={slide.cta.to} className="btn-accent">
                   {slide.cta.label}
                 </Link>
               </motion.div>
@@ -100,7 +100,7 @@ export default function HeroSlider() {
               onClick={() => setIndex(idx)}
               whileHover={{ scaleX: 1.1 }}
               whileTap={tapPress}
-              className={`h-1.5 w-10 rounded-none transition ${idx === index ? 'bg-white' : 'bg-white/20'
+              className={`h-1.5 w-10 rounded-full transition ${idx === index ? 'bg-white' : 'bg-white/20'
                 }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

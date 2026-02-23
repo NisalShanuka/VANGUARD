@@ -114,21 +114,31 @@ export default function RulesLayout({ data, fullPageData, isAdmin, refreshData }
               // ── VIEW MODE ──
               <>
                 {data.intro && (
-                  <div className="rounded-none border border-white/10 bg-ink-900/90 p-6 shadow-lg">
-                    <p className="text-overline uppercase tracking-[0.24em] text-white">{t('rules.overview')}</p>
-                    <p className="mt-3 text-body text-white/70">{data.intro}</p>
+                  <div className="liquid-card mb-8">
+                    <div className="liquid-card-header">
+                      <p className="section-kicker">{t('rules.overview')}</p>
+                    </div>
+                    <div className="p-8">
+                      <p className="text-body text-white/70 leading-relaxed font-light">{data.intro}</p>
+                    </div>
                   </div>
                 )}
                 {data.sections.map((section, idx) => (
-                  <div key={idx} className="rounded-none border border-white/10 bg-ink-900/90 p-6 shadow-lg">
-                    <h3 className="text-h3 mb-4">{section.title}</h3>
-                    <ul className="mt-4 list-disc space-y-2 pl-6 text-body text-white/70">
-                      {section.items.map((item, iIdx) => (
-                        <li key={iIdx} className="leading-relaxed">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                  <div key={idx} className="liquid-card mb-8">
+                    <div className="liquid-card-header">
+                      <h3 className="text-xl font-display font-bold uppercase tracking-widest text-white">{section.title}</h3>
+                      <div className="w-10 h-[1px] bg-white/20" />
+                    </div>
+                    <div className="p-8">
+                      <ul className="list-none space-y-4 text-body text-white/70">
+                        {section.items.map((item, iIdx) => (
+                          <li key={iIdx} className="leading-relaxed flex gap-4">
+                            <span className="text-accent-400 font-bold shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </>
@@ -245,10 +255,10 @@ export default function RulesLayout({ data, fullPageData, isAdmin, refreshData }
             )}
 
             {data.update && !isEditing && (
-              <div className="rounded-none border border-white/10 bg-ink-900/90 p-6 shadow-lg">
+              <div className="glass-panel">
                 <h4 className="text-h4 mb-4">{t('rules.updates')}</h4>
                 <div className="mt-4 flex items-center gap-3">
-                  <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-none" />
+                  <img src="/images/logo.png" alt="" className="h-10 w-10 rounded-xl" />
                   <div>
                     <p className="text-small text-white font-bold">{data.update.author}</p>
                     <p className="text-caption text-white/50">{data.update.date}</p>

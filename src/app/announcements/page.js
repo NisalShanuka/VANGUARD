@@ -41,18 +41,16 @@ export default function Announcements() {
                     ) : announcements.length === 0 ? (
                         <div className="col-span-full py-12 text-center text-white/30 text-sm">No announcements posted yet.</div>
                     ) : announcements.map((ann) => (
-                        <Link key={ann.id} href={`/announcements/${ann.id}`} className="group">
-                            <div className="rounded-none border border-white/10 bg-black/90 p-6 shadow-lg h-full transition duration-300 hover:border-white hover:-translate-y-1 hover:scale-[1.01] active:scale-95 flex flex-col">
+                        <Link key={ann.id} href={`/announcements/${ann.id}`} className="glass-panel group p-0 overflow-hidden flex flex-col h-full transition-all duration-500">
+                            {ann.image && (
+                                <img src={ann.image} alt={ann.title} className="w-full h-48 object-cover border-b border-white/10" />
+                            )}
+                            <div className="p-6 flex flex-col h-full">
                                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">
                                     <span>{ann.is_pinned ? <><i className="fas fa-thumbtack mr-1" /> PINNED</> : 'UPDATE'}</span>
                                     <span>{new Date(ann.created_at).toLocaleDateString()}</span>
                                 </div>
-                                <div className="mt-4 flex flex-col gap-3">
-                                    {ann.image && (
-                                        <img src={ann.image} alt={ann.title} className="w-full h-32 object-cover border border-white/10" />
-                                    )}
-                                    <h3 className="text-xl font-bold text-white">{ann.title}</h3>
-                                </div>
+                                <h3 className="mt-4 text-xl font-bold text-white group-hover:text-accent-400 transition-colors">{ann.title}</h3>
                                 <p className="mt-4 text-sm text-white/60 line-clamp-3 flex-1">{ann.content}</p>
                                 <span className="mt-6 inline-flex text-xs text-white font-bold tracking-widest">{t('announcements.readMore', 'READ MORE')} →</span>
                             </div>

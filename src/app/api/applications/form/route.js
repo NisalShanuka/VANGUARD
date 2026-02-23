@@ -23,23 +23,29 @@ export async function GET(request) {
                 options TEXT DEFAULT '',
                 is_required TINYINT(1) DEFAULT 1,
                 order_num INT DEFAULT 0,
+                section_order INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (type_id) REFERENCES application_types(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         `);
 
-        // Safely ensure section_title exists even if table was created before
-        try {
-            const rows = await query(
-                `SELECT COLUMN_NAME FROM information_schema.COLUMNS
-                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'application_questions' AND COLUMN_NAME = 'section_title'`
-            );
-            if (!rows || rows.length === 0) {
-                await query(`ALTER TABLE application_questions ADD COLUMN section_title VARCHAR(255) DEFAULT 'General Information' AFTER type_id`);
+        // Safely ensure section_title and ordering columns exist
+        const ensureColumn = async (col, definition) => {
+            try {
+                const cols = await query(
+                    `SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'application_questions' AND COLUMN_NAME = ?`,
+                    [col]
+                );
+                if (cols.length === 0) {
+                    await query(`ALTER TABLE application_questions ADD COLUMN ${col} ${definition}`);
+                }
+            } catch (e) {
+                console.error(`[Form API] Migration error for ${col}:`, e.message);
             }
-        } catch (e) {
-            console.error('[Form API] section_title migration:', e.message);
-        }
+        };
+
+        await ensureColumn('section_title', "VARCHAR(255) DEFAULT 'General Information' AFTER type_id");
+        await ensureColumn('section_order', "INT DEFAULT 0 AFTER order_num");
 
         // Get application type
         const types = await query(
@@ -53,9 +59,9 @@ export async function GET(request) {
 
         const type = types[0];
 
-        // Get questions — include section_title
+        // Get questions — ordered by section then by question order
         const questions = await query(
-            'SELECT id, section_title, label, field_type, is_required, options FROM application_questions WHERE type_id = ? ORDER BY order_num ASC',
+            'SELECT id, section_title, label, field_type, is_required, options FROM application_questions WHERE type_id = ? ORDER BY section_order ASC, order_num ASC',
             [type.id]
         );
 

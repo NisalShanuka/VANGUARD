@@ -41,7 +41,7 @@ export default function UCPDashboard() {
     if (loading) {
         return (
             <div className="flex h-[60vh] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-none border-b-2 border-white"></div>
+                <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
             </div>
         );
     }
@@ -68,20 +68,38 @@ export default function UCPDashboard() {
                                 <h2 className="text-h2">Available Opportunities</h2>
                                 <span className="text-overline text-white">Apply Now</span>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-6 sm:grid-cols-2">
                                 {types?.map((type) => (
                                     <Link key={type.id} href={`/ucp/apply/${type.slug}`}>
                                         <motion.div
-                                            whileHover={{ y: -4, scale: 1.01 }}
-                                            whileTap={tapPress}
-                                            className="glass-panel group relative overflow-hidden transition hover:border-white"
+                                            whileHover={{ y: -6, scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="glass-panel group relative flex flex-col justify-between min-h-[180px]"
                                         >
-                                            <div className="relative z-10">
-                                                <h4 className="text-h4">{type.name}</h4>
-                                                <p className="mt-1 text-caption text-white/50">Requirement: Character Level 1</p>
+                                            <div className="relative z-10 flex flex-col h-full">
+                                                <div className="mb-auto">
+                                                    <div className="flex items-center gap-3 mb-4">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)] animate-pulse" />
+                                                        <span className="text-[9px] font-black uppercase tracking-[0.35em] text-white/30">Application Open</span>
+                                                    </div>
+                                                    <h4 className="text-xl md:text-2xl font-display font-black leading-tight uppercase tracking-[0.1em] text-white">
+                                                        {type.name}
+                                                    </h4>
+                                                </div>
+
+                                                <div className="mt-8 flex items-center justify-between border-t border-white/5 pt-6">
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/20">
+                                                        Path: <span className="text-white/40">Vanguard Story</span>
+                                                    </p>
+                                                    <div className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center transition-all duration-500 group-hover:bg-white group-hover:border-white group-hover:shadow-accent-glow">
+                                                        <i className="fas fa-arrow-right text-[11px] text-white group-hover:text-black transition-colors" />
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="absolute -right-4 -top-4 text-6xl font-display opacity-5 transition group-hover:opacity-10">
-                                                {type.id}
+
+                                            {/* Decorative background ID */}
+                                            <div className="absolute -right-2 -top-2 text-8xl font-display font-black opacity-[0.03] transition-all duration-700 group-hover:opacity-[0.08] group-hover:scale-110 select-none pointer-events-none italic">
+                                                0{type.id}
                                             </div>
                                         </motion.div>
                                     </Link>

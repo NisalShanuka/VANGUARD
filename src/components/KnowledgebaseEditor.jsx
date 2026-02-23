@@ -79,7 +79,7 @@ export default function KnowledgebaseEditor() {
                             <h4 className="text-lg font-bold text-white uppercase tracking-tight">Editing: <span className="text-white/40 font-mono">/{editingPage.slug}</span></h4>
                             <div className="flex gap-3">
                                 <button onClick={() => setEditingPage(null)} className="px-4 py-2 text-xs font-bold text-white/50 hover:text-white transition">CANCEL</button>
-                                <button onClick={handleSave} disabled={saving} className="btn-primary px-6 py-2 text-xs">
+                                <button onClick={handleSave} disabled={saving} className="btn-accent px-6 py-2 text-xs">
                                     {saving ? 'SAVING...' : 'SAVE CHANGES'}
                                 </button>
                             </div>
@@ -96,7 +96,7 @@ export default function KnowledgebaseEditor() {
                                         type="text"
                                         value={editingPage.en.title}
                                         onChange={e => setEditingPage({ ...editingPage, en: { ...editingPage.en, title: e.target.value } })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none"
                                     />
                                 </div>
 
@@ -106,7 +106,7 @@ export default function KnowledgebaseEditor() {
                                         rows={3}
                                         value={editingPage.en.intro || ''}
                                         onChange={e => setEditingPage({ ...editingPage, en: { ...editingPage.en, intro: e.target.value } })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none resize-none"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none resize-none"
                                     />
                                 </div>
 
@@ -197,7 +197,7 @@ export default function KnowledgebaseEditor() {
                                         type="text"
                                         value={editingPage.si.title}
                                         onChange={e => setEditingPage({ ...editingPage, si: { ...editingPage.si, title: e.target.value } })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none"
                                     />
                                 </div>
 
@@ -207,7 +207,7 @@ export default function KnowledgebaseEditor() {
                                         rows={3}
                                         value={editingPage.si.intro || ''}
                                         onChange={e => setEditingPage({ ...editingPage, si: { ...editingPage.si, intro: e.target.value } })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none resize-none"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/40 outline-none resize-none"
                                     />
                                 </div>
 
@@ -264,7 +264,7 @@ export default function KnowledgebaseEditor() {
                         </div>
 
                         <div className="pt-8 border-t border-white/10 flex justify-end">
-                            <button onClick={handleSave} disabled={saving} className="btn-primary py-4 px-12">
+                            <button onClick={handleSave} disabled={saving} className="btn-accent py-4 px-12">
                                 {saving ? 'SAVING CONTENT...' : 'COMMIT CHANGES TO KNOWLEDGEBASE'}
                             </button>
                         </div>

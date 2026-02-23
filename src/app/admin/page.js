@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import AnimatedPage from '@/components/AnimatedPage';
@@ -11,30 +12,34 @@ import KnowledgebaseEditor from '@/components/KnowledgebaseEditor';
 
 // ─── Reusable input styles ────────────────────────────────────────────────────
 const inputStyle = {
-    width: '100%', padding: '9px 12px',
+    width: '100%', padding: '14px 16px',
     background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 0, color: '#fff', fontSize: 12, outline: 'none',
-    transition: 'border-color 0.2s',
+    borderRadius: '12px', color: '#fff', fontSize: '14px', outline: 'none',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    backdropFilter: 'blur(10px)',
 };
 const labelStyle = {
-    display: 'block', fontSize: 10, fontWeight: 700,
-    textTransform: 'uppercase', letterSpacing: '0.15em',
-    marginBottom: 5,
+    display: 'block', fontSize: '10px', fontWeight: 900,
+    textTransform: 'uppercase', letterSpacing: '0.2em',
+    marginBottom: 8, color: 'rgba(255,255,255,0.4)', marginLeft: 4
 };
 
 function Toast({ msg, type, onDone }) {
     useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, []);
     return (
         <div style={{
-            position: 'fixed', top: 80, right: 24, zIndex: 9999,
-            padding: '14px 20px', borderRadius: 0, fontSize: 13, fontWeight: 700,
-            background: 'rgba(255,255,255,0.05)',
-            border: `1px solid rgba(255,255,255,0.2)`,
-            color: '#fff',
-            backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
-            display: 'flex', alignItems: 'center', gap: 10
+            position: 'fixed', top: 100, right: 30, zIndex: 9999,
+            padding: '16px 24px', borderRadius: 0, fontSize: '12px', fontWeight: 900,
+            background: 'rgba(10,10,10,0.8)',
+            borderLeft: `3px solid ${type === 'success' ? '#43b581' : '#f04747'}`,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em',
+            backdropFilter: 'blur(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'center', gap: 12
         }}>
-            <i className={type === 'success' ? 'fas fa-check-circle text-white' : 'fas fa-exclamation-triangle text-white'} />
+            <i className={type === 'success' ? 'fas fa-check-circle text-[#43b581]' : 'fas fa-exclamation-triangle text-[#f04747]'} />
             {msg}
         </div>
     );
@@ -43,14 +48,16 @@ function Toast({ msg, type, onDone }) {
 function Toggle({ checked, onChange }) {
     return (
         <button type="button" onClick={() => onChange(!checked)} style={{
-            width: 44, height: 24, borderRadius: 0, border: 'none', cursor: 'pointer',
-            background: checked ? '#fff' : 'rgba(255,255,255,0.12)',
-            position: 'relative', transition: 'background 0.3s', flexShrink: 0,
+            width: 44, height: 24, borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
+            background: checked ? '#fff' : 'rgba(255,255,255,0.05)',
+            position: 'relative', transition: 'all 0.3s', flexShrink: 0,
+            boxShadow: checked ? '0 0 15px rgba(255,255,255,0.3)' : 'none'
         }}>
             <span style={{
-                position: 'absolute', top: 3, left: checked ? 23 : 3,
-                width: 18, height: 18, borderRadius: 0, background: checked ? '#000' : '#fff',
-                transition: 'left 0.3s',
+                position: 'absolute', top: 2, left: checked ? 22 : 2,
+                width: 18, height: 18, borderRadius: '50%', background: checked ? '#000' : 'rgba(255,255,255,0.4)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
             }} />
         </button>
     );
@@ -63,14 +70,14 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
     const [selectVal, setSelectVal] = useState(selectOptions ? selectOptions[0].value : "");
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ width: '100%', maxWidth: 400, background: '#000', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 0, padding: 24, boxShadow: '0 24px 80px rgba(0,0,0,1)' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 900, color: '#fff' }}>{title}</h3>
-                <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>{promptText}</p>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: 420, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, padding: 32, boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
+                <h3 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
+                <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{promptText}</p>
 
                 {!isConfirm && selectOptions && (
                     <select
-                        style={{ ...inputStyle, marginBottom: 10, cursor: 'pointer' }}
+                        style={{ ...inputStyle, marginBottom: 12, cursor: 'pointer', background: 'rgba(255,255,255,0.05)' }}
                         value={selectVal}
                         onChange={e => setSelectVal(e.target.value)}
                     >
@@ -89,10 +96,12 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
                         autoFocus
                         type={type}
                         list={autocompleteData ? "actionmodal-datalist" : undefined}
-                        style={{ ...inputStyle, marginBottom: secondaryType ? 10 : 0 }}
+                        style={{ ...inputStyle, marginBottom: secondaryType ? 12 : 0 }}
                         value={val}
-                        placeholder={autocompleteData ? "Start typing to search..." : ""}
+                        placeholder={autocompleteData ? "Search..." : ""}
                         onChange={e => setVal(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                         onKeyDown={e => e.key === 'Enter' && !secondaryType && onSubmit(val, selectVal)}
                     />
                 )}
@@ -104,13 +113,15 @@ function ActionModal({ title, promptText, actionButtonText, color, onClose, onSu
                         value={val2}
                         placeholder={secondaryPlaceholder}
                         onChange={e => setVal2(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                         onKeyDown={e => e.key === 'Enter' && onSubmit(val, selectVal, val2)}
                     />
                 )}
 
-                <div style={{ display: 'flex', gap: 10, marginTop: !isConfirm ? 20 : 0, justifyContent: 'flex-end' }}>
-                    <button onClick={onClose} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: 0, fontSize: 11, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cancel</button>
-                    <button onClick={() => onSubmit(val, selectVal, val2)} style={{ padding: '8px 16px', background: '#fff', border: 'none', color: '#000', borderRadius: 0, fontSize: 11, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{actionButtonText || 'Confirm'}</button>
+                <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'stretch' }}>
+                    <button onClick={onClose} style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', borderRadius: 0, fontSize: 11, fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.2em', transition: 'all 0.2s' }} onMouseEnter={e => e.target.style.color = '#fff'}>Cancel</button>
+                    <button onClick={() => onSubmit(val, selectVal, val2)} style={{ flex: 1, padding: '14px', background: '#fff', border: 'none', color: '#000', borderRadius: 0, fontSize: 11, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.2em' }}>{actionButtonText || 'Confirm'}</button>
                 </div>
             </motion.div>
         </div>
@@ -131,17 +142,17 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
 
     return (
         <div
-            style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(8px)' }}
+            style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(15px)' }}
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={{ opacity: 0, scale: 0.98, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                style={{ width: 700, background: '#000', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+                style={{ width: 740, background: '#080808', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', boxShadow: '0 40px 100px rgba(0,0,0,1)' }}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)' }}>
+                <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ color: '#fff', fontWeight: 900, fontSize: 18, fontFamily: 'monospace' }}>[{player.id}]</span>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -311,9 +322,11 @@ function QuestionsModal({ type, onClose }) {
     const [questions, setQuestions] = useState([]);
     const [sections, setSections] = useState([]);
     const [newSectionName, setNewSectionName] = useState('');
-    const [addingToSection, setAddingToSection] = useState(null); // section title currently being edited
+    const [addingToSection, setAddingToSection] = useState(null);
+    const [editingQuestion, setEditingQuestion] = useState(null);
     const [form, setForm] = useState({ label: '', field_type: 'text', options: '', is_required: true });
     const [saving, setSaving] = useState(false);
+    const [orderSaving, setOrderSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
     useEffect(() => { fetchQuestions(); }, []);
@@ -323,32 +336,43 @@ function QuestionsModal({ type, onClose }) {
         const data = await res.json();
         const qList = Array.isArray(data) ? data : [];
         setQuestions(qList);
-        // Extract existing sections
-        const existingSections = Array.from(new Set(qList.map(q => q.section_title || 'General Information')));
+
+        // Extract sections in order they appear in the sorted questions
+        const sectSet = new Set();
+        qList.forEach(q => sectSet.add(q.section_title || 'General Information'));
+        const existingSections = Array.from(sectSet);
         setSections(existingSections.length > 0 ? existingSections : ['General Information']);
     }
 
     function addSection() {
         if (!newSectionName.trim()) return;
-        if (sections.includes(newSectionName.trim())) return setToast({ msg: 'Section already exists', type: 'error' });
-        setSections([...sections, newSectionName.trim()]);
+        const name = newSectionName.trim();
+        if (sections.includes(name)) return setToast({ msg: 'Section already exists', type: 'error' });
+        setSections([...sections, name]);
         setNewSectionName('');
     }
 
-    async function addQuestion(sectionTitle) {
+    async function saveQuestion(sectionTitle) {
         if (!form.label.trim()) return setToast({ msg: 'Label required', type: 'error' });
         setSaving(true);
+
+        const isEdit = !!editingQuestion;
+        const method = isEdit ? 'PATCH' : 'POST';
+        const payload = { ...form, type_id: type.id, section_title: sectionTitle };
+        if (isEdit) payload.id = editingQuestion.id;
+
         const res = await fetch('/api/admin/questions', {
-            method: 'POST',
+            method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...form, type_id: type.id, section_title: sectionTitle }),
+            body: JSON.stringify(payload),
         });
         const data = await res.json();
         setSaving(false);
         if (data.success) {
-            setToast({ msg: 'Question added!', type: 'success' });
+            setToast({ msg: isEdit ? 'Question updated!' : 'Question added!', type: 'success' });
             setForm({ label: '', field_type: 'text', options: '', is_required: true });
             setAddingToSection(null);
+            setEditingQuestion(null);
             fetchQuestions();
         } else {
             setToast({ msg: data.error || 'Error', type: 'error' });
@@ -362,112 +386,236 @@ function QuestionsModal({ type, onClose }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, type_id: type.id }),
         });
-        fetchQuestions();
+        setQuestions(prev => prev.filter(q => q.id !== id));
     }
 
-    return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                style={{ width: '100%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', background: '#000', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 0, boxShadow: 'none' }}>
+    function startEdit(q) {
+        setEditingQuestion(q);
+        setForm({
+            label: q.label,
+            field_type: q.field_type,
+            options: q.options,
+            is_required: !!q.is_required
+        });
+        setAddingToSection(q.section_title || 'General Information');
+    }
+
+    async function saveOrder() {
+        setOrderSaving(true);
+        // Prepare questions with new order and section_title
+        const orderedQuestions = [];
+        sections.forEach((sectName, sectIdx) => {
+            const sectQuestions = questions.filter(q => (q.section_title || 'General Information') === sectName);
+            sectQuestions.forEach((q, qIdx) => {
+                orderedQuestions.push({
+                    id: q.id,
+                    order_num: qIdx,
+                    section_order: sectIdx,
+                    section_title: sectName
+                });
+            });
+        });
+
+        const res = await fetch('/api/admin/questions', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reorder: true, questions: orderedQuestions }),
+        });
+        const data = await res.json();
+        setOrderSaving(false);
+        if (data.success) {
+            setToast({ msg: 'Order saved!', type: 'success' });
+            fetchQuestions();
+        } else {
+            setToast({ msg: data.error || 'Error saving order', type: 'error' });
+        }
+    }
+
+    // Reorder questions within a section
+    function reorderQuestionsInSection(sectionName, newSectQuestions) {
+        const otherQuestions = questions.filter(q => (q.section_title || 'General Information') !== sectionName);
+        // Update section_title for the items just in case (though Reorder.Item should stay in same group)
+        const updatedSectQuestions = newSectQuestions.map(q => ({ ...q, section_title: sectionName }));
+        setQuestions([...otherQuestions, ...updatedSectQuestions]);
+    }
+
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md">
+            <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="liquid-card w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+            >
                 {/* Header */}
-                <div style={{ padding: '24px 30px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#000', zIndex: 1 }}>
+                <div className="liquid-card-header sticky top-0 z-10 bg-black/80 backdrop-blur-xl">
                     <div>
-                        <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form Builder</h2>
-                        <p style={{ margin: '4px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{type.name} — Define application questions</p>
+                        <h2 className="text-xl font-display font-black text-white uppercase tracking-widest">Form Builder</h2>
+                        <p className="mt-1 text-[10px] text-white/40 uppercase tracking-[0.1em]">{type.name} — Define application questions</p>
                     </div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: 34, height: 34, borderRadius: 0, cursor: 'pointer', fontSize: 16 }}>✕</button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={saveOrder}
+                            disabled={orderSaving}
+                            className="btn-accent py-2 px-4 text-[10px] tracking-widest uppercase gap-2"
+                        >
+                            {orderSaving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-sort"></i>}
+                            {orderSaving ? 'Saving...' : 'Save Layout'}
+                        </button>
+                        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-white/50 transition-colors">
+                            <i className="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div className="p-6 md:p-8 flex flex-col gap-8">
                     {/* Add Section Header */}
-                    <div style={{ display: 'flex', gap: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', padding: 16 }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ ...labelStyle, color: 'rgba(255,255,255,0.4)' }}>New Section Name</label>
-                            <input style={inputStyle} placeholder="e.g. Personal Details" value={newSectionName} onChange={e => setNewSectionName(e.target.value)} />
+                    <div className="glass-panel flex flex-col md:flex-row gap-4 md:items-end">
+                        <div className="flex-1">
+                            <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">New Section Name</label>
+                            <input className="glass-input" placeholder="e.g. Personal Details" value={newSectionName} onChange={e => setNewSectionName(e.target.value)} />
                         </div>
-                        <button onClick={addSection} style={{ alignSelf: 'flex-end', padding: '12px 20px', background: '#fff', border: 'none', color: '#000', fontWeight: 900, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
-                            + Create Section
+                        <button onClick={addSection} className="btn-primary whitespace-nowrap">
+                            <i className="fas fa-plus text-[10px]"></i> Create Section
                         </button>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                        {sections.map(section => (
-                            <div key={section} style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.04)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h4 style={{ margin: 0, fontSize: 11, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-                                        {section}
-                                    </h4>
-                                    <button onClick={() => setAddingToSection(addingToSection === section ? null : section)} style={{ background: 'transparent', border: 'none', color: addingToSection === section ? '#ff4d4d' : '#fff', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer' }}>
-                                        {addingToSection === section ? 'Cancel' : '+ Add Question'}
-                                    </button>
-                                </div>
-
-                                <div style={{ padding: 20 }}>
-                                    {/* Questions in this section */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: addingToSection === section ? 20 : 0 }}>
-                                        {questions.filter(q => (q.section_title || 'General Information') === section).length === 0 ? (
-                                            <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.2)', textAlign: 'center', padding: '10px 0' }}>No questions in this section.</p>
-                                        ) : (
-                                            questions.filter(q => (q.section_title || 'General Information') === section).map(q => (
-                                                <div key={q.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <div>
-                                                        <p style={{ fontWeight: 800, fontSize: 13, color: '#fff', margin: 0 }}>{q.label}</p>
-                                                        <p style={{ margin: '4px 0 0', fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                            {q.field_type?.toUpperCase()} {q.is_required ? '· REQUIRED' : ''}
-                                                        </p>
-                                                    </div>
-                                                    <button onClick={() => deleteQuestion(q.id)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 9, fontWeight: 900 }} onMouseEnter={e => e.currentTarget.style.color = '#ff4d4d'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}>
-                                                        REMOVE
-                                                    </button>
-                                                </div>
-                                            ))
-                                        )}
+                    <Reorder.Group axis="y" values={sections} onReorder={setSections} className="flex flex-col gap-8">
+                        {sections.map(section => {
+                            const sectionQuestions = questions.filter(q => (q.section_title || 'General Information') === section);
+                            return (
+                                <Reorder.Item key={section} value={section} className="glass-panel p-0 border-white/5 select-none">
+                                    <div className="liquid-card-header bg-white/[0.02] cursor-grab active:cursor-grabbing">
+                                        <h4 className="text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                                            <i className="fas fa-grip-lines text-white/20 text-[10px]"></i>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)]"></div>
+                                            {section}
+                                        </h4>
+                                        <div className="flex gap-4">
+                                            <button onClick={() => {
+                                                if (addingToSection === section) {
+                                                    setAddingToSection(null);
+                                                    setEditingQuestion(null);
+                                                    setForm({ label: '', field_type: 'text', options: '', is_required: true });
+                                                } else {
+                                                    setAddingToSection(section);
+                                                    setEditingQuestion(null);
+                                                    setForm({ label: '', field_type: 'text', options: '', is_required: true });
+                                                }
+                                            }} className={`text-[10px] font-black uppercase tracking-widest transition-colors ${addingToSection === section && !editingQuestion ? 'text-red-400 hover:text-red-300' : 'text-white/50 hover:text-white'}`}>
+                                                {addingToSection === section && !editingQuestion ? 'Cancel' : '+ Add Question'}
+                                            </button>
+                                            {sections.length > 1 && sectionQuestions.length === 0 && (
+                                                <button onClick={() => setSections(sections.filter(s => s !== section))} className="text-[10px] text-red-500/50 hover:text-red-500 font-black uppercase tracking-widest">
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Inline Add Question Form */}
-                                    {addingToSection === section && (
-                                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: 16, marginTop: 10 }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                                                <div>
-                                                    <label style={labelStyle}>Question Label *</label>
-                                                    <input style={inputStyle} value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
-                                                </div>
-                                                <div>
-                                                    <label style={labelStyle}>Field Type</label>
-                                                    <select style={inputStyle} value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
-                                                        <option value="text">Short Text</option>
-                                                        <option value="textarea">Long Text</option>
-                                                        <option value="number">Number</option>
-                                                        <option value="select">Dropdown</option>
-                                                        <option value="checkbox">Checkbox List</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            {['select', 'checkbox'].includes(form.field_type) && (
-                                                <div style={{ marginBottom: 12 }}>
-                                                    <label style={labelStyle}>Options (comma separated)</label>
-                                                    <input style={inputStyle} placeholder="Option 1, Option 2" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
-                                                </div>
+                                    <div className="p-6">
+                                        {/* Questions in this section */}
+                                        <Reorder.Group
+                                            axis="y"
+                                            values={sectionQuestions}
+                                            onReorder={(newItems) => reorderQuestionsInSection(section, newItems)}
+                                            className={`flex flex-col gap-3 ${addingToSection === section ? 'mb-6' : ''}`}
+                                        >
+                                            {sectionQuestions.length === 0 ? (
+                                                <p className="text-xs text-white/30 text-center py-4 italic">No questions in this section yet.</p>
+                                            ) : (
+                                                sectionQuestions.map(q => (
+                                                    <Reorder.Item key={q.id} value={q} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 hover:border-white/20 transition-colors group cursor-grab active:cursor-grabbing">
+                                                        <div className="flex items-center gap-4">
+                                                            <i className="fas fa-grip-vertical text-white/10 group-hover:text-white/30 transition-colors text-[10px]"></i>
+                                                            <div>
+                                                                <p className="font-bold text-sm text-white mb-1 group-hover:text-accent-400 transition-colors">{q.label}</p>
+                                                                <p className="text-[9px] text-white/40 font-bold uppercase tracking-[0.1em]">
+                                                                    {q.field_type?.toUpperCase()} {q.is_required ? <span className="text-accent-400 ml-2">· REQUIRED</span> : ''}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button onClick={(e) => { e.stopPropagation(); startEdit(q); }} className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all">
+                                                                <i className="fas fa-edit text-[10px]"></i>
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); deleteQuestion(q.id); }} className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-all">
+                                                                <i className="fas fa-trash-alt text-[10px]"></i>
+                                                            </button>
+                                                        </div>
+                                                    </Reorder.Item>
+                                                ))
                                             )}
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>
-                                                    <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
-                                                    Required
-                                                </label>
-                                                <button onClick={() => addQuestion(section)} disabled={saving} style={{ padding: '10px 20px', background: '#fff', border: 'none', color: '#000', fontWeight: 900, fontSize: 10, textTransform: 'uppercase', cursor: 'pointer' }}>
-                                                    {saving ? 'Saving...' : 'Confirm Question'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                                        </Reorder.Group>
+
+                                        {/* Inline Add/Edit Question Form */}
+                                        <AnimatePresence>
+                                            {addingToSection === section && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="bg-black/20 border border-white/10 p-6 mt-4">
+                                                        <h5 className="text-[9px] font-black uppercase tracking-[0.2em] text-accent-400 mb-6 flex items-center gap-2">
+                                                            <i className={editingQuestion ? "fas fa-edit" : "fas fa-plus-circle"}></i>
+                                                            {editingQuestion ? 'Edit Question' : 'Add New Question'}
+                                                        </h5>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                                            <div>
+                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Question Label *</label>
+                                                                <input className="glass-input" value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Field Type</label>
+                                                                <select className="glass-input [&>option]:bg-black [&>option]:text-white" value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
+                                                                    <option value="text">Short Text</option>
+                                                                    <option value="textarea">Long Text</option>
+                                                                    <option value="number">Number</option>
+                                                                    <option value="select">Dropdown</option>
+                                                                    <option value="checkbox">Checkbox List</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        {['select', 'checkbox'].includes(form.field_type) && (
+                                                            <div className="mb-6">
+                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Options (comma separated)</label>
+                                                                <input className="glass-input" placeholder="Option 1, Option 2" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between items-center sm:flex-row flex-col gap-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-white/80 mt-1">Required Question</span>
+                                                            </div>
+                                                            <div className="flex gap-3 w-full sm:w-auto">
+                                                                <button onClick={() => { setAddingToSection(null); setEditingQuestion(null); setForm({ label: '', field_type: 'text', options: '', is_required: true }); }} className="btn-outline flex-1 sm:flex-none py-2 px-4 shadow-none text-[10px] tracking-widest uppercase">
+                                                                    Cancel
+                                                                </button>
+                                                                <button onClick={() => saveQuestion(section)} disabled={saving} className="btn-accent flex-1 sm:flex-none py-2 px-6 border border-white/10 text-[10px] tracking-widest uppercase gap-2">
+                                                                    {saving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-save"></i>}
+                                                                    {saving ? 'Saving...' : (editingQuestion ? 'Update Question' : 'Save Question')}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </Reorder.Item>
+                            );
+                        })}
+                    </Reorder.Group>
                 </div>
             </motion.div>
             {toast && <Toast msg={toast.msg} type={toast.type} onDone={() => setToast(null)} />}
-        </div>
+        </div>,
+        document.body
     );
 }
 
@@ -527,100 +675,104 @@ function TypeCard({ type: initialType, onDelete, onSave }) {
     ];
 
     return (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${expanded ? 'rgba(255,255,255,0.2)' : (t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.07)')}`, borderRadius: 0, overflow: 'hidden', transition: 'all 0.3s' }}>
-            <div style={{ padding: '16px 20px', background: expanded ? 'rgba(255,255,255,0.03)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: expanded ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 44, height: 44, background: t.is_active ? 'rgba(67,181,129,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${expanded ? 'rgba(255,255,255,0.15)' : (t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.05)')}`, borderRadius: '16px', overflow: 'hidden', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', backdropFilter: 'blur(12px)', boxShadow: expanded ? '0 20px 40px rgba(0,0,0,0.3)' : '0 4px 15px rgba(0,0,0,0.1)' }}>
+            <div style={{ padding: '20px 24px', background: expanded ? 'rgba(255,255,255,0.02)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: expanded ? '1px solid rgba(255,255,255,0.1)' : 'none', position: 'relative' }}>
+                {expanded && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', height: '100%', background: 'radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, zIndex: 1 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '12px', background: t.is_active ? 'rgba(67,181,129,0.15)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: t.is_active ? '0 0 20px rgba(67,181,129,0.2)' : 'none', transition: 'all 0.3s' }}>
                         <i className={t.icon || 'fas fa-file-alt'} />
                     </div>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff' }}>{t.name}</h3>
-                        <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>/{t.slug} • {t.is_active ? 'LIVE' : 'HIDDEN'}</p>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '0.02em', dropShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{t.name}</h3>
+                        <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>/{t.slug} • {t.is_active ? <span style={{ color: '#43b581', fontWeight: 'bold' }}>LIVE</span> : 'HIDDEN'}</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 10 }}>
-                        {toggling ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> : <Toggle checked={!!t.is_active} onChange={handleToggleActive} />}
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
+                        {toggling ? <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> : <Toggle checked={!!t.is_active} onChange={handleToggleActive} />}
                     </div>
-                    <button onClick={() => setShowQuestions(true)} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Questions</button>
-                    <button onClick={() => setExpanded(!expanded)} style={{ padding: '7px 14px', border: '1px solid', borderRadius: 0, fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', background: expanded ? '#fff' : 'rgba(255,255,255,0.05)', borderColor: expanded ? '#fff' : 'rgba(255,255,255,0.1)', color: expanded ? '#000' : '#fff' }}>
+                    <button onClick={() => setShowQuestions(true)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(5px)' }} onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.transform = 'translateY(-1px)'; }} onMouseLeave={(e) => { e.target.style.background = 'rgba(255,255,255,0.05)'; e.target.style.transform = 'translateY(0)'; }}>Questions</button>
+                    <button onClick={() => setExpanded(!expanded)} style={{ padding: '8px 16px', border: '1px solid', borderRadius: '8px', fontSize: 11, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', background: expanded ? '#fff' : 'rgba(255,255,255,0.05)', borderColor: expanded ? '#fff' : 'rgba(255,255,255,0.1)', color: expanded ? '#000' : '#fff', boxShadow: expanded ? '0 0 15px rgba(255,255,255,0.3)' : 'none' }} onMouseEnter={(e) => { !expanded && (e.target.style.background = 'rgba(255,255,255,0.1)'); e.target.style.transform = 'translateY(-1px)'; }} onMouseLeave={(e) => { !expanded && (e.target.style.background = 'rgba(255,255,255,0.05)'); e.target.style.transform = 'translateY(0)'; }}>
                         {expanded ? 'CLOSE EDIT' : 'EDIT APP'}
                     </button>
-                    <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 14 }}><i className="fas fa-trash-can" /></button>
+                    <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 16, padding: '8px', transition: 'color 0.2s' }} onMouseEnter={(e) => e.target.style.color = '#ff4d4d'} onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.3)'}><i className="fas fa-trash-can" /></button>
                 </div>
             </div>
 
             <AnimatePresence>
                 {expanded && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, background: 'rgba(0,0,0,0.3)' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24 }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: -4 }}>General Settings</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: 32, background: 'rgba(0,0,0,0.2)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: -8, display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 4, height: 12, background: '#fff', borderRadius: 2 }} /> General Settings</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <div>
                                             <label style={labelStyle}>App Name</label>
-                                            <input style={inputStyle} value={t.name} onChange={e => setT({ ...t, name: e.target.value })} />
+                                            <input style={inputStyle} value={t.name} onChange={e => setT({ ...t, name: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                         <div>
                                             <label style={labelStyle}>URL Slug</label>
-                                            <input style={inputStyle} value={t.slug} onChange={e => setT({ ...t, slug: e.target.value })} />
+                                            <input style={inputStyle} value={t.slug} onChange={e => setT({ ...t, slug: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                     </div>
                                     <div>
                                         <label style={labelStyle}>Description</label>
-                                        <textarea style={{ ...inputStyle, minHeight: 60 }} value={t.description || ''} onChange={e => setT({ ...t, description: e.target.value })} />
+                                        <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={t.description || ''} onChange={e => setT({ ...t, description: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <div>
                                             <label style={labelStyle}>Icon (FA Class)</label>
-                                            <input style={inputStyle} value={t.icon || ''} onChange={e => setT({ ...t, icon: e.target.value })} />
+                                            <input style={inputStyle} value={t.icon || ''} onChange={e => setT({ ...t, icon: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                         <div>
                                             <label style={labelStyle}>Custom Cover Image filename</label>
-                                            <input style={inputStyle} value={t.cover_image || ''} onChange={e => setT({ ...t, cover_image: e.target.value })} />
+                                            <input style={inputStyle} value={t.cover_image || ''} onChange={e => setT({ ...t, cover_image: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Cover Image Preview</h4>
-                                    <ImageWithInfo src={t.cover_image} />
-                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 8, lineHeight: 1.5 }}>
-                                        Recommended Size: 1200×600px. <br />
-                                        Stored in: <span style={{ color: '#fff' }}>/public/images/covers/</span>
+                                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '24px' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 4, height: 12, background: '#fff', borderRadius: 2 }} /> Cover Image Preview</h4>
+                                    <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <ImageWithInfo src={t.cover_image} />
+                                    </div>
+                                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 16, lineHeight: 1.6 }}>
+                                        Recommended Size: <span style={{ color: '#fff', fontWeight: 'bold' }}>1200×600px</span>. <br />
+                                        Stored in: <span style={{ color: '#fff', backgroundColor: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>/public/images/covers/</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-bell mr-2" /> Discord Webhooks</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 24, border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 20 }}><i className="fas fa-bell mr-2" style={{ color: 'rgba(255,255,255,0.5)' }} /> Discord Webhooks</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                         {statuses.map(s => (
                                             <div key={s.key}>
-                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Hook</label>
-                                                <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." />
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.9 }}>{s.label} Hook</label>
+                                                <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." onFocus={(e) => e.target.style.borderColor = s.color} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-id-card mr-2" /> Auto-Roles</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 24, border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 20 }}><i className="fas fa-id-card mr-2" style={{ color: 'rgba(255,255,255,0.5)' }} /> Auto-Roles</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                         {statuses.map(s => (
                                             <div key={s.key}>
-                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Role ID</label>
-                                                <input style={inputStyle} value={t[`role_${s.key}`] || ''} onChange={e => setT({ ...t, [`role_${s.key}`]: e.target.value })} placeholder="Discord Role ID" />
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.9 }}>{s.label} Role ID</label>
+                                                <input style={inputStyle} value={t[`role_${s.key}`] || ''} onChange={e => setT({ ...t, [`role_${s.key}`]: e.target.value })} placeholder="Discord Role ID" onFocus={(e) => e.target.style.borderColor = s.color} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
-                                <button onClick={() => setExpanded(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}>Cancel</button>
-                                <button onClick={() => handleSave()} disabled={saving} style={{ padding: '10px 40px', background: '#fff', color: '#000', border: 'none', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 24, marginTop: 8 }}>
+                                <button onClick={() => setExpanded(false)} style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s', backdropFilter: 'blur(5px)' }} onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { e.target.style.background = 'rgba(255,255,255,0.05)'; }}>Cancel</button>
+                                <button onClick={() => handleSave()} disabled={saving} style={{ padding: '12px 48px', background: '#fff', color: '#000', border: 'none', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', opacity: saving ? 0.7 : 1, borderRadius: '8px', boxShadow: '0 0 20px rgba(255,255,255,0.3)', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.transform = 'scale(1.02)'; e.target.style.boxShadow = '0 0 30px rgba(255,255,255,0.5)'; }} onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = '0 0 20px rgba(255,255,255,0.3)'; }}>
                                     {saving ? 'Saving...' : 'Save Configuration'}
                                 </button>
                             </div>
@@ -823,12 +975,12 @@ export default function AdminDashboard() {
         } else if (status === 'authenticated') {
             fetchApps();
             // Auto refresh lists every 15 seconds
-            const interval = setInterval(() => {
-                fetchApps();
-                if (mainTab === 'server') fetchServerPlayers();
-                if (mainTab === 'logs') fetchLogs();
-            }, 15000);
-            return () => clearInterval(interval);
+            // const interval = setInterval(() => {
+            //     fetchApps();
+            //     if (mainTab === 'server') fetchServerPlayers();
+            //     if (mainTab === 'logs') fetchLogs();
+            // }, 15000);
+            // return () => clearInterval(interval);
         }
     }, [status, mainTab]);
 
@@ -1208,7 +1360,7 @@ export default function AdminDashboard() {
     if (loading) return (
         <div className="flex h-screen items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-                <div className="h-8 w-8 border-2 border-white border-t-transparent rounded-none animate-spin" />
+                <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
                 <p className="text-[10px] uppercase tracking-widest text-white/30">Loading Applications...</p>
             </div>
         </div>
@@ -1226,35 +1378,36 @@ export default function AdminDashboard() {
 
             <section className="mx-auto max-w-6xl px-6 pb-20">
                 {/* Main Tabs */}
-                <div className="mb-8 flex gap-2 border-b border-white/10 pb-4">
-                    {[
-                        { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
-                        { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
-                        { id: 'server', label: 'Live Server', icon: 'fas fa-network-wired' },
-                        { id: 'knowledgebase', label: 'Knowledgebase', icon: 'fas fa-book' },
-                        { id: 'logs', label: 'Staff Logs', icon: 'fas fa-folder-open' },
-                        { id: 'settings', label: 'Settings', icon: 'fas fa-cog' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setMainTab(tab.id)}
-                            className={`flex items-center gap-2 rounded-none px-5 py-2.5 text-sm font-bold transition-all ${mainTab === tab.id
-                                ? 'bg-white text-black'
-                                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-                                }`}
-                        >
-                            <i className={tab.icon} /> {tab.label}
-                        </button>
-                    ))}
+                <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6">
+                    <div className="flex gap-1.5 flex-wrap p-1 bg-white/[0.03] border border-white/5 rounded-none">
+                        {[
+                            { id: 'applications', label: 'Applications', icon: 'fas fa-file-lines' },
+                            { id: 'announcements', label: 'Announcements', icon: 'fas fa-bullhorn' },
+                            { id: 'server', label: 'Live Server', icon: 'fas fa-network-wired' },
+                            { id: 'knowledgebase', label: 'Knowledgebase', icon: 'fas fa-book' },
+                            { id: 'logs', label: 'Staff Logs', icon: 'fas fa-folder-open' },
+                            { id: 'settings', label: 'Settings', icon: 'fas fa-cog' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setMainTab(tab.id)}
+                                className={`flex items-center gap-2.5 px-4 md:px-6 py-3 text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 relative group ${mainTab === tab.id
+                                    ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+                                    : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+                                    }`}
+                            >
+                                <i className={`${tab.icon} ${mainTab === tab.id ? 'opacity-100' : 'opacity-40 group-hover:opacity-70'}`} />
+                                {tab.label}
+                                {mainTab === tab.id && <motion.div layoutId="activeTab" className="absolute inset-0 border border-white/20 pointer-events-none" />}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {mainTab === 'applications' && (
                     <>
-                        <div className="mb-8 flex items-center justify-between">
+                        <div className="mb-8">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Application Inbox</p>
-                            <button onClick={fetchApps} className="flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition">
-                                <i className="fas fa-rotate" /> Refresh
-                            </button>
                         </div>
 
                         {error && (
@@ -1264,16 +1417,26 @@ export default function AdminDashboard() {
                         )}
 
                         {/* Stat cards */}
-                        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <div className="mb-10 grid grid-cols-2 gap-5 md:grid-cols-4">
                             {TABS.map(tab => (
                                 <motion.button
                                     key={tab.key}
-                                    whileHover={{ y: -3 }}
+                                    whileHover={{ y: -4, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => setActiveTab(tab.key)}
-                                    className={`glass-panel text-center transition cursor-pointer w-full ${activeTab === tab.key ? 'border-white/50 bg-white/10' : ''}`}
+                                    className={`relative glass-panel p-6 text-center transition-all duration-300 cursor-pointer overflow-hidden ${activeTab === tab.key ? 'border-white/40 ring-1 ring-white/20' : 'hover:border-white/20'}`}
                                 >
-                                    <p className="text-3xl font-display font-black" style={{ color: activeTab === tab.key ? '#fff' : tab.color }}>{tab.count}</p>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mt-1">{tab.label}</p>
+                                    {activeTab === tab.key && (
+                                        <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: tab.color }} />
+                                    )}
+                                    <p className="text-4xl font-display font-black tracking-tighter mb-1" style={{ color: activeTab === tab.key ? '#fff' : tab.color }}>{tab.count}</p>
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">{tab.label}</p>
+
+                                    {activeTab === tab.key && (
+                                        <div className="absolute -right-4 -bottom-4 opacity-5 text-4xl transform -rotate-12 pointer-events-none">
+                                            <i className="fas fa-file-invoice" />
+                                        </div>
+                                    )}
                                 </motion.button>
                             ))}
                         </div>
@@ -1298,7 +1461,7 @@ export default function AdminDashboard() {
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Applicant</th>
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Type</th>
                                             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Status</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Submitted</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 hidden md:table-cell">Submitted</th>
                                             <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Action</th>
                                         </tr>
                                     </thead>
@@ -1327,7 +1490,7 @@ export default function AdminDashboard() {
                                                 <td className="px-6 py-4">
                                                     <StatusBadge status={app.status} />
                                                 </td>
-                                                <td className="px-6 py-4 text-[11px] text-white/40">
+                                                <td className="px-6 py-4 text-[11px] text-white/40 hidden md:table-cell">
                                                     {new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -1741,9 +1904,14 @@ export default function AdminDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
                         {/* Existing Types */}
                         <div>
-                            <h2 style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>
-                                Application Categories ({types?.length || 0})
-                            </h2>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <h2 style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                                    Application Categories ({types?.length || 0})
+                                </h2>
+                                <button onClick={fetchTypes} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <i className={`fas fa-rotate ${loading ? 'animate-spin' : ''}`} /> Refresh
+                                </button>
+                            </div>
                             {types?.length === 0 ? (
                                 <div className="glass-panel" style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
                                     No application types found. Create one below.
@@ -1820,6 +1988,14 @@ export default function AdminDashboard() {
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
+                select option {
+                    background-color: #0c0c0c !important;
+                    color: white !important;
+                }
+                select:focus {
+                    border-color: rgba(255,255,255,0.3) !important;
+                    background: rgba(255,255,255,0.06) !important;
+                }
             `}</style>
         </AnimatedPage>
     );
