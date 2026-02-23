@@ -64,31 +64,51 @@ export default function MyApplications() {
                             <motion.div
                                 key={app.id}
                                 variants={fadeUp(14, 0.4)}
-                                className="glass-panel"
+                                whileHover={{ x: 4 }}
+                                className="glass-panel group border-white/5 hover:border-white/10 hover:bg-white/5 transition-all duration-300"
                             >
-                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                    <div>
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="text-h3">{app.type_name}</h3>
-                                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${app.status === 'accepted' ? 'bg-white text-black border border-white' :
-                                                app.status === 'declined' ? 'bg-white/10 text-white/40 border border-white/20' :
-                                                    'bg-white/20 text-white border border-white/30'
+                                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                                    <div className="space-y-2">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <h3 className="text-xl md:text-2xl font-display font-bold uppercase tracking-wider text-white">
+                                                {app.type_name}
+                                            </h3>
+                                            <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] rounded-full border ${app.status === 'accepted' ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]' :
+                                                    app.status === 'declined' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                        'bg-white/10 text-white/60 border-white/10 shadow-inner'
                                                 }`}>
                                                 {app.status}
                                             </span>
                                         </div>
-                                        <p className="mt-1 text-caption text-white/40">Submitted on: {new Date(app.created_at).toLocaleString()}</p>
+                                        <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest text-white/30 font-bold">
+                                            <span className="flex items-center gap-2">
+                                                <i className="far fa-calendar text-[8px]" />
+                                                {new Date(app.created_at).toLocaleDateString()}
+                                            </span>
+                                            <span className="w-1 h-1 rounded-full bg-white/10" />
+                                            <span className="flex items-center gap-2">
+                                                <i className="far fa-clock text-[8px]" />
+                                                {new Date(app.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    <div className="flex flex-col items-end gap-2">
-                                        <p className="text-small text-white/60">Submitted as: <span className="text-white">{app.discord_name}</span></p>
+                                    <div className="flex flex-col md:items-end gap-1">
+                                        <p className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-black">Logged as Discord</p>
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/40 border border-white/5 group-hover:border-white/10 transition-colors">
+                                            <i className="fab fa-discord text-white/40 text-xs" />
+                                            <span className="text-xs font-bold text-white/70">{app.discord_name}</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {app.notes && (
-                                    <div className="mt-6 border-t border-white/5 pt-4">
-                                        <p className="text-overline text-white">Staff Feedback</p>
-                                        <p className="mt-2 text-body italic text-white/70">"{app.notes}"</p>
+                                    <div className="mt-8 pt-6 border-t border-white/5 relative">
+                                        <div className="absolute top-0 left-0 w-8 h-[1px] bg-white/20" />
+                                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 mb-3">Administrator Feedback</p>
+                                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 italic text-sm text-white/70 leading-relaxed">
+                                            "{app.notes}"
+                                        </div>
                                     </div>
                                 )}
                             </motion.div>

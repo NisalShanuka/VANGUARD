@@ -22,10 +22,7 @@ function getGameDb() {
             connectionLimit: 10,
             queueLimit: 0,
             enableKeepAlive: true,
-            keepAliveInitialDelay: 0,
-            ssl: {
-                rejectUnauthorized: false
-            }
+            keepAliveInitialDelay: 0
         });
     }
     return gamePool;

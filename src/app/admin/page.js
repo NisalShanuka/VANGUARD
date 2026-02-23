@@ -11,15 +11,16 @@ import KnowledgebaseEditor from '@/components/KnowledgebaseEditor';
 
 // ─── Reusable input styles ────────────────────────────────────────────────────
 const inputStyle = {
-    width: '100%', padding: '12px 14px',
-    background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 0, color: '#fff', fontSize: '13px', outline: 'none',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    width: '100%', padding: '14px 16px',
+    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '12px', color: '#fff', fontSize: '14px', outline: 'none',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    backdropFilter: 'blur(10px)',
 };
 const labelStyle = {
     display: 'block', fontSize: '10px', fontWeight: 900,
     textTransform: 'uppercase', letterSpacing: '0.2em',
-    marginBottom: 8, color: 'rgba(255,255,255,0.4)'
+    marginBottom: 8, color: 'rgba(255,255,255,0.4)', marginLeft: 4
 };
 
 function Toast({ msg, type, onDone }) {
@@ -46,14 +47,16 @@ function Toast({ msg, type, onDone }) {
 function Toggle({ checked, onChange }) {
     return (
         <button type="button" onClick={() => onChange(!checked)} style={{
-            width: 40, height: 20, borderRadius: 0, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
+            width: 44, height: 24, borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
             background: checked ? '#fff' : 'rgba(255,255,255,0.05)',
             position: 'relative', transition: 'all 0.3s', flexShrink: 0,
+            boxShadow: checked ? '0 0 15px rgba(255,255,255,0.3)' : 'none'
         }}>
             <span style={{
                 position: 'absolute', top: 2, left: checked ? 22 : 2,
-                width: 14, height: 14, borderRadius: 0, background: checked ? '#000' : 'rgba(255,255,255,0.4)',
+                width: 18, height: 18, borderRadius: '50%', background: checked ? '#000' : 'rgba(255,255,255,0.4)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
             }} />
         </button>
     );
@@ -534,100 +537,104 @@ function TypeCard({ type: initialType, onDelete, onSave }) {
     ];
 
     return (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${expanded ? 'rgba(255,255,255,0.2)' : (t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.07)')}`, borderRadius: 0, overflow: 'hidden', transition: 'all 0.3s' }}>
-            <div style={{ padding: '16px 20px', background: expanded ? 'rgba(255,255,255,0.03)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: expanded ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 44, height: 44, background: t.is_active ? 'rgba(67,181,129,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${expanded ? 'rgba(255,255,255,0.15)' : (t.is_active ? 'rgba(67,181,129,0.2)' : 'rgba(255,255,255,0.05)')}`, borderRadius: '16px', overflow: 'hidden', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', backdropFilter: 'blur(12px)', boxShadow: expanded ? '0 20px 40px rgba(0,0,0,0.3)' : '0 4px 15px rgba(0,0,0,0.1)' }}>
+            <div style={{ padding: '20px 24px', background: expanded ? 'rgba(255,255,255,0.02)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: expanded ? '1px solid rgba(255,255,255,0.1)' : 'none', position: 'relative' }}>
+                {expanded && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', height: '100%', background: 'radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, zIndex: 1 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '12px', background: t.is_active ? 'rgba(67,181,129,0.15)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.is_active ? '#43b581' : 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: t.is_active ? '0 0 20px rgba(67,181,129,0.2)' : 'none', transition: 'all 0.3s' }}>
                         <i className={t.icon || 'fas fa-file-alt'} />
                     </div>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#fff' }}>{t.name}</h3>
-                        <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>/{t.slug} • {t.is_active ? 'LIVE' : 'HIDDEN'}</p>
+                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: '0.02em', dropShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{t.name}</h3>
+                        <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>/{t.slug} • {t.is_active ? <span style={{ color: '#43b581', fontWeight: 'bold' }}>LIVE</span> : 'HIDDEN'}</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 10 }}>
-                        {toggling ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> : <Toggle checked={!!t.is_active} onChange={handleToggleActive} />}
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
+                        {toggling ? <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> : <Toggle checked={!!t.is_active} onChange={handleToggleActive} />}
                     </div>
-                    <button onClick={() => setShowQuestions(true)} style={{ padding: '7px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Questions</button>
-                    <button onClick={() => setExpanded(!expanded)} style={{ padding: '7px 14px', border: '1px solid', borderRadius: 0, fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', background: expanded ? '#fff' : 'rgba(255,255,255,0.05)', borderColor: expanded ? '#fff' : 'rgba(255,255,255,0.1)', color: expanded ? '#000' : '#fff' }}>
+                    <button onClick={() => setShowQuestions(true)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(5px)' }} onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.transform = 'translateY(-1px)'; }} onMouseLeave={(e) => { e.target.style.background = 'rgba(255,255,255,0.05)'; e.target.style.transform = 'translateY(0)'; }}>Questions</button>
+                    <button onClick={() => setExpanded(!expanded)} style={{ padding: '8px 16px', border: '1px solid', borderRadius: '8px', fontSize: 11, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', background: expanded ? '#fff' : 'rgba(255,255,255,0.05)', borderColor: expanded ? '#fff' : 'rgba(255,255,255,0.1)', color: expanded ? '#000' : '#fff', boxShadow: expanded ? '0 0 15px rgba(255,255,255,0.3)' : 'none' }} onMouseEnter={(e) => { !expanded && (e.target.style.background = 'rgba(255,255,255,0.1)'); e.target.style.transform = 'translateY(-1px)'; }} onMouseLeave={(e) => { !expanded && (e.target.style.background = 'rgba(255,255,255,0.05)'); e.target.style.transform = 'translateY(0)'; }}>
                         {expanded ? 'CLOSE EDIT' : 'EDIT APP'}
                     </button>
-                    <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: 14 }}><i className="fas fa-trash-can" /></button>
+                    <button onClick={() => onDelete(t.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 16, padding: '8px', transition: 'color 0.2s' }} onMouseEnter={(e) => e.target.style.color = '#ff4d4d'} onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.3)'}><i className="fas fa-trash-can" /></button>
                 </div>
             </div>
 
             <AnimatePresence>
                 {expanded && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, background: 'rgba(0,0,0,0.3)' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24 }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: -4 }}>General Settings</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: 32, background: 'rgba(0,0,0,0.2)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: -8, display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 4, height: 12, background: '#fff', borderRadius: 2 }} /> General Settings</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <div>
                                             <label style={labelStyle}>App Name</label>
-                                            <input style={inputStyle} value={t.name} onChange={e => setT({ ...t, name: e.target.value })} />
+                                            <input style={inputStyle} value={t.name} onChange={e => setT({ ...t, name: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                         <div>
                                             <label style={labelStyle}>URL Slug</label>
-                                            <input style={inputStyle} value={t.slug} onChange={e => setT({ ...t, slug: e.target.value })} />
+                                            <input style={inputStyle} value={t.slug} onChange={e => setT({ ...t, slug: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                     </div>
                                     <div>
                                         <label style={labelStyle}>Description</label>
-                                        <textarea style={{ ...inputStyle, minHeight: 60 }} value={t.description || ''} onChange={e => setT({ ...t, description: e.target.value })} />
+                                        <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={t.description || ''} onChange={e => setT({ ...t, description: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         <div>
                                             <label style={labelStyle}>Icon (FA Class)</label>
-                                            <input style={inputStyle} value={t.icon || ''} onChange={e => setT({ ...t, icon: e.target.value })} />
+                                            <input style={inputStyle} value={t.icon || ''} onChange={e => setT({ ...t, icon: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                         <div>
                                             <label style={labelStyle}>Custom Cover Image filename</label>
-                                            <input style={inputStyle} value={t.cover_image || ''} onChange={e => setT({ ...t, cover_image: e.target.value })} />
+                                            <input style={inputStyle} value={t.cover_image || ''} onChange={e => setT({ ...t, cover_image: e.target.value })} onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Cover Image Preview</h4>
-                                    <ImageWithInfo src={t.cover_image} />
-                                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 8, lineHeight: 1.5 }}>
-                                        Recommended Size: 1200×600px. <br />
-                                        Stored in: <span style={{ color: '#fff' }}>/public/images/covers/</span>
+                                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '24px' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}><div style={{ width: 4, height: 12, background: '#fff', borderRadius: 2 }} /> Cover Image Preview</h4>
+                                    <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <ImageWithInfo src={t.cover_image} />
+                                    </div>
+                                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 16, lineHeight: 1.6 }}>
+                                        Recommended Size: <span style={{ color: '#fff', fontWeight: 'bold' }}>1200×600px</span>. <br />
+                                        Stored in: <span style={{ color: '#fff', backgroundColor: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>/public/images/covers/</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-bell mr-2" /> Discord Webhooks</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 24, border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 20 }}><i className="fas fa-bell mr-2" style={{ color: 'rgba(255,255,255,0.5)' }} /> Discord Webhooks</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                         {statuses.map(s => (
                                             <div key={s.key}>
-                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Hook</label>
-                                                <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." />
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.9 }}>{s.label} Hook</label>
+                                                <input style={inputStyle} value={t[`webhook_${s.key}`] || ''} onChange={e => setT({ ...t, [`webhook_${s.key}`]: e.target.value })} placeholder="https://..." onFocus={(e) => e.target.style.borderColor = s.color} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
-                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}><i className="fas fa-id-card mr-2" /> Auto-Roles</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: 24, border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+                                    <h4 style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#fff', marginBottom: 20 }}><i className="fas fa-id-card mr-2" style={{ color: 'rgba(255,255,255,0.5)' }} /> Auto-Roles</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                         {statuses.map(s => (
                                             <div key={s.key}>
-                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.8 }}>{s.label} Role ID</label>
-                                                <input style={inputStyle} value={t[`role_${s.key}`] || ''} onChange={e => setT({ ...t, [`role_${s.key}`]: e.target.value })} placeholder="Discord Role ID" />
+                                                <label style={{ ...labelStyle, color: s.color, opacity: 0.9 }}>{s.label} Role ID</label>
+                                                <input style={inputStyle} value={t[`role_${s.key}`] || ''} onChange={e => setT({ ...t, [`role_${s.key}`]: e.target.value })} placeholder="Discord Role ID" onFocus={(e) => e.target.style.borderColor = s.color} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
-                                <button onClick={() => setExpanded(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}>Cancel</button>
-                                <button onClick={() => handleSave()} disabled={saving} style={{ padding: '10px 40px', background: '#fff', color: '#000', border: 'none', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 24, marginTop: 8 }}>
+                                <button onClick={() => setExpanded(false)} style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s', backdropFilter: 'blur(5px)' }} onMouseEnter={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { e.target.style.background = 'rgba(255,255,255,0.05)'; }}>Cancel</button>
+                                <button onClick={() => handleSave()} disabled={saving} style={{ padding: '12px 48px', background: '#fff', color: '#000', border: 'none', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', opacity: saving ? 0.7 : 1, borderRadius: '8px', boxShadow: '0 0 20px rgba(255,255,255,0.3)', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.transform = 'scale(1.02)'; e.target.style.boxShadow = '0 0 30px rgba(255,255,255,0.5)'; }} onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = '0 0 20px rgba(255,255,255,0.3)'; }}>
                                     {saving ? 'Saving...' : 'Save Configuration'}
                                 </button>
                             </div>
