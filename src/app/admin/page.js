@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -375,7 +376,9 @@ function QuestionsModal({ type, onClose }) {
         fetchQuestions();
     }
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md">
             <motion.div
                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -500,7 +503,8 @@ function QuestionsModal({ type, onClose }) {
                 </div>
             </motion.div>
             {toast && <Toast msg={toast.msg} type={toast.type} onDone={() => setToast(null)} />}
-        </div>
+        </div>,
+        document.body
     );
 }
 
