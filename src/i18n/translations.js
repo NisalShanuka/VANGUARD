@@ -115,7 +115,7 @@ export const translations = {
       cta: 'Return Home',
     },
     footer: {
-      copyright: 'Vanguard RolePlay (c) 2025',
+      copyright: '© 2026 BY VANGUARD ROLEPLAY. ALL RIGHTS RESERVED.',
     },
   },
   si: {
@@ -233,7 +233,7 @@ export const translations = {
       cta: 'Mul Pitawata Apahu',
     },
     footer: {
-      copyright: 'Vanguard RolePlay (c) 2025',
+      copyright: '© 2026 BY VANGUARD ROLEPLAY. ALL RIGHTS RESERVED.',
     },
   },
 };

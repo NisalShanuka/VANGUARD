@@ -23,29 +23,37 @@ export default function Footer() {
         <motion.span variants={fadeUp(12, 0.3)} className="uppercase tracking-widest text-[10px] font-bold">
           {t('footer.copyright')}
         </motion.span>
-        <motion.div
-          variants={stagger(0.08, 0.04)}
-          initial="hidden"
-          whileInView="show"
-          viewport={viewport}
-          className="flex items-center gap-4"
-        >
-          {socials.map((social) => (
-            <motion.a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-white/10 bg-white/5 p-2 text-white/70 transition-all duration-300 hover:border-accent-500/50 hover:bg-accent-500/20 hover:text-white hover:shadow-[0_0_15px_rgba(200,200,200,0.3)] h-10 w-10 flex items-center justify-center"
-              aria-label={social.label}
-              variants={fadeUp(10, 0.2)}
-              whileHover={{ y: -3, rotate: -2 }}
-              whileTap={tapPress}
-            >
-              <i className={social.icon}></i>
-            </motion.a>
-          ))}
-        </motion.div>
+        <div className="flex flex-col items-center md:items-end gap-3">
+          <motion.div
+            variants={stagger(0.08, 0.04)}
+            initial="hidden"
+            whileInView="show"
+            viewport={viewport}
+            className="flex items-center gap-4"
+          >
+            {socials.map((social) => (
+              <motion.a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/10 bg-white/5 p-2 text-white/70 transition-all duration-300 hover:border-accent-500/50 hover:bg-accent-500/20 hover:text-white hover:shadow-[0_0_15px_rgba(200,200,200,0.3)] h-10 w-10 flex items-center justify-center"
+                aria-label={social.label}
+                variants={fadeUp(10, 0.2)}
+                whileHover={{ y: -3, rotate: -2 }}
+                whileTap={tapPress}
+              >
+                <i className={social.icon}></i>
+              </motion.a>
+            ))}
+          </motion.div>
+          <motion.span
+            variants={fadeUp(12, 0.4)}
+            className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20"
+          >
+            DEVELOPED BY SLCL COMMUNITY
+          </motion.span>
+        </div>
       </div>
     </motion.footer>
   );
