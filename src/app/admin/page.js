@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import AnimatedPage from '@/components/AnimatedPage';
@@ -317,6 +317,224 @@ function PlayerInfoModal({ player, onClose, onAction, actionLoading }) {
     );
 }
 
+
+// ─── Draggable Components (Defined outside to prevent unmount on re-render) ───────
+const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
+    const controls = useDragControls();
+    return (
+        <Reorder.Item
+            value={q}
+            dragListener={false}
+            dragControls={controls}
+            className="flex justify-between items-center p-4 bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all group rounded-none mb-1 shadow-lg"
+        >
+            <div className="flex items-center gap-4">
+                <div
+                    onPointerDown={(e) => controls.start(e)}
+                    className="cursor-grab active:cursor-grabbing p-3 -ml-4 text-white/30 hover:text-white transition-colors flex items-center justify-center bg-white/5 mr-2"
+                    style={{ touchAction: 'none' }}
+                >
+                    <i className="fas fa-grip-vertical text-sm"></i>
+                </div>
+                <div>
+                    <p className="font-bold text-sm text-white/90 mb-1 group-hover:text-white transition-colors">{q.label}</p>
+                    <p className="text-[9px] text-white/30 font-bold uppercase tracking-[0.1em]">
+                        {q.field_type?.toUpperCase()} {q.is_required ? <span className="text-white/60 ml-2">· REQUIRED</span> : ''}
+                    </p>
+                </div>
+            </div>
+            <div className="flex gap-2">
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(q); }}
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all border border-white/5 hover:border-white/20"
+                    title="Edit Question"
+                >
+                    <i className="fas fa-pen-to-square text-sm"></i>
+                </button>
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteQuestion(q.id); }}
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all border border-white/5 hover:border-red-400/20"
+                    title="Delete Question"
+                >
+                    <i className="fas fa-trash-can text-sm"></i>
+                </button>
+            </div>
+        </Reorder.Item>
+    );
+};
+
+const DraggableSection = ({
+    section,
+    sections,
+    setSections,
+    questions,
+    startEdit,
+    deleteQuestion,
+    addingToSection,
+    setAddingToSection,
+    editingQuestion,
+    setEditingQuestion,
+    setForm,
+    reorderQuestionsInSection,
+    saving,
+    saveQuestion,
+    form,
+    sectionsLength,
+    Toggle
+}) => {
+    const controls = useDragControls();
+    const sectionQuestions = questions.filter(q => (q.section_title || 'General Information') === section);
+
+    return (
+        <Reorder.Item
+            value={section}
+            dragListener={false}
+            dragControls={controls}
+            className="glass-panel p-0 border-white/10 select-none overflow-visible mb-6"
+        >
+            <div className="liquid-card-header bg-white/[0.08] flex items-center justify-between px-6 py-4">
+                <div
+                    onPointerDown={(e) => controls.start(e)}
+                    className="cursor-grab active:cursor-grabbing flex items-center gap-4 py-2 pr-6 -ml-2 group bg-white/5 rounded-md px-3"
+                    style={{ touchAction: 'none' }}
+                >
+                    <i className="fas fa-grip-lines text-white group-hover:text-white transition-colors"></i>
+                    <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.7)]"></div>
+                    <h4 className="text-[12px] font-black text-white uppercase tracking-[0.3em]">
+                        {section}
+                    </h4>
+                </div>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => {
+                            if (addingToSection === section) {
+                                setAddingToSection(null);
+                                setEditingQuestion(null);
+                                setForm({ label: '', field_type: 'text', options: '', is_required: true });
+                            } else {
+                                setAddingToSection(section);
+                                setEditingQuestion(null);
+                                setForm({ label: '', field_type: 'text', options: '', is_required: true });
+                            }
+                        }}
+                        className={`text-[10px] font-black uppercase tracking-widest transition-all px-4 py-2 border shadow-sm ${addingToSection === section ? 'bg-red-500/20 border-red-500/40 text-red-100' : 'bg-white/10 border-white/20 text-white/90 hover:text-white hover:bg-white/20'}`}
+                    >
+                        {addingToSection === section ? 'CLOSE EDITOR' : '+ ADD QUESTION'}
+                    </button>
+                    {sectionsLength > 1 && sectionQuestions.length === 0 && (
+                        <button
+                            onClick={() => setSections(sections.filter(s => s !== section))}
+                            className="text-[10px] text-red-500/50 hover:text-red-500 font-black uppercase tracking-widest px-2"
+                        >
+                            REMOVE SECTION
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="p-6">
+                <Reorder.Group
+                    axis="y"
+                    values={sectionQuestions}
+                    onReorder={(newItems) => reorderQuestionsInSection(section, newItems)}
+                    className={`flex flex-col gap-1 ${addingToSection === section ? 'mb-8' : ''}`}
+                >
+                    {sectionQuestions.length === 0 ? (
+                        <div className="py-12 border border-dashed border-white/5 text-center bg-black/10">
+                            <p className="text-[10px] text-white/20 uppercase font-black tracking-widest">No Questions Found</p>
+                        </div>
+                    ) : (
+                        sectionQuestions.map(q => (
+                            <DraggableQuestion
+                                key={q.id}
+                                q={q}
+                                startEdit={startEdit}
+                                deleteQuestion={deleteQuestion}
+                            />
+                        ))
+                    )}
+                </Reorder.Group>
+
+                <AnimatePresence>
+                    {addingToSection === section && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-white/5 border border-white/10 p-8 mt-4 shadow-inner">
+                                <h5 className="text-[11px] font-black uppercase tracking-[0.2em] text-white mb-8 flex items-center gap-3">
+                                    <div className="w-6 h-[2px] bg-white"></div>
+                                    {editingQuestion ? 'UPDATE QUESTION' : 'NEW QUESTION'}
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Question Text *</label>
+                                        <input
+                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all font-medium"
+                                            value={form.label}
+                                            onChange={e => setForm(f => ({ ...f, label: e.target.value }))}
+                                            placeholder="Enter your question label..."
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Input Type</label>
+                                        <select
+                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all [&>option]:bg-black font-medium"
+                                            value={form.field_type}
+                                            onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}
+                                        >
+                                            <option value="text">Short Input</option>
+                                            <option value="textarea">Paragraph Input</option>
+                                            <option value="number">Number Only</option>
+                                            <option value="select">Dropdown Menu</option>
+                                            <option value="checkbox">Multiple Selection</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                {['select', 'checkbox'].includes(form.field_type) && (
+                                    <div className="mb-8 flex flex-col gap-2">
+                                        <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-1 ml-1">Choice Options (comma separated)</label>
+                                        <input
+                                            className="w-full bg-black/60 border border-white/10 p-4 text-white text-sm outline-none focus:border-white/40 transition-all"
+                                            placeholder="Example: Option 1, Option 2, Option 3"
+                                            value={form.options}
+                                            onChange={e => setForm(f => ({ ...f, options: e.target.value }))}
+                                        />
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center sm:flex-row flex-col gap-8 pt-8 border-t border-white/5">
+                                    <div className="flex items-center gap-6">
+                                        <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
+                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Mandatory question</span>
+                                    </div>
+                                    <div className="flex gap-4 w-full sm:w-auto">
+                                        <button
+                                            onClick={() => { setAddingToSection(null); setEditingQuestion(null); setForm({ label: '', field_type: 'text', options: '', is_required: true }); }}
+                                            className="px-8 py-4 text-[11px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all hover:bg-white/5"
+                                        >
+                                            Discard
+                                        </button>
+                                        <button
+                                            onClick={() => saveQuestion(section)}
+                                            disabled={saving}
+                                            className="bg-white text-black px-10 py-4 text-[11px] font-black uppercase tracking-[0.25em] disabled:opacity-50 flex items-center gap-3 shadow-[0_10px_20px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                        >
+                                            {saving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-save"></i>}
+                                            {editingQuestion ? 'UPDATE NOW' : 'CREATE QUESTION'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </Reorder.Item>
+    );
+};
+
 // ─── Questions Modal ──────────────────────────────────────────────────────────
 function QuestionsModal({ type, onClose }) {
     const [questions, setQuestions] = useState([]);
@@ -433,11 +651,12 @@ function QuestionsModal({ type, onClose }) {
 
     // Reorder questions within a section
     function reorderQuestionsInSection(sectionName, newSectQuestions) {
-        const otherQuestions = questions.filter(q => (q.section_title || 'General Information') !== sectionName);
-        // Update section_title for the items just in case (though Reorder.Item should stay in same group)
-        const updatedSectQuestions = newSectQuestions.map(q => ({ ...q, section_title: sectionName }));
-        setQuestions([...otherQuestions, ...updatedSectQuestions]);
+        setQuestions(prev => {
+            const others = prev.filter(q => (q.section_title || 'General Information') !== sectionName);
+            return [...others, ...newSectQuestions];
+        });
     }
+
 
     if (typeof document === 'undefined') return null;
 
@@ -460,13 +679,27 @@ function QuestionsModal({ type, onClose }) {
                         <button
                             onClick={saveOrder}
                             disabled={orderSaving}
-                            className="btn-accent py-2 px-4 text-[10px] tracking-widest uppercase gap-2"
+                            style={{
+                                background: orderSaving ? 'rgba(255,255,255,0.1)' : '#fff',
+                                color: '#000',
+                                padding: '8px 20px',
+                                fontSize: '11px',
+                                fontWeight: '900',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
                         >
-                            {orderSaving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-sort"></i>}
+                            {orderSaving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-save text-[12px]"></i>}
                             {orderSaving ? 'Saving...' : 'Save Layout'}
                         </button>
                         <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-white/50 transition-colors">
-                            <i className="fas fa-times"></i>
+                            <i className="fas fa-times text-lg"></i>
                         </button>
                     </div>
                 </div>
@@ -483,133 +716,29 @@ function QuestionsModal({ type, onClose }) {
                         </button>
                     </div>
 
-                    <Reorder.Group axis="y" values={sections} onReorder={setSections} className="flex flex-col gap-8">
-                        {sections.map(section => {
-                            const sectionQuestions = questions.filter(q => (q.section_title || 'General Information') === section);
-                            return (
-                                <Reorder.Item key={section} value={section} className="glass-panel p-0 border-white/5 select-none">
-                                    <div className="liquid-card-header bg-white/[0.02] cursor-grab active:cursor-grabbing">
-                                        <h4 className="text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
-                                            <i className="fas fa-grip-lines text-white/20 text-[10px]"></i>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-accent-400 shadow-[0_0_8px_rgba(200,200,200,0.5)]"></div>
-                                            {section}
-                                        </h4>
-                                        <div className="flex gap-4">
-                                            <button onClick={() => {
-                                                if (addingToSection === section) {
-                                                    setAddingToSection(null);
-                                                    setEditingQuestion(null);
-                                                    setForm({ label: '', field_type: 'text', options: '', is_required: true });
-                                                } else {
-                                                    setAddingToSection(section);
-                                                    setEditingQuestion(null);
-                                                    setForm({ label: '', field_type: 'text', options: '', is_required: true });
-                                                }
-                                            }} className={`text-[10px] font-black uppercase tracking-widest transition-colors ${addingToSection === section && !editingQuestion ? 'text-red-400 hover:text-red-300' : 'text-white/50 hover:text-white'}`}>
-                                                {addingToSection === section && !editingQuestion ? 'Cancel' : '+ Add Question'}
-                                            </button>
-                                            {sections.length > 1 && sectionQuestions.length === 0 && (
-                                                <button onClick={() => setSections(sections.filter(s => s !== section))} className="text-[10px] text-red-500/50 hover:text-red-500 font-black uppercase tracking-widest">
-                                                    Remove
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6">
-                                        {/* Questions in this section */}
-                                        <Reorder.Group
-                                            axis="y"
-                                            values={sectionQuestions}
-                                            onReorder={(newItems) => reorderQuestionsInSection(section, newItems)}
-                                            className={`flex flex-col gap-3 ${addingToSection === section ? 'mb-6' : ''}`}
-                                        >
-                                            {sectionQuestions.length === 0 ? (
-                                                <p className="text-xs text-white/30 text-center py-4 italic">No questions in this section yet.</p>
-                                            ) : (
-                                                sectionQuestions.map(q => (
-                                                    <Reorder.Item key={q.id} value={q} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 hover:border-white/20 transition-colors group cursor-grab active:cursor-grabbing">
-                                                        <div className="flex items-center gap-4">
-                                                            <i className="fas fa-grip-vertical text-white/10 group-hover:text-white/30 transition-colors text-[10px]"></i>
-                                                            <div>
-                                                                <p className="font-bold text-sm text-white mb-1 group-hover:text-accent-400 transition-colors">{q.label}</p>
-                                                                <p className="text-[9px] text-white/40 font-bold uppercase tracking-[0.1em]">
-                                                                    {q.field_type?.toUpperCase()} {q.is_required ? <span className="text-accent-400 ml-2">· REQUIRED</span> : ''}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button onClick={(e) => { e.stopPropagation(); startEdit(q); }} className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all">
-                                                                <i className="fas fa-edit text-[10px]"></i>
-                                                            </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); deleteQuestion(q.id); }} className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-all">
-                                                                <i className="fas fa-trash-alt text-[10px]"></i>
-                                                            </button>
-                                                        </div>
-                                                    </Reorder.Item>
-                                                ))
-                                            )}
-                                        </Reorder.Group>
-
-                                        {/* Inline Add/Edit Question Form */}
-                                        <AnimatePresence>
-                                            {addingToSection === section && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden"
-                                                >
-                                                    <div className="bg-black/20 border border-white/10 p-6 mt-4">
-                                                        <h5 className="text-[9px] font-black uppercase tracking-[0.2em] text-accent-400 mb-6 flex items-center gap-2">
-                                                            <i className={editingQuestion ? "fas fa-edit" : "fas fa-plus-circle"}></i>
-                                                            {editingQuestion ? 'Edit Question' : 'Add New Question'}
-                                                        </h5>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                                            <div>
-                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Question Label *</label>
-                                                                <input className="glass-input" value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Field Type</label>
-                                                                <select className="glass-input [&>option]:bg-black [&>option]:text-white" value={form.field_type} onChange={e => setForm(f => ({ ...f, field_type: e.target.value }))}>
-                                                                    <option value="text">Short Text</option>
-                                                                    <option value="textarea">Long Text</option>
-                                                                    <option value="number">Number</option>
-                                                                    <option value="select">Dropdown</option>
-                                                                    <option value="checkbox">Checkbox List</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        {['select', 'checkbox'].includes(form.field_type) && (
-                                                            <div className="mb-6">
-                                                                <label className="block text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-3 ml-1">Options (comma separated)</label>
-                                                                <input className="glass-input" placeholder="Option 1, Option 2" value={form.options} onChange={e => setForm(f => ({ ...f, options: e.target.value }))} />
-                                                            </div>
-                                                        )}
-                                                        <div className="flex justify-between items-center sm:flex-row flex-col gap-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-white/80 mt-1">Required Question</span>
-                                                            </div>
-                                                            <div className="flex gap-3 w-full sm:w-auto">
-                                                                <button onClick={() => { setAddingToSection(null); setEditingQuestion(null); setForm({ label: '', field_type: 'text', options: '', is_required: true }); }} className="btn-outline flex-1 sm:flex-none py-2 px-4 shadow-none text-[10px] tracking-widest uppercase">
-                                                                    Cancel
-                                                                </button>
-                                                                <button onClick={() => saveQuestion(section)} disabled={saving} className="btn-accent flex-1 sm:flex-none py-2 px-6 border border-white/10 text-[10px] tracking-widest uppercase gap-2">
-                                                                    {saving ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-save"></i>}
-                                                                    {saving ? 'Saving...' : (editingQuestion ? 'Update Question' : 'Save Question')}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                </Reorder.Item>
-                            );
-                        })}
+                    <Reorder.Group axis="y" values={sections} onReorder={setSections} className="flex flex-col">
+                        {sections.map(section => (
+                            <DraggableSection
+                                key={section}
+                                section={section}
+                                sections={sections}
+                                setSections={setSections}
+                                questions={questions}
+                                startEdit={startEdit}
+                                deleteQuestion={deleteQuestion}
+                                addingToSection={addingToSection}
+                                setAddingToSection={setAddingToSection}
+                                editingQuestion={editingQuestion}
+                                setEditingQuestion={setEditingQuestion}
+                                setForm={setForm}
+                                reorderQuestionsInSection={reorderQuestionsInSection}
+                                saving={saving}
+                                saveQuestion={saveQuestion}
+                                form={form}
+                                sectionsLength={sections.length}
+                                Toggle={Toggle}
+                            />
+                        ))}
                     </Reorder.Group>
                 </div>
             </motion.div>
