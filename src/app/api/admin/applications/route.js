@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { initLogsTable } from '../logs/route';
+import { manageDiscordRole } from '@/lib/discord';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,24 +78,11 @@ export async function PATCH(req) {
         const { id, status, notes } = await req.json();
         if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
-        await ensureColumn('applications', 'notes', "TEXT DEFAULT ''");
-
-        await query(
-            `UPDATE applications SET status = ?, notes = ?, updated_at = NOW() WHERE id = ?`,
-            [status, notes ?? '', id]
-        );
-
-        // Add to admin logs
-        await initLogsTable();
-        await query(
-            `INSERT INTO admin_logs (admin_discord_id, admin_name, action_type, action_details) VALUES (?, ?, ?, ?)`,
-            [session.user.id, session.user.name || 'Admin', 'APPLICATION', `Set application #${id} status to ${status.toUpperCase()}`]
-        );
-
-        // Get full application for webhook
+        // 1. Get current application details BEFORE update to know the old status
         const apps = await query(`
             SELECT a.*, u.username, u.discord_id, u.avatar, t.name as type_name,
-                   t.webhook_accepted, t.webhook_declined, t.webhook_interview, t.webhook_log
+                   t.webhook_accepted, t.webhook_declined, t.webhook_interview, t.webhook_log,
+                   t.role_pending, t.role_interview, t.role_accepted, t.role_declined
             FROM applications a
             LEFT JOIN application_users u ON a.user_id = u.id
             LEFT JOIN application_types t ON a.type_id = t.id
@@ -102,9 +90,43 @@ export async function PATCH(req) {
         `, [id]);
 
         const app = apps[0];
-        if (!app) return NextResponse.json({ success: true });
+        if (!app) return NextResponse.json({ error: 'Application not found' }, { status: 404 });
 
-        // Fire Discord webhook based on new status
+        const oldStatus = app.status;
+        const newStatus = status;
+
+        // 2. Perform the update
+        await ensureColumn('applications', 'notes', "TEXT DEFAULT ''");
+        await query(
+            `UPDATE applications SET status = ?, notes = ?, updated_at = NOW() WHERE id = ?`,
+            [newStatus, notes ?? '', id]
+        );
+
+        // 3. Automated Role Management
+        if (app.discord_id) {
+            // Remove old role if it exists and is different
+            if (oldStatus !== newStatus) {
+                const oldRoleId = app[`role_${oldStatus}`];
+                if (oldRoleId && String(oldRoleId).trim() !== '') {
+                    await manageDiscordRole({ userId: app.discord_id, roleId: String(oldRoleId).trim(), action: 'remove' }).catch(() => { });
+                }
+            }
+
+            // Add new role
+            const newRoleId = app[`role_${newStatus}`];
+            if (newRoleId && String(newRoleId).trim() !== '') {
+                await manageDiscordRole({ userId: app.discord_id, roleId: String(newRoleId).trim(), action: 'add' }).catch(() => { });
+            }
+        }
+
+        // 4. Add to admin logs
+        await initLogsTable();
+        await query(
+            `INSERT INTO admin_logs (admin_discord_id, admin_name, action_type, action_details) VALUES (?, ?, ?, ?)`,
+            [session.user.discord_id || session.user.id, session.user.name || 'Admin', 'APPLICATION', `Set application #${id} status from ${oldStatus?.toUpperCase()} to ${newStatus.toUpperCase()}`]
+        );
+
+        // 5. Fire Discord webhooks
         const webhookMap = {
             accepted: {
                 url: app.webhook_accepted,
@@ -126,9 +148,9 @@ export async function PATCH(req) {
             },
         };
 
-        const wh = webhookMap[status];
+        const wh = webhookMap[newStatus];
 
-        // 1. Send status update webhook (to applicant/public)
+        // Status update webhook (to applicant/public)
         if (wh && wh.url) {
             const mention = app.discord_id ? `<@${app.discord_id}>` : `**${app.username}**`;
 
@@ -138,12 +160,12 @@ export async function PATCH(req) {
                 body: JSON.stringify({
                     content: mention,
                     embeds: [{
-                        title: `🛡️ APPLICATION STATUS: ${status.toUpperCase()}`,
+                        title: `🛡️ APPLICATION STATUS: ${newStatus.toUpperCase()}`,
                         thumbnail: { url: app.avatar ? `https://cdn.discordapp.com/avatars/${app.discord_id}/${app.avatar}.png` : 'https://vanguardroleplay.net/logo.png' },
                         description: `### Hello ${mention},\nYour application for **${app.type_name}** has been processed by our management team.`,
                         color: wh.color,
                         fields: [
-                            { name: '📊 DECISION', value: `>>> **${status.toUpperCase()}** ${wh.emoji}`, inline: true },
+                            { name: '📊 DECISION', value: `>>> **${newStatus.toUpperCase()}** ${wh.emoji}`, inline: true },
                             { name: '🏷️ TYPE', value: `>>> ${app.type_name}`, inline: true },
                             { name: '📝 STAFF MESSAGE', value: notes ? `\`\`\`${notes}\`\`\`` : `\`\`\`Read our community rules and guidelines carefully.\`\`\``, inline: false }
                         ],

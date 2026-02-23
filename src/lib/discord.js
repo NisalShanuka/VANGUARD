@@ -45,3 +45,50 @@ export async function addDiscordMemberToGuild({ userId, userAccessToken }) {
         };
     }
 }
+
+export async function manageDiscordRole({ userId, roleId, action = 'add' }) {
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+    const guildId = process.env.DISCORD_GUILD_ID;
+
+    // Ensure they are strings
+    const strUserId = userId ? String(userId) : null;
+    const strRoleId = roleId ? String(roleId) : null;
+
+    if (!botToken || !guildId || !strUserId || !strRoleId) {
+        console.error("[manageDiscordRole] Missing parameters:", { botToken: !!botToken, guildId, strUserId, strRoleId });
+        return { ok: false, reason: "missing_parameters" };
+    }
+
+    const endpoint = `${DISCORD_API_BASE}/guilds/${guildId}/members/${strUserId}/roles/${strRoleId}`;
+
+    try {
+        console.log(`[Discord API] ${action === 'add' ? 'Adding' : 'Removing'} role ${strRoleId} to/from user ${strUserId}`);
+        const response = await fetch(endpoint, {
+            method: action === 'add' ? 'PUT' : 'DELETE',
+            headers: {
+                Authorization: `Bot ${botToken}`,
+            },
+        });
+
+        if (response.status === 204) {
+            console.log(`[Discord API] Success: 204 No Content`);
+            return { ok: true };
+        }
+
+        const raw = await response.text();
+        console.error(`[manageDiscordRole] Discord API error (${response.status}):`, raw);
+        return {
+            ok: false,
+            status: response.status,
+            reason: "discord_api_error",
+            body: raw,
+        };
+    } catch (error) {
+        console.error("[manageDiscordRole] Network error:", error);
+        return {
+            ok: false,
+            reason: "network_or_fetch_error",
+            error: error?.message || String(error),
+        };
+    }
+}

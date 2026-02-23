@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { manageDiscordRole } from "@/lib/discord";
 
 // Simple Discord Webhook function
 async function sendDiscordWebhook(url, embed, content = null) {
@@ -61,6 +62,15 @@ export async function POST(req) {
             "INSERT INTO applications (user_id, type_id, content, status) VALUES (?, ?, ?, 'pending')",
             [session.user.id, typeId, JSON.stringify(answers || {})]
         );
+
+        // Auto-assign Pending Role
+        if (session.user.discord_id && appType.role_pending) {
+            await manageDiscordRole({
+                userId: session.user.discord_id,
+                roleId: appType.role_pending,
+                action: 'add'
+            }).catch(e => console.error("Pending Role Error:", e));
+        }
 
         // Webhook notification (pending)
         if (appType.webhook_pending) {
