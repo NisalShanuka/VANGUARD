@@ -522,6 +522,7 @@ const DraggableSection = ({
                                             <option value="text">Single Line Text</option>
                                             <option value="textarea">Multi-line Paragraph</option>
                                             <option value="number">Numeric Input</option>
+                                            <option value="date">Date Picker (Calendar)</option>
                                             <option value="select">Selection Menu</option>
                                             <option value="checkbox">Multi-Checkbox</option>
                                             <option value="checkbox_single">Single Checkbox (Tick)</option>
