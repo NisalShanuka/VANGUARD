@@ -144,7 +144,7 @@ export async function PATCH(req) {
                 url: app.webhook_interview,
                 emoji: '🎤',
                 color: 0x7289da,
-                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693344153770/standard_2.gif?ex=699d7bee&is=699c2a6e&hm=f00784c328e028b3a5e5e7ea3d8e3c5401d3ac0f8ff124177129b34ded3a2f89&'
+                image: 'https://cdn.discordapp.com/attachments/1460228743955218497/1475437693344153670/standard_2.gif?ex=699e24ae&is=699cd32e&hm=67c49ba4ed6ce8492b74730a011b1110dfd05792081c311ce52078d724bf3f8c&'
             },
         };
 
@@ -209,3 +209,4 @@ export async function PATCH(req) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
