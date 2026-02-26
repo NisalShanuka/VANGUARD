@@ -44,15 +44,31 @@ export default function WhitelistForm({
     const form = event.currentTarget;
     const formData = new FormData(form);
 
-    // Collect answers
+    // Collect answers and validate
     const answers = {};
+    const missingFields = [];
+
     questions.forEach(q => {
+      const isRequired = Number(q.is_required) === 1;
+      let value;
+
       if (q.field_type === 'checkbox') {
-        answers[q.id] = formData.getAll(String(q.id)).join(', ');
+        value = formData.getAll(String(q.id)).join(', ');
+        if (isRequired && !value) missingFields.push(q.label);
       } else {
-        answers[q.id] = formData.get(String(q.id));
+        value = formData.get(String(q.id));
+        if (isRequired && (!value || value.trim() === "")) missingFields.push(q.label);
       }
+
+      answers[q.id] = value;
     });
+
+    if (missingFields.length > 0) {
+      setServerErrorMessage(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      setStatus('error');
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/applications/submit', {
@@ -136,19 +152,19 @@ export default function WhitelistForm({
                     <div key={field.id} className={`flex flex-col gap-4 ${isFullWidth ? 'md:col-span-2' : ''}`}>
                       <label className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30 ml-1">
                         {field.label}
-                        {field.is_required ? <span className="ml-2 text-white/60">*</span> : <span className="ml-2 text-white/10">(Optional)</span>}
+                        {Number(field.is_required) === 1 ? <span className="ml-2 text-red-500/80 font-black">* REQUIRED</span> : <span className="ml-2 text-white/10">(Optional)</span>}
                       </label>
 
                       {field.field_type === 'textarea' ? (
                         <textarea
                           name={String(field.id)}
-                          required={!!field.is_required}
+                          required={Number(field.is_required) === 1}
                           className="w-full border border-white/10 bg-white/[0.02] p-5 text-sm text-white transition-all focus:border-white/40 focus:bg-white/[0.05] outline-none rounded-sm min-h-[120px]"
                         />
                       ) : field.field_type === 'select' ? (
                         <select
                           name={String(field.id)}
-                          required={!!field.is_required}
+                          required={Number(field.is_required) === 1}
                           defaultValue=""
                           className="w-full border border-white/10 bg-white/[0.02] p-5 text-sm text-white transition-all focus:border-white/40 focus:bg-white/[0.05] outline-none rounded-sm appearance-none cursor-pointer"
                         >
@@ -158,20 +174,25 @@ export default function WhitelistForm({
                           ))}
                         </select>
                       ) : field.field_type === 'checkbox' ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 border border-white/10 bg-white/[0.02] rounded-sm">
-                          {optionList.map((opt, oIdx) => (
-                            <label key={oIdx} className="flex items-center gap-4 cursor-pointer group">
-                              <input
-                                type="checkbox"
-                                name={String(field.id)}
-                                value={opt}
-                                className="w-5 h-5 accent-white cursor-pointer bg-black"
-                              />
-                              <span className="text-xs font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">
-                                {opt}
-                              </span>
-                            </label>
-                          ))}
+                        <div className="flex flex-col gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 border border-white/10 bg-white/[0.02] rounded-sm">
+                            {optionList.map((opt, oIdx) => (
+                              <label key={oIdx} className="flex items-center gap-4 cursor-pointer group">
+                                <input
+                                  type="checkbox"
+                                  name={String(field.id)}
+                                  value={opt}
+                                  className="w-5 h-5 accent-white cursor-pointer bg-black"
+                                />
+                                <span className="text-xs font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">
+                                  {opt}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                          {Number(field.is_required) === 1 && (
+                            <span className="text-[9px] text-white/20 uppercase tracking-widest ml-1">Please select at least one option</span>
+                          )}
                         </div>
                       ) : field.field_type === 'checkbox_single' ? (
                         <label className="flex items-center gap-5 p-6 border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer group rounded-sm">
@@ -179,18 +200,18 @@ export default function WhitelistForm({
                             type="checkbox"
                             name={String(field.id)}
                             value="Yes"
-                            required={!!field.is_required}
+                            required={Number(field.is_required) === 1}
                             className="w-6 h-6 accent-white cursor-pointer"
                           />
                           <span className="text-xs font-bold text-white/60 group-hover:text-white transition-colors uppercase tracking-widest leading-relaxed">
-                            {field.label} {field.is_required && <span className="text-white/20 ml-1">(Required to proceed)</span>}
+                            {field.label} {Number(field.is_required) === 1 && <span className="text-red-500/40 ml-1">(REQUIRED)</span>}
                           </span>
                         </label>
                       ) : (
                         <input
                           type={field.field_type || 'text'}
                           name={String(field.id)}
-                          required={!!field.is_required}
+                          required={Number(field.is_required) === 1}
                           className="w-full border border-white/10 bg-white/[0.02] p-5 text-sm text-white transition-all focus:border-white/40 focus:bg-white/[0.05] outline-none rounded-sm"
                         />
                       )}
