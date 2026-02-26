@@ -543,9 +543,14 @@ const DraggableSection = ({
                                 )}
 
                                 <div className="flex justify-between items-center sm:flex-row flex-col gap-8 pt-10 border-t border-white/5 mt-4">
-                                    <div className="flex items-center gap-6 group cursor-pointer" onClick={() => setForm(f => ({ ...f, is_required: !f.is_required }))}>
+                                    <div className="flex items-center gap-6">
                                         <Toggle checked={form.is_required} onChange={v => setForm(f => ({ ...f, is_required: v }))} />
-                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-white transition-colors">Mark as Mandatory</span>
+                                        <span
+                                            className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60 hover:text-white transition-colors cursor-pointer select-none"
+                                            onClick={() => setForm(f => ({ ...f, is_required: !form.is_required }))}
+                                        >
+                                            Mark as Required
+                                        </span>
                                     </div>
                                     <div className="flex gap-4 w-full sm:w-auto">
                                         <button
