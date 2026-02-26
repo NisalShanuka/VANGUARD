@@ -19,7 +19,7 @@ export async function GET(request) {
                 type_id INT NOT NULL,
                 section_title VARCHAR(255) DEFAULT 'General Information',
                 label TEXT NOT NULL,
-                field_type VARCHAR(50) DEFAULT 'text',
+                field_type VARCHAR(255) DEFAULT 'text',
                 options TEXT DEFAULT '',
                 is_required TINYINT(1) DEFAULT 1,
                 order_num INT DEFAULT 0,
@@ -46,6 +46,9 @@ export async function GET(request) {
 
         await ensureColumn('section_title', "VARCHAR(255) DEFAULT 'General Information' AFTER type_id");
         await ensureColumn('section_order', "INT DEFAULT 0 AFTER order_num");
+
+        // Fix field_type length if it's too small
+        await query(`ALTER TABLE application_questions MODIFY COLUMN field_type VARCHAR(255) DEFAULT 'text'`);
 
         // Get application type
         const types = await query(
