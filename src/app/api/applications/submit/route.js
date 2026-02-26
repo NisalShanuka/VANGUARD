@@ -57,10 +57,23 @@ export async function POST(req) {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         `);
 
+        // Ensure user exists and get internal DB ID
+        let userId = session.user.id;
+        const users = await query("SELECT id FROM application_users WHERE discord_id = ? OR id = ? LIMIT 1", [session.user.discord_id || userId, userId]);
+        if (users.length === 0) {
+            const result = await query(
+                "INSERT INTO application_users (discord_id, username, discriminator, avatar) VALUES (?, ?, ?, ?)",
+                [session.user.discord_id || userId, session.user.name || "Unknown", "", session.user.image || ""]
+            );
+            userId = result.insertId;
+        } else {
+            userId = users[0].id;
+        }
+
         // Save application
         await query(
             "INSERT INTO applications (user_id, type_id, content, status) VALUES (?, ?, ?, 'pending')",
-            [session.user.id, typeId, JSON.stringify(answers || {})]
+            [userId, typeId, JSON.stringify(answers || {})]
         );
 
         // Auto-assign Pending Role
