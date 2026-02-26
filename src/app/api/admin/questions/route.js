@@ -34,6 +34,7 @@ export async function GET(req) {
     await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
     await ensureColumn('application_questions', 'order_num', "INT DEFAULT 0");
     await ensureColumn('application_questions', 'section_order', "INT DEFAULT 0");
+    await query(`ALTER TABLE application_questions MODIFY COLUMN field_type VARCHAR(255) DEFAULT 'text'`);
 
     const questions = await query(
         `SELECT * FROM application_questions WHERE type_id = ? ORDER BY section_order ASC, order_num ASC`,
@@ -55,6 +56,8 @@ export async function POST(req) {
     await ensureColumn('application_questions', 'section_title', "VARCHAR(255) DEFAULT 'General Information'");
     await ensureColumn('application_questions', 'order_num', "INT DEFAULT 0");
     await ensureColumn('application_questions', 'section_order', "INT DEFAULT 0");
+    await query(`ALTER TABLE application_questions MODIFY COLUMN field_type VARCHAR(255) DEFAULT 'text'`);
+
 
     try {
         const result = await query(
