@@ -352,9 +352,9 @@ const DraggableQuestion = ({ q, startEdit, deleteQuestion }) => {
                         <span className="text-[8px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
                             {q.field_type === 'checkbox_single' ? 'SINGLE TICK' : q.field_type?.toUpperCase()}
                         </span>
-                        {q.is_required && (
+                        {Number(q.is_required) === 1 && (
                             <span className="text-[8px] text-accent-400 font-black uppercase tracking-widest flex items-center gap-1">
-                                <div className="w-1 h-1 rounded-full bg-accent-400"></div> Required
+                                <div className="w-1 h-1 rounded-full bg-accent-400 shadow-[0_0_5px_rgba(255,255,255,0.5)]"></div> Required
                             </span>
                         )}
                     </div>
@@ -661,7 +661,7 @@ function QuestionsModal({ type, onClose }) {
             label: q.label,
             field_type: q.field_type,
             options: q.options,
-            is_required: !!q.is_required
+            is_required: Number(q.is_required) === 1
         });
         setAddingToSection(q.section_title || 'General Information');
     }
