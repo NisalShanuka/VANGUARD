@@ -45,18 +45,29 @@ export const authOptions = {
         async session({ session, token }) {
             if (session.user) {
                 try {
-                    const dbUser = await getUserByDiscordId(token.sub);
+                    let dbUser = await getUserByDiscordId(token.sub);
+
+                    if (!dbUser) {
+                        try {
+                            const newId = await createOrUpdateUser({
+                                id: token.sub,
+                                username: session.user.name || "Unknown",
+                                discriminator: "0",
+                                avatar: session.user.image || null
+                            });
+                            dbUser = { id: newId, discord_id: token.sub, role: 'user' };
+                        } catch (err) {
+                            console.error("Failed to auto-create missing user in session:", err);
+                        }
+                    }
+
                     if (dbUser) {
                         session.user.id = dbUser.id;
                         session.user.discord_id = dbUser.discord_id;
                         session.user.role = dbUser.role;
-                    } else {
-                        session.user.id = token.sub;
                     }
                 } catch (error) {
-                    console.error("Error in session callback (getUserByDiscordId):", error);
-                    // Fallback to token sub if DB fails so login doesn't crash
-                    session.user.id = token.sub;
+                    console.error("Error in session callback:", error);
                 }
             }
             return session;
