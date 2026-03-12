@@ -37,6 +37,7 @@ export async function PATCH(req) {
         
         await query(`UPDATE pdm_orders SET status = ? WHERE id = ?`, [status, order_id]);
 
+        let dmResult = null;
         // If order was found and status is completed or declined, send a Discord DM
         if (currentOrders.length > 0 && (status === 'completed' || status === 'declined')) {
             const order = currentOrders[0];
@@ -51,13 +52,14 @@ export async function PATCH(req) {
                 }
             };
 
-            await sendDiscordDM({
+            dmResult = await sendDiscordDM({
                 userId: order.user_id,
                 embed
             });
+            console.log("Discord DM Send Result:", dmResult);
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, dm_result: dmResult });
     } catch (error) {
         console.error('Dealer Update Order Error:', error);
         return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });

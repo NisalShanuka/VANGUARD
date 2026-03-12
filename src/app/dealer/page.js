@@ -51,6 +51,12 @@ export default function DealerPanel() {
             if (data.success) {
                 setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
                 setToast(`Order updated to ${newStatus}`);
+                
+                // Show DM result for debugging
+                console.log("DM Result:", data.dm_result);
+                if (data.dm_result && !data.dm_result.ok) {
+                    alert('Discord DM Failed: ' + (data.dm_result.reason || data.dm_result.error));
+                }
             } else {
                 alert(data.error);
             }
