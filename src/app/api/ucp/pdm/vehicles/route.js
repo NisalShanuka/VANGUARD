@@ -43,9 +43,14 @@ export async function GET() {
             pendingMap[p.vehicle_model] = parseInt(p.pending_qty) || 0;
         }
 
+        const excludeCategories = [
+            'boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 
+            'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service'
+        ];
+        const excludeShops = ['aircraft dealer', 'boat dealer', 'truck dealer', 'other'];
+
         const enrichedVehicles = vehicles.map(v => {
             const pendingAuth = pendingMap[v.spawn_code] || 0;
-            // The true amount available to players right now!
             const trueStock = Math.max(0, (v.current_stock || 0) - pendingAuth);
             return {
                 ...v,
@@ -54,6 +59,10 @@ export async function GET() {
                 original_stock: v.current_stock || 0,
                 pending_orders: pendingAuth
             };
+        }).filter(v => {
+            if (excludeCategories.includes((v.category || '').toLowerCase())) return false;
+            if (excludeShops.includes((v.shop || '').toLowerCase())) return false;
+            return true;
         });
 
         return NextResponse.json({ success: true, vehicles: enrichedVehicles });

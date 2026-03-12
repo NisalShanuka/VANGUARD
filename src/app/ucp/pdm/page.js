@@ -18,6 +18,8 @@ export default function PDMDealership() {
     const [sortBy, setSortBy] = useState('price-asc');
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+    const [myOrders, setMyOrders] = useState([]);
     const [placingOrder, setPlacingOrder] = useState(false);
     const [toast, setToast] = useState(null);
 
@@ -41,6 +43,23 @@ export default function PDMDealership() {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function fetchMyOrders() {
+        try {
+            const res = await fetch('/api/ucp/pdm/my-orders');
+            const data = await res.json();
+            if (data.success) {
+                setMyOrders(data.orders);
+            }
+        } catch (error) {
+            console.error('Error fetching my orders:', error);
+        }
+    }
+
+    function openMyOrders() {
+        fetchMyOrders();
+        setIsOrdersOpen(true);
     }
 
     function addToCart(vehicle) {
@@ -159,7 +178,14 @@ export default function PDMDealership() {
             />
 
             <section className="mx-auto max-w-7xl px-6 pb-20">
-                <div className="flex justify-end mb-6">
+                <div className="flex justify-end gap-4 mb-6">
+                    <button 
+                        onClick={openMyOrders}
+                        className="bg-white/5 border border-white/10 text-white px-6 py-3 rounded font-black uppercase tracking-widest text-xs flex items-center hover:bg-white/10 transition-all"
+                    >
+                        <i className="fas fa-list-alt mr-3 text-accent-400"></i>
+                        My Orders
+                    </button>
                     <button 
                         onClick={() => setIsCartOpen(true)}
                         className="bg-accent-400 text-black px-6 py-3 rounded font-black uppercase tracking-widest text-xs flex items-center shadow-[0_0_20px_rgba(var(--accent-400-rgb),0.3)] hover:bg-white hover:scale-105 transition-all"
@@ -234,7 +260,7 @@ export default function PDMDealership() {
                                         <img 
                                             src={`https://docs.fivem.net/vehicles/${vehicle.spawn_code}.webp`}
                                             alt={vehicle.model}
-                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                                            className="w-full h-full object-contain p-6 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                                             onError={(e) => {
                                                 // If image not found, try a generic GTA V vehicle database URL or fallback to icon
                                                 e.target.onerror = null; 
@@ -340,8 +366,8 @@ export default function PDMDealership() {
                                                 <button onClick={() => removeFromCart(item.spawn_code)} className="absolute top-2 right-2 text-white/20 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <i className="fas fa-trash"></i>
                                                 </button>
-                                                <div className="w-20 h-16 bg-black/50 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                                    <img src={`https://docs.fivem.net/vehicles/${item.spawn_code}.webp`} className="w-full h-full object-cover opacity-80" onError={e => {e.target.style.display='none'; e.target.nextSibling.style.display='block';}} />
+                                                <div className="w-20 h-16 bg-black/50 rounded overflow-hidden flex-shrink-0 flex items-center justify-center p-1">
+                                                    <img src={`https://docs.fivem.net/vehicles/${item.spawn_code}.webp`} className="w-full h-full object-contain opacity-80" onError={e => {e.target.style.display='none'; e.target.nextSibling.style.display='block';}} />
                                                     <i className="fas fa-car text-white/20 text-2xl" style={{ display: 'none' }}></i>
                                                 </div>
                                                 <div className="flex-1">
@@ -378,6 +404,72 @@ export default function PDMDealership() {
                                     </button>
                                 </div>
                             )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* My Orders Sidebar */}
+            <AnimatePresence>
+                {isOrdersOpen && (
+                    <div className="fixed inset-0 z-[100] flex justify-end">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }} 
+                            onClick={() => setIsOrdersOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+                        ></motion.div>
+                        
+                        <motion.div 
+                            initial={{ x: '100%' }} 
+                            animate={{ x: 0 }} 
+                            exit={{ x: '100%' }} 
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="relative w-full max-w-md h-full bg-[#0a0a0a] border-l border-white/10 shadow-2xl flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="text-xl font-display font-black uppercase tracking-widest text-white">My Order History</h2>
+                                <button onClick={() => setIsOrdersOpen(false)} className="text-white/40 hover:text-white">
+                                    <i className="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto w-full p-6 space-y-4">
+                                {myOrders.length === 0 ? (
+                                    <div className="text-center text-white/40 pt-20">
+                                        <i className="fas fa-box-open text-4xl mb-4 opacity-20"></i>
+                                        <p className="font-bold uppercase tracking-widest text-xs">No orders found</p>
+                                    </div>
+                                ) : (
+                                    myOrders.map(order => (
+                                        <div key={order.id} className="bg-white/5 border border-white/10 p-4 rounded flex flex-col gap-2">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <span className="text-accent-400/80 text-xs font-mono mb-1 block">#PDM-{order.id}</span>
+                                                    <h4 className="text-sm font-bold text-white uppercase">{order.vehicle_name}</h4>
+                                                    {order.is_preorder === 1 && (
+                                                        <span className="text-yellow-400 text-[9px] uppercase font-black tracking-widest">Pre-Order</span>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className={`px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded ${
+                                                        order.status === 'completed' ? 'bg-green-500/20 text-green-400 border border-green-500/50' : 
+                                                        order.status === 'declined' ? 'bg-red-500/20 text-red-400 border border-red-500/50' :
+                                                        'bg-white/10 text-white border border-white/20'
+                                                    }`}>
+                                                        {order.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 pt-2 border-t border-white/5 flex justify-between items-center opacity-60">
+                                                <p className="text-xs">{(order.quantity || 1)}x • ${(order.price).toLocaleString()}</p>
+                                                <p className="text-[10px]">{new Date(order.created_at).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </motion.div>
                     </div>
                 )}
