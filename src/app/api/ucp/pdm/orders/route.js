@@ -11,21 +11,24 @@ export async function POST(req) {
 
     try {
         const body = await req.json();
-        const { vehicle_model, vehicle_name, price, is_preorder } = body;
+        const { vehicle_model, vehicle_name, price, is_preorder, quantity } = body;
 
         if (!vehicle_model || !vehicle_name || price === undefined) {
             return NextResponse.json({ success: false, error: 'Missing information' }, { status: 400 });
         }
 
+        const qty = parseInt(quantity) || 1;
+
         const insert = await query(`
-            INSERT INTO pdm_orders (user_id, username, vehicle_model, vehicle_name, price, status, is_preorder)
-            VALUES (?, ?, ?, ?, ?, 'pending', ?)
+            INSERT INTO pdm_orders (user_id, username, vehicle_model, vehicle_name, price, quantity, status, is_preorder)
+            VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)
         `, [
             session.user.discord_id || session.user.id,
             session.user.name,
             vehicle_model,
             vehicle_name,
             price,
+            qty,
             is_preorder ? 1 : 0
         ]);
 

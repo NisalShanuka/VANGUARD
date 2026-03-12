@@ -41,8 +41,36 @@ export default function PDMDealership() {
         }
     }
 
-    async function handleOrder(vehicle, isPreorder) {
-        if (!confirm(`Are you sure you want to ${isPreorder ? 'pre-order' : 'order'} the ${vehicle.brand} ${vehicle.model} for $${vehicle.price}?`)) return;
+    async function handleOrder(vehicle, hasStock) {
+        const qtyStr = prompt(`How many ${vehicle.brand || 'Custom'} ${vehicle.model}s do you want?\n(Price: $${vehicle.price.toLocaleString()} each)`, '1');
+        if(!qtyStr) return;
+        const qty = parseInt(qtyStr);
+        if(isNaN(qty) || qty <= 0) return alert('Invalid quantity');
+
+        let msg = '';
+        let isPreorder = false;
+        
+        if (!vehicle.unlimited_stock) {
+            if (qty > vehicle.current_stock) {
+                if (vehicle.current_stock > 0) {
+                    const preQty = qty - vehicle.current_stock;
+                    msg = `⚠️ Only ${vehicle.current_stock} available. You are ordering ${vehicle.current_stock} from stock and PRE-ORDERING ${preQty}.\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
+                    isPreorder = true; 
+                } else {
+                    msg = `⚠️ There is no stock available right now. You will be PRE-ORDERING ${qty} vehicle(s).\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
+                    isPreorder = true;
+                }
+            } else {
+                msg = `You are ordering ${qty} vehicle(s) from available stock.\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
+                isPreorder = false;
+            }
+        } else {
+            msg = `You are ordering ${qty} vehicle(s).\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
+            isPreorder = false;
+        }
+
+        if (!confirm(msg)) return;
+
         setPlacingOrder(vehicle.spawn_code);
         try {
             const res = await fetch('/api/ucp/pdm/orders', {
@@ -51,13 +79,15 @@ export default function PDMDealership() {
                 body: JSON.stringify({
                     vehicle_model: vehicle.spawn_code,
                     vehicle_name: `${vehicle.brand} ${vehicle.model}`,
-                    price: vehicle.price,
+                    price: vehicle.price * qty,
+                    quantity: qty,
                     is_preorder: isPreorder
                 })
             });
             const data = await res.json();
             if (data.success) {
-                setToast(`Successfully ${isPreorder ? 'pre-ordered' : 'ordered'} the vehicle! A dealer will contact you soon.`);
+                setToast(`Successfully ${isPreorder ? 'pre-ordered' : 'ordered'} ${qty} vehicle(s)! A dealer will contact you soon.`);
+                fetchVehicles(); // refresh stock immediately
             } else {
                 alert(data.error);
             }
@@ -206,17 +236,25 @@ export default function PDMDealership() {
                                                 <p className="text-lg font-black text-white">${vehicle.price.toLocaleString()}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-bold uppercase text-white/40 mb-1">Status</p>
-                                                {hasStock ? (
+                                                <p className="text-[10px] font-bold uppercase text-white/40 mb-1">Stock</p>
+                                                {vehicle.unlimited_stock ? (
                                                     <p className="text-green-400 text-xs font-black uppercase tracking-widest">In Stock</p>
+                                                ) : hasStock ? (
+                                                    <p className="text-green-400 text-xs font-black uppercase tracking-widest" title={`${vehicle.pending_orders} pending orders limit actual stock`}>
+                                                        {vehicle.current_stock} Available
+                                                        {vehicle.pending_orders > 0 && <span className="text-white/30 text-[9px] ml-1">({vehicle.pending_orders} Pending)</span>}
+                                                    </p>
                                                 ) : (
-                                                    <p className="text-yellow-400 text-xs font-black uppercase tracking-widest">Pre-Order</p>
+                                                    <p className="text-yellow-400 text-xs font-black uppercase tracking-widest" title={`Original stock was ${vehicle.original_stock}, but ${vehicle.pending_orders} are pending`}>
+                                                        Pre-Order
+                                                        {vehicle.pending_orders > 0 && <span className="text-white/30 text-[9px] ml-1">({vehicle.pending_orders} Pending)</span>}
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
 
                                         <button
-                                            onClick={() => handleOrder(vehicle, !hasStock)}
+                                            onClick={() => handleOrder(vehicle, hasStock)}
                                             disabled={placingOrder === vehicle.spawn_code}
                                             className={`mt-4 w-full py-3 text-xs font-black uppercase tracking-widest transition-all rounded ${
                                                 hasStock 

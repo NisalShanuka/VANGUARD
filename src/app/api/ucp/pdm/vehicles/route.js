@@ -30,10 +30,31 @@ export async function GET() {
             } catch (e) {}
         }
 
-        const enrichedVehicles = vehicles.map(v => ({
-            ...v,
-            shop: shopMap[v.category] || 'Other'
-        }));
+        // Fetch pending orders to deduct from available stock
+        const pendingOrders = await query(`
+            SELECT vehicle_model, COALESCE(SUM(quantity), 0) as pending_qty 
+            FROM pdm_orders 
+            WHERE status = 'pending' 
+            GROUP BY vehicle_model
+        `);
+        
+        let pendingMap = {};
+        for (const p of pendingOrders) {
+            pendingMap[p.vehicle_model] = parseInt(p.pending_qty) || 0;
+        }
+
+        const enrichedVehicles = vehicles.map(v => {
+            const pendingAuth = pendingMap[v.spawn_code] || 0;
+            // The true amount available to players right now!
+            const trueStock = Math.max(0, (v.current_stock || 0) - pendingAuth);
+            return {
+                ...v,
+                shop: shopMap[v.category] || 'Other',
+                current_stock: trueStock,
+                original_stock: v.current_stock || 0,
+                pending_orders: pendingAuth
+            };
+        });
 
         return NextResponse.json({ success: true, vehicles: enrichedVehicles });
     } catch (error) {

@@ -97,6 +97,7 @@ export default function DealerPanel() {
                                         <h4 className="text-white text-lg font-bold">
                                             {order.vehicle_name} 
                                             <span className="text-white/40 text-sm ml-2 font-mono">({order.vehicle_model})</span>
+                                            <span className="ml-3 bg-white/10 text-white border border-white/20 rounded-full px-3 py-0.5 text-xs font-black">x{order.quantity || 1}</span>
                                         </h4>
                                         {order.is_preorder === 1 && (
                                             <span className="bg-yellow-400 text-black text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded">Pre-Order</span>
@@ -138,7 +139,10 @@ export default function DealerPanel() {
                     {pastOrders.map((order, i) => (
                         <div key={order.id} className="glass-panel opacity-60 flex items-center justify-between p-4">
                             <div>
-                                <h4 className="text-white font-bold">{order.vehicle_name}</h4>
+                                <h4 className="text-white font-bold">
+                                    {order.vehicle_name} 
+                                    <span className="ml-2 text-white/50 text-xs">x{order.quantity || 1}</span>
+                                </h4>
                                 <p className="text-white/40 text-xs">Ordered by {order.username} on {new Date(order.created_at).toLocaleDateString()}</p>
                             </div>
                             <div>
