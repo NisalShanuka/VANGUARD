@@ -16,7 +16,9 @@ export default function PDMDealership() {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedShop, setSelectedShop] = useState('All');
     const [sortBy, setSortBy] = useState('price-asc');
-    const [placingOrder, setPlacingOrder] = useState(null);
+    const [cart, setCart] = useState([]);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [placingOrder, setPlacingOrder] = useState(false);
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
@@ -41,60 +43,75 @@ export default function PDMDealership() {
         }
     }
 
-    async function handleOrder(vehicle, hasStock) {
-        const qtyStr = prompt(`How many ${vehicle.brand || 'Custom'} ${vehicle.model}s do you want?\n(Price: $${vehicle.price.toLocaleString()} each)`, '1');
-        if(!qtyStr) return;
-        const qty = parseInt(qtyStr);
-        if(isNaN(qty) || qty <= 0) return alert('Invalid quantity');
-
-        let msg = '';
-        let isPreorder = false;
-        
-        if (!vehicle.unlimited_stock) {
-            if (qty > vehicle.current_stock) {
-                if (vehicle.current_stock > 0) {
-                    const preQty = qty - vehicle.current_stock;
-                    msg = `⚠️ Only ${vehicle.current_stock} available. You are ordering ${vehicle.current_stock} from stock and PRE-ORDERING ${preQty}.\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
-                    isPreorder = true; 
-                } else {
-                    msg = `⚠️ There is no stock available right now. You will be PRE-ORDERING ${qty} vehicle(s).\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
-                    isPreorder = true;
-                }
-            } else {
-                msg = `You are ordering ${qty} vehicle(s) from available stock.\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
-                isPreorder = false;
+    function addToCart(vehicle) {
+        setCart(prev => {
+            const existing = prev.find(item => item.spawn_code === vehicle.spawn_code);
+            if (existing) {
+                return prev.map(item => item.spawn_code === vehicle.spawn_code ? { ...item, qty: item.qty + 1 } : item);
             }
-        } else {
-            msg = `You are ordering ${qty} vehicle(s).\nTotal: $${(vehicle.price * qty).toLocaleString()}\nProceed?`;
-            isPreorder = false;
-        }
+            return [...prev, { ...vehicle, qty: 1 }];
+        });
+        setToast(`Added ${vehicle.brand || 'Custom'} ${vehicle.model} to cart.`);
+    }
 
-        if (!confirm(msg)) return;
+    function removeFromCart(spawn_code) {
+        setCart(prev => prev.filter(item => item.spawn_code !== spawn_code));
+    }
 
-        setPlacingOrder(vehicle.spawn_code);
+    function updateCartQty(spawn_code, delta) {
+        setCart(prev => prev.map(item => {
+            if (item.spawn_code === spawn_code) {
+                const newQty = Math.max(1, item.qty + delta);
+                return { ...item, qty: newQty };
+            }
+            return item;
+        }));
+    }
+
+    async function handleCheckout() {
+        if (cart.length === 0) return;
+        setPlacingOrder(true);
         try {
-            const res = await fetch('/api/ucp/pdm/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    vehicle_model: vehicle.spawn_code,
-                    vehicle_name: `${vehicle.brand} ${vehicle.model}`,
-                    price: vehicle.price * qty,
-                    quantity: qty,
-                    is_preorder: isPreorder
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setToast(`Successfully ${isPreorder ? 'pre-ordered' : 'ordered'} ${qty} vehicle(s)! A dealer will contact you soon.`);
-                fetchVehicles(); // refresh stock immediately
+            let allSuccess = true;
+            let orderIds = [];
+            for (const item of cart) {
+                let isPreorder = false;
+                if (!item.unlimited_stock && item.qty > item.current_stock) {
+                    isPreorder = true; 
+                }
+
+                const res = await fetch('/api/ucp/pdm/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        vehicle_model: item.spawn_code,
+                        vehicle_name: `${item.brand} ${item.model}`,
+                        price: item.price * item.qty,
+                        quantity: item.qty,
+                        is_preorder: isPreorder
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    allSuccess = false;
+                } else {
+                    orderIds.push(data.order_id);
+                }
+            }
+
+            if (allSuccess) {
+                const idStr = orderIds.map(id => `#PDM-${id}`).join(', ');
+                setToast(`Order successful! Reference ID: ${idStr}`);
+                setCart([]);
+                setIsCartOpen(false);
+                fetchVehicles();
             } else {
-                alert(data.error);
+                alert('Some items failed to order.');
             }
         } catch (e) {
-            alert('Failed to place order.');
+            alert('Checkout failed.');
         } finally {
-            setPlacingOrder(null);
+            setPlacingOrder(false);
         }
     }
 
@@ -142,6 +159,16 @@ export default function PDMDealership() {
             />
 
             <section className="mx-auto max-w-7xl px-6 pb-20">
+                <div className="flex justify-end mb-6">
+                    <button 
+                        onClick={() => setIsCartOpen(true)}
+                        className="bg-accent-400 text-black px-6 py-3 rounded font-black uppercase tracking-widest text-xs flex items-center shadow-[0_0_20px_rgba(var(--accent-400-rgb),0.3)] hover:bg-white hover:scale-105 transition-all"
+                    >
+                        <i className="fas fa-shopping-cart mr-3"></i>
+                        My Cart ({cart.reduce((a,b)=>a+b.qty, 0)})
+                    </button>
+                </div>
+
                 <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-black/40 p-5 border border-white/10 rounded-lg">
                     <div className="flex-1 w-full">
                         <input 
@@ -254,15 +281,10 @@ export default function PDMDealership() {
                                         </div>
 
                                         <button
-                                            onClick={() => handleOrder(vehicle, hasStock)}
-                                            disabled={placingOrder === vehicle.spawn_code}
-                                            className={`mt-4 w-full py-3 text-xs font-black uppercase tracking-widest transition-all rounded ${
-                                                hasStock 
-                                                    ? 'bg-accent-400 text-black hover:bg-white' 
-                                                    : 'bg-yellow-400 text-black hover:bg-white'
-                                            } disabled:opacity-50`}
+                                            onClick={() => addToCart(vehicle)}
+                                            className={`mt-4 w-full py-3 text-xs font-black uppercase tracking-widest transition-all rounded bg-white/10 text-white hover:bg-accent-400 hover:text-black shadow-lg border border-white/10 hover:border-transparent`}
                                         >
-                                            {placingOrder === vehicle.spawn_code ? 'Processing...' : (hasStock ? 'Order Vehicle' : 'Pre-Order Now')}
+                                            <i className="fas fa-cart-plus mr-2"></i> Add to Cart
                                         </button>
                                     </div>
                                 </motion.div>
@@ -278,12 +300,95 @@ export default function PDMDealership() {
                 )}
             </section>
             
+            {/* Cart Sidebar */}
+            <AnimatePresence>
+                {isCartOpen && (
+                    <div className="fixed inset-0 z-[100] flex justify-end">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }} 
+                            onClick={() => setIsCartOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+                        ></motion.div>
+                        
+                        <motion.div 
+                            initial={{ x: '100%' }} 
+                            animate={{ x: 0 }} 
+                            exit={{ x: '100%' }} 
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="relative w-full max-w-md h-full bg-[#0a0a0a] border-l border-white/10 shadow-2xl flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="text-xl font-display font-black uppercase tracking-widest text-white">Your Cart</h2>
+                                <button onClick={() => setIsCartOpen(false)} className="text-white/40 hover:text-white">
+                                    <i className="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                {cart.length === 0 ? (
+                                    <div className="text-center text-white/40 pt-20">
+                                        <i className="fas fa-shopping-cart text-4xl mb-4 opacity-20"></i>
+                                        <p className="font-bold uppercase tracking-widest text-xs">Cart is empty</p>
+                                    </div>
+                                ) : (
+                                    cart.map(item => {
+                                        const isPreorder = !item.unlimited_stock && item.qty > item.current_stock;
+                                        return (
+                                            <div key={item.spawn_code} className="bg-white/5 border border-white/10 p-4 rounded flex gap-4 relative group">
+                                                <button onClick={() => removeFromCart(item.spawn_code)} className="absolute top-2 right-2 text-white/20 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                                <div className="w-20 h-16 bg-black/50 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                    <img src={`https://docs.fivem.net/vehicles/${item.spawn_code}.webp`} className="w-full h-full object-cover opacity-80" onError={e => {e.target.style.display='none'; e.target.nextSibling.style.display='block';}} />
+                                                    <i className="fas fa-car text-white/20 text-2xl" style={{ display: 'none' }}></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-bold text-white uppercase">{item.brand} {item.model}</h4>
+                                                    <p className="text-accent-400 font-black text-xs mt-1">${(item.price * item.qty).toLocaleString()}</p>
+                                                    {isPreorder && (
+                                                        <p className="text-yellow-400 text-[9px] uppercase font-black tracking-widest mt-1">Contains Pre-order</p>
+                                                    )}
+                                                    
+                                                    <div className="flex items-center gap-3 mt-3">
+                                                        <button onClick={() => updateCartQty(item.spawn_code, -1)} className="w-6 h-6 rounded bg-white/10 text-white flex items-center justify-center hover:bg-white/20"><i className="fas fa-minus text-[10px]"></i></button>
+                                                        <span className="text-xs font-bold w-4 text-center">{item.qty}</span>
+                                                        <button onClick={() => updateCartQty(item.spawn_code, 1)} className="w-6 h-6 rounded bg-white/10 text-white flex items-center justify-center hover:bg-white/20"><i className="fas fa-plus text-[10px]"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                            {cart.length > 0 && (
+                                <div className="p-6 border-t border-white/10 bg-black/40">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <span className="text-white/60 text-xs font-bold uppercase tracking-widest">Total</span>
+                                        <span className="text-2xl font-black text-white">${cart.reduce((a,b)=>a+(b.price*b.qty),0).toLocaleString()}</span>
+                                    </div>
+                                    <button 
+                                        onClick={handleCheckout}
+                                        disabled={placingOrder}
+                                        className="w-full bg-accent-400 text-black py-4 rounded font-black uppercase tracking-widest text-sm hover:bg-white transition-all disabled:opacity-50"
+                                    >
+                                        {placingOrder ? 'Processing...' : 'Place Order'}
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {toast && (
                 <div className="fixed bottom-10 right-10 z-50 bg-black border border-accent-400 text-white px-6 py-4 rounded shadow-2xl flex items-center gap-4 animate-bounce">
                     <i className="fas fa-check-circle text-accent-400 text-xl"></i>
                     <div>
                         <p className="font-bold text-sm">{toast}</p>
-                        <p className="text-xs text-white/60">An admin or dealer will coordinate with you via Discord.</p>
+                        <p className="text-xs text-white/60">Give this ID to a dealer in-city when collecting your vehicle!</p>
                     </div>
                     <button onClick={() => setToast(null)} className="ml-4 text-white/40 hover:text-white"><i className="fas fa-times"></i></button>
                 </div>
