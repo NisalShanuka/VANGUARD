@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { sendDiscordDM } from '@/lib/discord';
 
 export async function GET() {
     const session = await getServerSession(authOptions);
@@ -31,7 +32,31 @@ export async function PATCH(req) {
             return NextResponse.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
         }
 
+        // Fetch the order before updating it so we can DM the user
+        const currentOrders = await query(`SELECT user_id, vehicle_name, quantity FROM pdm_orders WHERE id = ?`, [order_id]);
+        
         await query(`UPDATE pdm_orders SET status = ? WHERE id = ?`, [status, order_id]);
+
+        // If order was found and status is completed or declined, send a Discord DM
+        if (currentOrders.length > 0 && (status === 'completed' || status === 'declined')) {
+            const order = currentOrders[0];
+            const isCompleted = status === 'completed';
+            const embed = {
+                title: isCompleted ? "✅ PDM Order Ready" : "❌ PDM Order Declined",
+                description: `Your order **#PDM-${order_id}** for **${order.quantity || 1}x ${order.vehicle_name}** has been marked as **${status.toUpperCase()}** by a dealer.`,
+                color: isCompleted ? 65280 : 16711680, // Green or Red
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: isCompleted ? "Please contact a dealer in-city to collect your vehicle." : "If you have questions, please reach out via a ticket."
+                }
+            };
+
+            await sendDiscordDM({
+                userId: order.user_id,
+                embed
+            });
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Dealer Update Order Error:', error);
