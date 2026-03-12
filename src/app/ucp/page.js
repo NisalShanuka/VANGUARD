@@ -185,6 +185,9 @@ export default function UCPDashboard() {
                                     <Link href="/rules/server" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">SERVER RULES</Link>
                                 </li>
                                 <li>
+                                    <Link href="/ucp/pdm" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">PDM DEALERSHIP</Link>
+                                </li>
+                                <li>
                                     <Link href="https://discord.gg/wuq7TFYT" target="_blank" className="text-caption font-bold tracking-widest text-white/60 hover:text-white">DISCORD SUPPORT</Link>
                                 </li>
                             </ul>
@@ -193,8 +196,20 @@ export default function UCPDashboard() {
                         {(userData?.is_admin || session?.user?.role === 'admin') && (
                             <motion.div variants={fadeUp(14, 0.35)} className="glass-panel border-white/20 bg-white/5">
                                 <h4 className="text-h4 mb-2 text-white">Admin Section</h4>
-                                <Link href="/admin" className="btn-primary w-full justify-center bg-white hover:bg-white/80 text-black">
+                                <Link href="/admin" className="btn-primary w-full justify-center bg-white hover:bg-white/80 text-black mb-3">
                                     ADMIN PANEL
+                                </Link>
+                                <Link href="/dealer" className="btn-primary w-full justify-center bg-transparent border border-white hover:bg-white/10 text-white">
+                                    DEALER PANEL
+                                </Link>
+                            </motion.div>
+                        )}
+
+                        {(!userData?.is_admin && session?.user?.role !== 'admin' && session?.user?.role === 'dealer') && (
+                            <motion.div variants={fadeUp(14, 0.35)} className="glass-panel border-white/20 bg-white/5">
+                                <h4 className="text-h4 mb-2 text-white">Dealer Section</h4>
+                                <Link href="/dealer" className="btn-primary w-full justify-center bg-transparent border border-white hover:bg-white/10 text-white">
+                                    DEALER PANEL
                                 </Link>
                             </motion.div>
                         )}
