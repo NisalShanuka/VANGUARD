@@ -193,19 +193,19 @@ export default function UCPDashboard() {
                             </ul>
                         </motion.div>
 
-                        {(userData?.is_admin || session?.user?.role === 'admin') && (
+                        {/* ADMIN ONLY - Sees Admin Section and ADMIN PANEL button */}
+                        {(userData?.is_admin || session?.user?.role === 'admin' || userData?.role === 'admin') && (
                             <motion.div variants={fadeUp(14, 0.35)} className="glass-panel border-white/20 bg-white/5">
                                 <h4 className="text-h4 mb-2 text-white">Admin Section</h4>
                                 <Link href="/admin" className="btn-primary w-full justify-center bg-white hover:bg-white/80 text-black mb-3">
                                     ADMIN PANEL
                                 </Link>
-                                <Link href="/dealer" className="btn-primary w-full justify-center bg-transparent border border-white hover:bg-white/10 text-white">
-                                    DEALER PANEL
-                                </Link>
                             </motion.div>
                         )}
 
-                        {(!userData?.is_admin && session?.user?.role !== 'admin' && session?.user?.role === 'dealer') && (
+                        {/* DEALER ONLY - Sees Dealer Section and DEALER PANEL button */}
+                        {/* Note: If a user somehow has BOTH admin and dealer roles (e.g., is_admin=true and role='dealer'), they will see both sections. */}
+                        {(userData?.role === 'dealer' || session?.user?.role === 'dealer' || userData?.is_dealer === 1) && (
                             <motion.div variants={fadeUp(14, 0.35)} className="glass-panel border-white/20 bg-white/5">
                                 <h4 className="text-h4 mb-2 text-white">Dealer Section</h4>
                                 <Link href="/dealer" className="btn-primary w-full justify-center bg-transparent border border-white hover:bg-white/10 text-white">

@@ -17,7 +17,7 @@ export async function GET() {
     try {
         // Fetch user basic data
         const users = await query(
-            'SELECT role FROM application_users WHERE id = ?',
+            'SELECT * FROM application_users WHERE id = ?',
             [session.user.id]
         );
         const user = users[0];

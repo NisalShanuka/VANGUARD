@@ -6,11 +6,18 @@ import { sendDiscordDM } from '@/lib/discord';
 
 export async function GET() {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || !['admin', 'dealer'].includes(session.user.role)) {
-        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!session || !session.user) {
+        return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
     }
 
     try {
+        const users = await query('SELECT * FROM application_users WHERE id = ?', [session.user.id]);
+        const user = users[0];
+
+        if (!user || (user.role !== 'dealer' && user.is_dealer !== 1)) {
+            return NextResponse.json({ success: false, error: 'Unauthorized. Dealer access only.' }, { status: 401 });
+        }
+
         const orders = await query(`SELECT * FROM pdm_orders ORDER BY created_at DESC`);
         return NextResponse.json({ success: true, orders });
     } catch (error) {
@@ -21,11 +28,18 @@ export async function GET() {
 
 export async function PATCH(req) {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || !['admin', 'dealer'].includes(session.user.role)) {
-        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!session || !session.user) {
+        return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
     }
 
     try {
+        const users = await query('SELECT * FROM application_users WHERE id = ?', [session.user.id]);
+        const user = users[0];
+
+        if (!user || (user.role !== 'dealer' && user.is_dealer !== 1)) {
+            return NextResponse.json({ success: false, error: 'Unauthorized. Dealer access only.' }, { status: 401 });
+        }
+
         const { order_id, status } = await req.json();
         
         if (!order_id || !['pending', 'completed', 'declined'].includes(status)) {

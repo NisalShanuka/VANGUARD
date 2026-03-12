@@ -18,11 +18,7 @@ export default function DealerPanel() {
         if (status === 'unauthenticated') {
             router.push('/');
         } else if (status === 'authenticated') {
-            if (!['admin', 'dealer'].includes(session.user.role)) {
-                router.push('/ucp');
-            } else {
-                fetchOrders();
-            }
+            fetchOrders();
         }
     }, [status]);
 
@@ -32,6 +28,9 @@ export default function DealerPanel() {
             const data = await res.json();
             if (data.success) {
                 setOrders(data.orders);
+            } else if (data.error === 'Unauthorized. Dealer access only.' || data.status === 401 || !data.success) {
+                // If API rejects them, bounce to UCP
+                router.push('/ucp');
             }
         } catch (error) {
             console.error('Error fetching orders:', error);
