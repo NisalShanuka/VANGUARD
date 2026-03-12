@@ -345,12 +345,28 @@ export default function PDMDealership() {
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                             className="relative w-full max-w-md h-full bg-[#0a0a0a] border-l border-white/10 shadow-2xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
                                 <h2 className="text-xl font-display font-black uppercase tracking-widest text-white">Your Cart</h2>
                                 <button onClick={() => setIsCartOpen(false)} className="text-white/40 hover:text-white">
                                     <i className="fas fa-times text-xl"></i>
                                 </button>
                             </div>
+
+                            {cart.length > 0 && (
+                                <div className="p-6 border-b border-white/10 bg-black/60 shadow-lg z-10">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="text-white/60 text-xs font-bold uppercase tracking-widest">Total</span>
+                                        <span className="text-2xl font-black text-white">${cart.reduce((a,b)=>a+(b.price*b.qty),0).toLocaleString()}</span>
+                                    </div>
+                                    <button 
+                                        onClick={handleCheckout}
+                                        disabled={placingOrder}
+                                        className="w-full bg-accent-400 text-black py-4 rounded font-black uppercase tracking-widest text-sm hover:bg-white transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(var(--accent-400-rgb),0.3)]"
+                                    >
+                                        {placingOrder ? 'Processing...' : 'Place Order Now'}
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-4">
                                 {cart.length === 0 ? (
@@ -388,22 +404,6 @@ export default function PDMDealership() {
                                     })
                                 )}
                             </div>
-
-                            {cart.length > 0 && (
-                                <div className="p-6 border-t border-white/10 bg-black/40">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <span className="text-white/60 text-xs font-bold uppercase tracking-widest">Total</span>
-                                        <span className="text-2xl font-black text-white">${cart.reduce((a,b)=>a+(b.price*b.qty),0).toLocaleString()}</span>
-                                    </div>
-                                    <button 
-                                        onClick={handleCheckout}
-                                        disabled={placingOrder}
-                                        className="w-full bg-accent-400 text-black py-4 rounded font-black uppercase tracking-widest text-sm hover:bg-white transition-all disabled:opacity-50"
-                                    >
-                                        {placingOrder ? 'Processing...' : 'Place Order'}
-                                    </button>
-                                </div>
-                            )}
                         </motion.div>
                     </div>
                 )}
