@@ -43,13 +43,42 @@ export async function PATCH(req) {
             const order = currentOrders[0];
             const isCompleted = status === 'completed';
             const embed = {
-                title: isCompleted ? "✅ PDM Order Ready" : "❌ PDM Order Declined",
-                description: `Your order **#PDM-${order_id}** for **${order.quantity || 1}x ${order.vehicle_name}** has been marked as **${status.toUpperCase()}** by a dealer.`,
-                color: isCompleted ? 65280 : 16711680, // Green or Red
-                timestamp: new Date().toISOString(),
+                title: isCompleted ? "🎉 Your Delivery is Ready!" : "❌ Order Declined",
+                description: isCompleted 
+                    ? `Great news! Your recent vehicle order has been processed by our dealership team and is now **Ready for Collection**.` 
+                    : `Unfortunately, your recent vehicle order has been **Declined** by our dealership team.`,
+                color: isCompleted ? 0x2ecc71 : 0xe74c3c, // Emerald or Alizarin
+                fields: [
+                    {
+                        name: "🧾 Order Reference",
+                        value: `\`#PDM-${order_id}\``,
+                        inline: true
+                    },
+                    {
+                        name: "📊 Status",
+                        value: isCompleted ? "✅ Completed" : "🚫 Declined",
+                        inline: true
+                    },
+                    {
+                        name: "🏎️ Vehicle Ordered",
+                        value: `**${order.quantity || 1}x** ${order.vehicle_name}`,
+                        inline: false
+                    }
+                ],
+                author: {
+                    name: "Vanguard Dealership",
+                    icon_url: "https://r2.fivemanage.com/ZInWw3B9H2Y6pU3zSjC6o/images/logonew.png"
+                },
+                thumbnail: {
+                    url: "https://cdn.discordapp.com/attachments/1113800619864703086/1144265507548233818/pdm.png"
+                },
                 footer: {
-                    text: isCompleted ? "Please contact a dealer in-city to collect your vehicle." : "If you have questions, please reach out via a ticket."
-                }
+                    text: isCompleted 
+                        ? "Please visit the dealership in-city and provide your Order Reference to collect." 
+                        : "Please open a ticket if you believe this was an error.",
+                    icon_url: "https://r2.fivemanage.com/ZInWw3B9H2Y6pU3zSjC6o/images/logonew.png"
+                },
+                timestamp: new Date().toISOString()
             };
 
             dmResult = await sendDiscordDM({
