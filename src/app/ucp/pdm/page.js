@@ -114,10 +114,21 @@ export default function PDMDealership() {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                     className="glass-panel group relative flex flex-col overflow-hidden p-0 border border-white/5 hover:border-white/10 hover:shadow-2xl transition-all"
                                 >
-                                    {/* Vehicle Image Placeholder */}
+                                    {/* Vehicle Image */}
                                     <div className="h-40 w-full bg-black/40 flex items-center justify-center overflow-hidden relative">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
-                                        <i className="fas fa-car text-6xl text-white/5 group-hover:scale-110 transition-transform duration-700"></i>
+                                        <img 
+                                            src={`https://docs.fivem.net/vehicles/${vehicle.spawn_code}.webp`}
+                                            alt={vehicle.model}
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                                            onError={(e) => {
+                                                // If image not found, try a generic GTA V vehicle database URL or fallback to icon
+                                                e.target.onerror = null; 
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'block';
+                                            }}
+                                        />
+                                        <i className="fas fa-car text-6xl text-white/5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden" style={{ display: 'none' }}></i>
                                         <div className="absolute top-3 right-3 z-20">
                                             <span className="bg-black/80 backdrop-blur text-white text-[10px] font-black tracking-widest px-3 py-1 uppercase rounded-full border border-white/10">
                                                 {vehicle.category}
