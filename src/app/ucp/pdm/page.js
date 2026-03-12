@@ -13,6 +13,9 @@ export default function PDMDealership() {
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedShop, setSelectedShop] = useState('All');
+    const [sortBy, setSortBy] = useState('price-asc');
     const [placingOrder, setPlacingOrder] = useState(null);
     const [toast, setToast] = useState(null);
 
@@ -73,11 +76,32 @@ export default function PDMDealership() {
         );
     }
 
-    const filteredVehicles = vehicles.filter(v => 
+    const categories = ['All', ...Array.from(new Set(vehicles.map(v => v.category))).sort()];
+    const shops = ['All', ...Array.from(new Set(vehicles.map(v => v.shop))).sort()];
+
+    let filteredVehicles = vehicles.filter(v => 
         (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
         (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         v.spawn_code.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (selectedShop !== 'All') {
+        filteredVehicles = filteredVehicles.filter(v => v.shop === selectedShop);
+    }
+
+    if (selectedCategory !== 'All') {
+        filteredVehicles = filteredVehicles.filter(v => v.category === selectedCategory);
+    }
+
+    filteredVehicles.sort((a, b) => {
+        if (sortBy === 'price-asc') return a.price - b.price;
+        if (sortBy === 'price-desc') return b.price - a.price;
+        const nameA = `${a.brand || ''} ${a.model}`.trim();
+        const nameB = `${b.brand || ''} ${b.model}`.trim();
+        if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
+        if (sortBy === 'name-desc') return nameB.localeCompare(nameA);
+        return 0;
+    });
 
     return (
         <AnimatedPage>
@@ -88,17 +112,50 @@ export default function PDMDealership() {
             />
 
             <section className="mx-auto max-w-7xl px-6 pb-20">
-                <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <input 
-                        type="text" 
-                        placeholder="Search for vehicles..." 
-                        className="glass-input w-full md:max-w-md"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <div className="text-white/40 text-sm font-bold tracking-widest uppercase">
-                        {filteredVehicles.length} Vehicles Found
+                <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-black/40 p-5 border border-white/10 rounded-lg">
+                    <div className="flex-1 w-full">
+                        <input 
+                            type="text" 
+                            placeholder="Search by brand, model or spawn code..." 
+                            className="glass-input w-full md:max-w-md ring-1 ring-white/10 focus:ring-accent-400/50"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                        <select 
+                            className="glass-input w-full sm:w-auto ring-1 ring-white/10 [&>option]:bg-black text-[11px] font-bold uppercase tracking-widest cursor-pointer"
+                            value={selectedShop}
+                            onChange={(e) => setSelectedShop(e.target.value)}
+                        >
+                            {shops.map(shop => (
+                                <option key={shop} value={shop}>{shop === 'All' ? 'All Shops / Dealerships' : shop}</option>
+                            ))}
+                        </select>
+                        <select 
+                            className="glass-input w-full sm:w-auto ring-1 ring-white/10 [&>option]:bg-black text-[11px] font-bold uppercase tracking-widest cursor-pointer"
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                        >
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+                            ))}
+                        </select>
+                        <select 
+                            className="glass-input w-full sm:w-auto ring-1 ring-white/10 [&>option]:bg-black text-[11px] font-bold uppercase tracking-widest cursor-pointer"
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                        >
+                            <option value="price-asc">Sort: Price (Low to High)</option>
+                            <option value="price-desc">Sort: Price (High to Low)</option>
+                            <option value="name-asc">Sort: Name (A-Z)</option>
+                            <option value="name-desc">Sort: Name (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="mb-6 border-b border-white/10 pb-4 flex justify-between items-center text-white/40 text-[10px] font-black tracking-[0.2em] uppercase">
+                    <p>{filteredVehicles.length} Vehicles Matching Criteria</p>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -131,7 +188,7 @@ export default function PDMDealership() {
                                         <i className="fas fa-car text-6xl text-white/5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden" style={{ display: 'none' }}></i>
                                         <div className="absolute top-3 right-3 z-20">
                                             <span className="bg-black/80 backdrop-blur text-white text-[10px] font-black tracking-widest px-3 py-1 uppercase rounded-full border border-white/10">
-                                                {vehicle.category}
+                                                {vehicle.shop || vehicle.category}
                                             </span>
                                         </div>
                                     </div>
