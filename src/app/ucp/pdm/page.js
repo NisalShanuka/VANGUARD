@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ export default function PDMDealership() {
     const [myOrders, setMyOrders] = useState([]);
     const [placingOrder, setPlacingOrder] = useState(false);
     const [toast, setToast] = useState(null);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -142,32 +143,46 @@ export default function PDMDealership() {
         );
     }
 
-    const categories = ['All', ...Array.from(new Set(vehicles.map(v => v.category))).sort()];
-    const shops = ['All', ...Array.from(new Set(vehicles.map(v => v.shop))).sort()];
+    const categories = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.category))).sort()], [vehicles]);
+    const shops = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.shop))).sort()], [vehicles]);
 
-    let filteredVehicles = vehicles.filter(v => 
-        (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
-        (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        v.spawn_code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredVehicles = useMemo(() => {
+        let result = vehicles.filter(v => 
+            (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+            (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            v.spawn_code.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
-    if (selectedShop !== 'All') {
-        filteredVehicles = filteredVehicles.filter(v => v.shop === selectedShop);
-    }
+        if (selectedShop !== 'All') {
+            result = result.filter(v => v.shop === selectedShop);
+        }
 
-    if (selectedCategory !== 'All') {
-        filteredVehicles = filteredVehicles.filter(v => v.category === selectedCategory);
-    }
+        if (selectedCategory !== 'All') {
+            result = result.filter(v => v.category === selectedCategory);
+        }
 
-    filteredVehicles.sort((a, b) => {
-        if (sortBy === 'price-asc') return a.price - b.price;
-        if (sortBy === 'price-desc') return b.price - a.price;
-        const nameA = `${a.brand || ''} ${a.model}`.trim();
-        const nameB = `${b.brand || ''} ${b.model}`.trim();
-        if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
-        if (sortBy === 'name-desc') return nameB.localeCompare(nameA);
-        return 0;
-    });
+        const sorted = [...result].sort((a, b) => {
+            if (sortBy === 'price-asc') return a.price - b.price;
+            if (sortBy === 'price-desc') return b.price - a.price;
+            const nameA = `${a.brand || ''} ${a.model}`.trim();
+            const nameB = `${b.brand || ''} ${b.model}`.trim();
+            if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
+            if (sortBy === 'name-desc') return nameB.localeCompare(nameA);
+            return 0;
+        });
+
+        return sorted;
+    }, [vehicles, searchTerm, selectedShop, selectedCategory, sortBy]);
+
+    const suggestions = useMemo(() => {
+        if (!searchTerm || searchTerm.length < 2) return [];
+        return vehicles
+            .filter(v => 
+                v.model.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                v.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .slice(0, 6); // Top 6 suggestions
+    }, [vehicles, searchTerm]);
 
     return (
         <AnimatedPage>
@@ -196,14 +211,66 @@ export default function PDMDealership() {
                 </div>
 
                 <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center bg-black/40 p-5 border border-white/10 rounded-lg">
-                    <div className="flex-1 w-full">
+                    <div className="flex-1 w-full relative">
                         <input 
                             type="text" 
                             placeholder="Search by brand, model or spawn code..." 
                             className="glass-input w-full md:max-w-md ring-1 ring-white/10 focus:ring-accent-400/50"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setShowSuggestions(true);
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                         />
+                        
+                        {/* Search Suggestions Dropdown */}
+                        <AnimatePresence>
+                            {showSuggestions && suggestions.length > 0 && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute left-0 right-0 md:max-w-md mt-2 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60] overflow-hidden"
+                                >
+                                    <div className="p-2 border-b border-white/5 bg-white/5">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 px-3">Quick Suggestions</p>
+                                    </div>
+                                    <div className="py-2">
+                                        {suggestions.map((s, idx) => (
+                                            <button
+                                                key={s.spawn_code}
+                                                className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent-400 group transition-colors text-left"
+                                                onClick={() => {
+                                                    setSearchTerm(s.model);
+                                                    setShowSuggestions(false);
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 bg-black/40 rounded flex items-center justify-center border border-white/5 group-hover:border-black/20">
+                                                        <img 
+                                                            src={`https://docs.fivem.net/vehicles/${s.spawn_code}.webp`} 
+                                                            className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all"
+                                                            onError={e => {e.target.style.display='none'; e.target.nextSibling.style.display='block';}}
+                                                        />
+                                                        <i className="fas fa-car text-white/20 text-lg hidden" style={{ display: 'none' }}></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white text-xs font-black uppercase group-hover:text-black transition-colors">{s.brand} {s.model}</p>
+                                                        <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest group-hover:text-black/60 transition-colors">{s.category}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-accent-400 group-hover:text-black font-black text-[10px]">${s.price.toLocaleString()}</p>
+                                                    <i className="fas fa-arrow-right text-[10px] text-white/10 group-hover:text-black/40 mt-1"></i>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                         <select 
@@ -251,7 +318,7 @@ export default function PDMDealership() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.3, delay: i * 0.05 }}
+                                    transition={{ duration: 0.3, delay: Math.min(i * 0.05, 1) }}
                                     className="glass-panel group relative flex flex-col overflow-hidden p-0 border border-white/5 hover:border-white/10 hover:shadow-2xl transition-all"
                                 >
                                     {/* Vehicle Image */}
@@ -260,6 +327,7 @@ export default function PDMDealership() {
                                         <img 
                                             src={`https://docs.fivem.net/vehicles/${vehicle.spawn_code}.webp`}
                                             alt={vehicle.model}
+                                            loading="lazy"
                                             className="w-full h-full object-contain p-6 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
                                             onError={(e) => {
                                                 // If image not found, try a generic GTA V vehicle database URL or fallback to icon

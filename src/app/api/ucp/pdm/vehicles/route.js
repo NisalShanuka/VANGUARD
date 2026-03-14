@@ -8,25 +8,33 @@ export async function GET() {
         const session = await getServerSession(authOptions);
         const isAdmin = session?.user?.role === 'admin';
 
-        const vehicles = await query(`
-            SELECT 
-                v.spawn_code,
-                v.brand,
-                v.model,
-                v.category,
-                v.price,
-                v.unlimited_stock,
-                v.global_stock_limit,
-                COALESCE(SUM(s.stock), 0) AS current_stock
-            FROM dealership_vehicles v
-            LEFT JOIN dealership_stock s ON v.spawn_code = s.vehicle
-            GROUP BY v.spawn_code, v.brand, v.model, v.category, v.price, v.unlimited_stock, v.global_stock_limit
-            ORDER BY v.category, v.price ASC
-        `);
+        // Run queries in parallel to save time
+        const [vehicles, shops, pendingOrders, settings] = await Promise.all([
+            query(`
+                SELECT 
+                    v.spawn_code,
+                    v.brand,
+                    v.model,
+                    v.category,
+                    v.price,
+                    v.unlimited_stock,
+                    v.global_stock_limit,
+                    COALESCE(SUM(s.stock), 0) AS current_stock
+                FROM dealership_vehicles v
+                LEFT JOIN dealership_stock s ON v.spawn_code = s.vehicle
+                GROUP BY v.spawn_code, v.brand, v.model, v.category, v.price, v.unlimited_stock, v.global_stock_limit
+                ORDER BY v.category, v.price ASC
+            `),
+            query('SELECT name, categories FROM dealership_locations'),
+            query(`
+                SELECT vehicle_model, COALESCE(SUM(quantity), 0) as pending_qty 
+                FROM pdm_orders 
+                WHERE status = 'pending' 
+                GROUP BY vehicle_model
+            `),
+            query("SELECT setting_value FROM site_settings WHERE setting_key = 'pdm_luxury_enabled'")
+        ]);
 
-        // Fetch location details to know which vehicle goes to which shop
-        const shops = await query('SELECT name, categories FROM dealership_locations');
-        
         let shopMap = {};
         for (const shop of shops) {
             try {
@@ -34,22 +42,12 @@ export async function GET() {
                 for (const c of cats) shopMap[c] = shop.name;
             } catch (e) {}
         }
-
-        // Fetch pending orders to deduct from available stock
-        const pendingOrders = await query(`
-            SELECT vehicle_model, COALESCE(SUM(quantity), 0) as pending_qty 
-            FROM pdm_orders 
-            WHERE status = 'pending' 
-            GROUP BY vehicle_model
-        `);
         
         let pendingMap = {};
         for (const p of pendingOrders) {
             pendingMap[p.vehicle_model] = parseInt(p.pending_qty) || 0;
         }
 
-        // Fetch luxury enabled setting
-        const settings = await query("SELECT setting_value FROM site_settings WHERE setting_key = 'pdm_luxury_enabled'");
         const isLuxuryEnabled = settings.length > 0 ? settings[0].setting_value === 'true' : false;
 
         const excludeCategories = [
