@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
+        const isAdmin = session?.user?.role === 'admin';
+
         const vehicles = await query(`
             SELECT 
                 v.spawn_code,
@@ -43,6 +48,10 @@ export async function GET() {
             pendingMap[p.vehicle_model] = parseInt(p.pending_qty) || 0;
         }
 
+        // Fetch luxury enabled setting
+        const settings = await query("SELECT setting_value FROM site_settings WHERE setting_key = 'pdm_luxury_enabled'");
+        const isLuxuryEnabled = settings.length > 0 ? settings[0].setting_value === 'true' : false;
+
         const excludeCategories = [
             'boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 
             'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service'
@@ -60,8 +69,13 @@ export async function GET() {
                 pending_orders: pendingAuth
             };
         }).filter(v => {
-            if (excludeCategories.includes((v.category || '').toLowerCase())) return false;
+            const categoryLow = (v.category || '').toLowerCase();
+            if (excludeCategories.includes(categoryLow)) return false;
             if (excludeShops.includes((v.shop || '').toLowerCase())) return false;
+            
+            // Luxury Category toggle
+            if ((categoryLow === 'luxury' || categoryLow === 'luxury vehicles') && !isLuxuryEnabled && !isAdmin) return false;
+            
             return true;
         });
 

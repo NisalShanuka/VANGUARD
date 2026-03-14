@@ -12,6 +12,8 @@ export default function DealerPanel() {
     const router = useRouter();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [updatingSetting, setUpdatingSetting] = useState(false);
+    const [luxuryEnabled, setLuxuryEnabled] = useState(false);
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
@@ -19,8 +21,42 @@ export default function DealerPanel() {
             router.push('/');
         } else if (status === 'authenticated') {
             fetchOrders();
+            fetchSettings();
         }
     }, [status]);
+
+    async function fetchSettings() {
+        try {
+            const res = await fetch('/api/admin/settings');
+            const data = await res.json();
+            if (data.success) {
+                setLuxuryEnabled(data.settings.pdm_luxury_enabled === 'true');
+            }
+        } catch (e) {
+            console.error('Error fetching settings:', e);
+        }
+    }
+
+    async function toggleLuxury() {
+        setUpdatingSetting(true);
+        try {
+            const newValue = !luxuryEnabled;
+            const res = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'pdm_luxury_enabled', value: newValue ? 'true' : 'false' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setLuxuryEnabled(newValue);
+                setToast(`Luxury Vehicles ${newValue ? 'Enabled' : 'Disabled'}`);
+            }
+        } catch (e) {
+            alert('Failed to update setting');
+        } finally {
+            setUpdatingSetting(false);
+        }
+    }
 
     async function fetchOrders() {
         try {
@@ -84,6 +120,35 @@ export default function DealerPanel() {
             />
 
             <section className="mx-auto max-w-7xl px-6 pb-20 mt-10">
+                {session?.user?.role === 'admin' && (
+                    <div className="mb-10 glass-panel p-8 border-accent-400/20 bg-accent-400/5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                            <i className="fas fa-gem text-9xl"></i>
+                        </div>
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white/60 mb-6 flex items-center gap-3">
+                            <i className="fas fa-shield-alt text-accent-400"></i> Server Administrator Controls
+                        </h3>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <h4 className="text-lg font-display font-black text-white uppercase tracking-wider">Luxury Vehicles Category</h4>
+                                <p className="text-white/40 text-[11px] font-bold uppercase tracking-wider mt-1">If disabled, the Luxury category and its vehicles will be hidden for normal users.</p>
+                            </div>
+                            <div className="flex items-center gap-4 bg-black/40 p-3 rounded-lg border border-white/5">
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${luxuryEnabled ? 'text-accent-400' : 'text-white/40'}`}>
+                                    {luxuryEnabled ? 'Active' : 'Hidden'}
+                                </span>
+                                <button 
+                                    onClick={toggleLuxury}
+                                    disabled={updatingSetting}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all focus:outline-none ${luxuryEnabled ? 'bg-accent-400 shadow-[0_0_15px_rgba(var(--accent-400-rgb),0.4)]' : 'bg-white/10'}`}
+                                >
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform ${luxuryEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <h3 className="text-xl font-display font-black uppercase text-accent-400 mb-6 tracking-[0.2em] border-b border-white/10 pb-4">Pending Orders ({pendingOrders.length})</h3>
                 
                 <div className="space-y-4 mb-16">
