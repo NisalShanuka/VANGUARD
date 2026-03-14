@@ -71,8 +71,8 @@ export async function GET() {
             if (excludeCategories.includes(categoryLow)) return false;
             if (excludeShops.includes((v.shop || '').toLowerCase())) return false;
             
-            // Luxury Category toggle
-            if ((categoryLow === 'luxury' || categoryLow === 'luxury vehicles') && !isLuxuryEnabled && !isAdmin) return false;
+            // Luxury Category toggle - Applies to everyone when disabled
+            if ((categoryLow === 'luxury' || categoryLow === 'luxury vehicles') && !isLuxuryEnabled) return false;
             
             return true;
         });
