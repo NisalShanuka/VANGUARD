@@ -20,12 +20,9 @@ export async function GET() {
 export async function POST(req) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+        if (session?.user?.role !== 'admin') {
+            return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
         }
-
-        // Ideally check for admin role here if you have it in session
-        // For now, we trust the frontend check but securing here is better
         
         const { key, value } = await req.json();
         
