@@ -73,7 +73,7 @@ export async function GET() {
             
             // Luxury Shop toggle - Applies to everyone when disabled
             const shopLow = (v.shop || '').toLowerCase();
-            if ((shopLow === 'luxury dealer' || shopLow === 'luxury vehicles' || shopLow === 'luxury') && !isLuxuryEnabled) return false;
+            if ((shopLow.includes('luxury')) && !isLuxuryEnabled) return false;
             
             return true;
         });
