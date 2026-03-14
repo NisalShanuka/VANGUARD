@@ -135,14 +135,6 @@ export default function PDMDealership() {
         }
     }
 
-    if (loading) {
-        return (
-            <div className="flex h-[60vh] items-center justify-center">
-                <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
-            </div>
-        );
-    }
-
     const categories = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.category))).sort()], [vehicles]);
     const shops = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.shop))).sort()], [vehicles]);
 
@@ -183,6 +175,14 @@ export default function PDMDealership() {
             )
             .slice(0, 6); // Top 6 suggestions
     }, [vehicles, searchTerm]);
+
+    if (loading) {
+        return (
+            <div className="flex h-[60vh] items-center justify-center">
+                <div className="relative flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-accent-400 shadow-[0_0_10px_#c8c8c84d]"></div><div className="absolute inset-[-4px] rounded-full border border-white/5 animate-pulse"></div></div>
+            </div>
+        );
+    }
 
     return (
         <AnimatedPage>
