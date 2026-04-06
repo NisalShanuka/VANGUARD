@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useDeferredValue } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ export default function PDMDealership() {
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const deferredSearchTerm = useDeferredValue(searchTerm);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedShop, setSelectedShop] = useState('All');
     const [sortBy, setSortBy] = useState('price-asc');
@@ -37,7 +38,12 @@ export default function PDMDealership() {
             const res = await fetch('/api/ucp/pdm/vehicles');
             const data = await res.json();
             if (data.success) {
-                setVehicles(data.vehicles);
+                // Pre-index for insanely fast search
+                const indexed = data.vehicles.map(v => ({
+                    ...v,
+                    searchStr: `${v.brand || ''} ${v.model || ''} ${v.spawn_code || ''} ${v.category || ''} ${v.shop || ''}`.toLowerCase().trim()
+                }));
+                setVehicles(indexed);
             }
         } catch (error) {
             console.error('Error fetching vehicles:', error);
@@ -139,11 +145,8 @@ export default function PDMDealership() {
     const shops = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.shop || 'Other'))).sort()], [vehicles]);
 
     const filteredVehicles = useMemo(() => {
-        let result = vehicles.filter(v => 
-            (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
-            (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (v.spawn_code?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-        );
+        const query = deferredSearchTerm.toLowerCase().trim();
+        let result = vehicles.filter(v => v.searchStr.includes(query));
 
         if (selectedShop !== 'All') {
             result = result.filter(v => v.shop === selectedShop);
@@ -164,17 +167,15 @@ export default function PDMDealership() {
         });
 
         return sorted;
-    }, [vehicles, searchTerm, selectedShop, selectedCategory, sortBy]);
+    }, [vehicles, deferredSearchTerm, selectedShop, selectedCategory, sortBy]);
 
     const suggestions = useMemo(() => {
-        if (!searchTerm || searchTerm.length < 2) return [];
+        if (!deferredSearchTerm || deferredSearchTerm.length < 2) return [];
+        const query = deferredSearchTerm.toLowerCase().trim();
         return vehicles
-            .filter(v => 
-                (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
-                (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-            )
+            .filter(v => v.searchStr.includes(query))
             .slice(0, 6); // Top 6 suggestions
-    }, [vehicles, searchTerm]);
+    }, [vehicles, deferredSearchTerm]);
 
     if (loading) {
         return (

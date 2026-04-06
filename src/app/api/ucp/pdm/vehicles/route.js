@@ -8,6 +8,11 @@ export async function GET() {
         const session = await getServerSession(authOptions);
         const isAdmin = session?.user?.role === 'admin';
 
+        const excludeCategories = [
+            'boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 
+            'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service'
+        ];
+
         // Run queries in parallel to save time
         const [vehicles, shops, pendingOrders, settings] = await Promise.all([
             query(`
@@ -21,8 +26,9 @@ export async function GET() {
                     COALESCE(v.category, 'Other') AS category
                 FROM dealership_stock s
                 LEFT JOIN dealership_vehicles v ON s.vehicle = v.spawn_code
+                WHERE v.category IS NULL OR v.category NOT IN (?)
                 ORDER BY category, s.price ASC
-            `),
+            `, [excludeCategories]),
             query('SELECT name, categories FROM dealership_locations'),
             query(`
                 SELECT vehicle_model, COALESCE(SUM(quantity), 0) as pending_qty 
@@ -33,8 +39,7 @@ export async function GET() {
             query("SELECT setting_value FROM site_settings WHERE setting_key = 'pdm_luxury_enabled'")
         ]);
 
-        let shopMap = {}; // We still keep this to categorize based on v.category if needed, 
-        // but now s.dealership gives us the direct shop name.
+        let shopMap = {}; // Fallback mapping
         for (const shop of shops) {
             try {
                 const cats = JSON.parse(shop.categories || '[]');
@@ -48,18 +53,11 @@ export async function GET() {
         }
 
         const isLuxuryEnabled = settings.length > 0 ? settings[0].setting_value === 'true' : false;
-
-        const excludeCategories = [
-            'boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 
-            'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service'
-        ];
         const excludeShops = ['aircraft dealer', 'boat dealer', 'truck dealer', 'other'];
 
         const enrichedVehicles = vehicles.map(v => {
             const pendingAuth = pendingMap[v.spawn_code] || 0;
             const trueStock = Math.max(0, (v.current_stock || 0) - pendingAuth);
-            
-            // Priority: Use the dealership name from stock table, fallback to category mapping
             const finalShop = v.shop_name || shopMap[v.category] || 'Other';
 
             return {
@@ -70,13 +68,10 @@ export async function GET() {
                 pending_orders: pendingAuth
             };
         }).filter(v => {
-            const categoryLow = (v.category || '').toLowerCase();
-            if (excludeCategories.includes(categoryLow)) return false;
-            
             const shopLow = (v.shop || '').toLowerCase();
             if (excludeShops.includes(shopLow)) return false;
             
-            // Luxury Shop toggle
+            // Luxury Shop toggle - Applies to everyone when disabled
             if ((shopLow.includes('luxury')) && !isLuxuryEnabled) return false;
             
             return true;
