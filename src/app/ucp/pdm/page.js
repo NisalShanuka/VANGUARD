@@ -239,12 +239,12 @@ export default function PDMDealership() {
                                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 px-3">Quick Suggestions</p>
                                     </div>
                                     <div className="py-2">
-                                        {suggestions.map((s, idx) => (
+                                        {suggestions.map((s) => (
                                             <button
-                                                key={s.spawn_code}
+                                                key={`sug-${s.spawn_code}-${s.shop}`}
                                                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent-400 group transition-colors text-left"
                                                 onClick={() => {
-                                                    setSearchTerm(s.model);
+                                                    setSearchTerm(s.spawn_code);
                                                     setShowSuggestions(false);
                                                 }}
                                             >
@@ -310,12 +310,12 @@ export default function PDMDealership() {
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    <AnimatePresence>
+                    <AnimatePresence mode="popLayout">
                         {filteredVehicles.map((vehicle, i) => {
-                            const hasStock = vehicle.unlimited_stock || vehicle.current_stock > 0;
+                            const hasStock = vehicle.unlimited_stock || (Number(vehicle.current_stock) || 0) > 0;
                             return (
                                 <motion.div
-                                    key={vehicle.spawn_code}
+                                    key={`veh-${vehicle.spawn_code}-${vehicle.shop}`}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
@@ -355,7 +355,7 @@ export default function PDMDealership() {
                                         <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                                             <div>
                                                 <p className="text-[10px] font-bold uppercase text-white/40 mb-1">Price</p>
-                                                <p className="text-lg font-black text-white">${vehicle.price.toLocaleString()}</p>
+                                                <p className="text-lg font-black text-white">${(Number(vehicle.price) || 0).toLocaleString()}</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] font-bold uppercase text-white/40 mb-1">Stock</p>

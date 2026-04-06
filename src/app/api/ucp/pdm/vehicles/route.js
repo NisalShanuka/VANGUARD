@@ -20,7 +20,7 @@ export async function GET() {
                     s.dealership AS shop_name,
                     s.vehicle AS spawn_code,
                     s.stock AS current_stock,
-                    s.price,
+                    COALESCE(s.price, 0) AS price,
                     COALESCE(v.brand, 'Unknown') AS brand,
                     COALESCE(v.model, s.vehicle) AS model,
                     COALESCE(v.category, 'Other') AS category
