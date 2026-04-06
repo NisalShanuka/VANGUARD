@@ -8,11 +8,6 @@ export async function GET() {
         const session = await getServerSession(authOptions);
         const isAdmin = session?.user?.role === 'admin';
 
-        const excludeCategories = [
-            'boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 
-            'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service'
-        ];
-
         // Run queries in parallel to save time
         const [vehicles, shops, pendingOrders, settings] = await Promise.all([
             query(`
@@ -26,9 +21,9 @@ export async function GET() {
                     COALESCE(v.category, 'Other') AS category
                 FROM dealership_stock s
                 LEFT JOIN dealership_vehicles v ON s.vehicle = v.spawn_code
-                WHERE v.category IS NULL OR v.category NOT IN (?)
+                WHERE v.category IS NULL OR v.category NOT IN ('boat', 'boats', 'commercial', 'commercail', 'emergency', 'emergancy', 'helicopters', 'industrial', 'military', 'openwheel', 'planes', 'service')
                 ORDER BY category, s.price ASC
-            `, [excludeCategories]),
+            `),
             query('SELECT name, categories FROM dealership_locations'),
             query(`
                 SELECT vehicle_model, COALESCE(SUM(quantity), 0) as pending_qty 
