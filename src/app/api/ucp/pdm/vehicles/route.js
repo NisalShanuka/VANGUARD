@@ -16,12 +16,12 @@ export async function GET() {
                     s.vehicle AS spawn_code,
                     s.stock AS current_stock,
                     s.price,
-                    v.brand,
-                    v.model,
-                    v.category
+                    COALESCE(v.brand, 'Unknown') AS brand,
+                    COALESCE(v.model, s.vehicle) AS model,
+                    COALESCE(v.category, 'Other') AS category
                 FROM dealership_stock s
                 LEFT JOIN dealership_vehicles v ON s.vehicle = v.spawn_code
-                ORDER BY v.category, s.price ASC
+                ORDER BY category, s.price ASC
             `),
             query('SELECT name, categories FROM dealership_locations'),
             query(`

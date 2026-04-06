@@ -135,14 +135,14 @@ export default function PDMDealership() {
         }
     }
 
-    const categories = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.category))).sort()], [vehicles]);
-    const shops = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.shop))).sort()], [vehicles]);
+    const categories = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.category || 'Other'))).sort()], [vehicles]);
+    const shops = useMemo(() => ['All', ...Array.from(new Set(vehicles.map(v => v.shop || 'Other'))).sort()], [vehicles]);
 
     const filteredVehicles = useMemo(() => {
         let result = vehicles.filter(v => 
             (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
             (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            v.spawn_code.toLowerCase().includes(searchTerm.toLowerCase())
+            (v.spawn_code?.toLowerCase() || '').includes(searchTerm.toLowerCase())
         );
 
         if (selectedShop !== 'All') {
@@ -154,10 +154,10 @@ export default function PDMDealership() {
         }
 
         const sorted = [...result].sort((a, b) => {
-            if (sortBy === 'price-asc') return a.price - b.price;
-            if (sortBy === 'price-desc') return b.price - a.price;
-            const nameA = `${a.brand || ''} ${a.model}`.trim();
-            const nameB = `${b.brand || ''} ${b.model}`.trim();
+            if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
+            if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+            const nameA = `${a.brand || ''} ${a.model || ''}`.trim();
+            const nameB = `${b.brand || ''} ${b.model || ''}`.trim();
             if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
             if (sortBy === 'name-desc') return nameB.localeCompare(nameA);
             return 0;
@@ -170,8 +170,8 @@ export default function PDMDealership() {
         if (!searchTerm || searchTerm.length < 2) return [];
         return vehicles
             .filter(v => 
-                v.model.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                v.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+                (v.model?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+                (v.brand?.toLowerCase() || '').includes(searchTerm.toLowerCase())
             )
             .slice(0, 6); // Top 6 suggestions
     }, [vehicles, searchTerm]);
