@@ -12,18 +12,16 @@ export async function GET() {
         const [vehicles, shops, pendingOrders, settings] = await Promise.all([
             query(`
                 SELECT 
-                    v.spawn_code,
+                    s.dealership AS shop_name,
+                    s.vehicle AS spawn_code,
+                    s.stock AS current_stock,
+                    s.price,
                     v.brand,
                     v.model,
-                    v.category,
-                    v.price,
-                    v.unlimited_stock,
-                    v.global_stock_limit,
-                    COALESCE(SUM(s.stock), 0) AS current_stock
-                FROM dealership_vehicles v
-                LEFT JOIN dealership_stock s ON v.spawn_code = s.vehicle
-                GROUP BY v.spawn_code, v.brand, v.model, v.category, v.price, v.unlimited_stock, v.global_stock_limit
-                ORDER BY v.category, v.price ASC
+                    v.category
+                FROM dealership_stock s
+                LEFT JOIN dealership_vehicles v ON s.vehicle = v.spawn_code
+                ORDER BY v.category, s.price ASC
             `),
             query('SELECT name, categories FROM dealership_locations'),
             query(`
@@ -35,7 +33,8 @@ export async function GET() {
             query("SELECT setting_value FROM site_settings WHERE setting_key = 'pdm_luxury_enabled'")
         ]);
 
-        let shopMap = {};
+        let shopMap = {}; // We still keep this to categorize based on v.category if needed, 
+        // but now s.dealership gives us the direct shop name.
         for (const shop of shops) {
             try {
                 const cats = JSON.parse(shop.categories || '[]');
@@ -59,9 +58,13 @@ export async function GET() {
         const enrichedVehicles = vehicles.map(v => {
             const pendingAuth = pendingMap[v.spawn_code] || 0;
             const trueStock = Math.max(0, (v.current_stock || 0) - pendingAuth);
+            
+            // Priority: Use the dealership name from stock table, fallback to category mapping
+            const finalShop = v.shop_name || shopMap[v.category] || 'Other';
+
             return {
                 ...v,
-                shop: shopMap[v.category] || 'Other',
+                shop: finalShop,
                 current_stock: trueStock,
                 original_stock: v.current_stock || 0,
                 pending_orders: pendingAuth
@@ -69,10 +72,11 @@ export async function GET() {
         }).filter(v => {
             const categoryLow = (v.category || '').toLowerCase();
             if (excludeCategories.includes(categoryLow)) return false;
-            if (excludeShops.includes((v.shop || '').toLowerCase())) return false;
             
-            // Luxury Shop toggle - Applies to everyone when disabled
             const shopLow = (v.shop || '').toLowerCase();
+            if (excludeShops.includes(shopLow)) return false;
+            
+            // Luxury Shop toggle
             if ((shopLow.includes('luxury')) && !isLuxuryEnabled) return false;
             
             return true;
