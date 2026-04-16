@@ -8,6 +8,7 @@ const getPool = () => {
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'test1',
+        port: parseInt(process.env.GAME_DB_PORT || '3307', 10),
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
