@@ -17,7 +17,7 @@ function getGameDb() {
             user: process.env.GAME_DB_USER || 'u34572_rhgHiyuWev',
             password: 'h47149Ob27@D+jBHCJ^k2oL0',
             database: process.env.GAME_DB_NAME || 's34572_qbox',
-            port: parseInt(process.env.GAME_DB_PORT || '3306'),
+            port: parseInt(process.env.GAME_DB_PORT || '3307'),
             waitForConnections: true,
             connectionLimit: 10,
             queueLimit: 0,
